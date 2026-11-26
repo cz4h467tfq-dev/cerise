@@ -150,7 +150,10 @@ nav button.on{color:var(--crimson2)}
         <div class="field"><label for="s-key">Gemini API key</label>
           <input id="s-key" type="password" placeholder="Paste your key here" autocomplete="off">
           <small>Free from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a>. It's saved only on this phone and sent only to Google.</small></div>
-        <div class="field"><label for="s-model">Model</label>
+        <div class="field"><label for="s-groq">Backup brain: Groq API key (optional)</label>
+          <input id="s-groq" type="password" placeholder="gsk_…" autocomplete="off">
+          <small>Free from <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>. Used automatically when Gemini is busy.</small></div>
+        <div class="field"><label for="s-model">Gemini model</label>
           <input id="s-model" autocomplete="off">
           <small>Leave empty to pick a working model automatically.</small></div>
         <button class="btn" id="s-ping" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test connection</button>
@@ -188,7 +191,7 @@ const $ = (s) => document.querySelector(s);
 const MOODS = ['neutral','cold','smug','annoyed','laugh','giggle','shock','surprised','pout','cry'];
 
 // ---------- state ----------
-const DEF = {key:'', model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[]};
+const DEF = {key:'', groqKey:'', model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 const save = () => { try { localStorage.setItem('cerise.v1', JSON.stringify(S)); } catch (e) {} };
@@ -376,19 +379,45 @@ async function callModel(model, contents) {
   if (!text) { const err = new Error('empty'); err.status = 0; err.detail = 'Empty reply (' + (data.candidates?.[0]?.finishReason || data.promptFeedback?.blockReason || 'unknown') + ')'; throw err; }
   try { return JSON.parse(text); } catch (e) { const m = text.match(/\{[\s\S]*\}/); if (m) try { return JSON.parse(m[0]); } catch (e2) {} return { reply: text, mood: 'cold', lang: 'en', actions: [] }; }
 }
-async function callGemini(contents) {
-  const first = (S.model || '').trim() || S.okModel || DEF.model;
-  const order = [first, S.okModel, ...FALLBACK_MODELS].filter((m, i, a) => m && a.indexOf(m) === i);
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+async function callGroq(contents) {
+  const msgs = [{ role: 'system', content: systemPrompt() + '\nOUTPUT: reply ONLY with a JSON object: {"reply": string, "mood": one of ' + JSON.stringify(MOODS) + ', "lang": "en"|"fr"|"ar", "actions": [{"type": string, "value": string}]}' }]
+    .concat(contents.map(c => ({ role: c.role === 'model' ? 'assistant' : 'user', content: c.parts.map(p => p.text).join('') })));
   let lastErr;
-  for (const m of order) {
-    try { const out = await callModel(m, contents); if (S.okModel !== m) { S.okModel = m; save(); } return out; }
-    catch (e) {
-      lastErr = e;
-      const keyProblem = e.status === 400 && /api key|API_KEY/i.test(e.detail || '') || e.status === 401 || (e.status === 403 && /key|permission|denied/i.test(e.detail || ''));
-      if (keyProblem || e.status === undefined) throw e; // bad key or network: no point trying other models
-    }
+  for (const model of ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile']) {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.groqKey.trim() },
+        body: JSON.stringify({ model, messages: msgs, temperature: 0.9, max_tokens: 2048, response_format: { type: 'json_object' } })
+      });
+      if (!res.ok) { const err = new Error('HTTP ' + res.status); err.status = res.status; try { err.detail = 'Groq: ' + (await res.json()).error.message; } catch (e) {} throw err; }
+      const data = await res.json(); const text = data.choices?.[0]?.message?.content || '';
+      const out = JSON.parse(text.match(/\{[\s\S]*\}/)[0]); S.okModel = 'groq:' + model; save(); return out;
+    } catch (e) { lastErr = e; if (e.status === 401) throw e; }
   }
   throw lastErr;
+}
+async function callGemini(contents) {
+  let lastErr;
+  if (S.key) {
+    const first = (S.model || '').trim() || (S.okModel && !S.okModel.startsWith('groq:') ? S.okModel : '') || FALLBACK_MODELS[0];
+    const order = [first, ...FALLBACK_MODELS].filter((m, i, a) => m && a.indexOf(m) === i);
+    for (const m of order) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try { const out = await callModel(m, contents); if (S.okModel !== m) { S.okModel = m; save(); } return out; }
+        catch (e) {
+          if (!lastErr || (e.status !== 404 && e.status !== 400)) lastErr = e;
+          const keyProblem = (e.status === 400 && /api key|API_KEY/i.test(e.detail || '')) || e.status === 401 || (e.status === 403 && /key|permission|denied/i.test(e.detail || ''));
+          if (keyProblem) { if (S.groqKey) break; throw e; }
+          if (e.status === undefined) throw e;
+          if ((e.status === 503 || e.status === 500) && attempt === 0) { status('think', 'Retrying'); await sleep(1200); continue; }
+          break;
+        }
+      }
+    }
+  }
+  if (S.groqKey) { status('think', 'Backup brain'); return await callGroq(contents); }
+  throw lastErr || Object.assign(new Error('No API key'), { detail: 'No API key' });
 }
 function historyContents() {
   const h = S.history.slice(-16); while (h.length && h[0].who !== 'me') h.shift();
@@ -399,7 +428,7 @@ async function send(text) {
   text = (text || '').trim(); if (!text || busy) return;
   unlockAudio();
   addLog('me', text);
-  if (!S.key) { const l = "Wow, you expect me to think for free? Put a Gemini API key in Settings first."; herSays(l, 'smug', 'en', []); addLog('her', l, false); return; }
+  if (!S.key && !S.groqKey) { const l = "Wow, you expect me to think for free? Put a Gemini API key in Settings first."; herSays(l, 'smug', 'en', []); addLog('her', l, false); return; }
   busy = true; status('think', 'Thinking'); setMood('cold', 20000);
   try {
     let contents = historyContents();
@@ -427,6 +456,7 @@ async function send(text) {
     let line = "Ugh. Something broke and it was definitely not my fault.";
     if (!navigator.onLine) line = "You're offline. I can't think without internet, you know.";
     else if (/api key|api_key/.test(d) || e.status === 401) line = "That API key doesn't work. Copy it again from AI Studio and paste it in Settings.";
+    else if (e.status === 503 || e.status === 500 || /high demand|overloaded|unavailable/.test(d)) line = S.groqKey ? "Every brain I have is overloaded right now. Try again in a minute." : "Google's servers are overloaded. Add a free Groq key in Settings so I have a backup brain.";
     else if (e.status === 429 || /quota|exhausted/.test(d)) line = "Google says I'm out of free quota right now. Wait a minute and try again.";
     else if (e.status === 403) line = "Google blocked the request. Your key might be restricted, check it in AI Studio.";
     else if (e.status === undefined) line = "I couldn't reach Google at all. Check your internet.";
@@ -468,11 +498,11 @@ function bind(id, key, type) {
   el.addEventListener(type === 'check' ? 'change' : 'input', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
-bind('#s-key', 'key'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
+bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
 bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-voice', 'voice');
 $('#s-ping').onclick = async () => {
-  const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); save();
-  if (!S.key) { out.textContent = 'Paste your key first.'; return; }
+  const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
+  if (!S.key && !S.groqKey) { out.textContent = 'Paste a key first.'; return; }
   out.textContent = 'Testing…';
   try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
