@@ -298,7 +298,7 @@ nav button{padding:4px 10px!important}
         <div class="hsPetals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="hsFloor"></div>
         <div id="bodyWrap">
-          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126194617">
+          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126195338">
         </div>
         <div class="hsTag"><span class="hsNo">No. 01</span><span>The Crimson Jester</span></div>
       </div>
@@ -369,7 +369,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126194617 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126195338 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -389,7 +389,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126194617';
+const VER = '20261126195338';
 
 // ---------- show errors on screen ----------
 window.addEventListener('error', (e) => { if (e && e.message && !/Script error|ResizeObserver/i.test(e.message)) setTimeout(() => { try { toast('Error: ' + e.message.slice(0, 120)); } catch (x) {} }, 0); });
@@ -660,7 +660,8 @@ async function fetchOrpheus(chunk) {
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.groqKey.trim() },
     body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: S.orphVoice || 'hannah', input: chunk, response_format: 'wav' }) });
   if (!res.ok) { const err = new Error('Orpheus ' + res.status); err.status = res.status; try { err.detail = (await res.json()).error.message; } catch (e) {} throw err; }
-  return parseWav(await res.arrayBuffer());
+  const ab = await res.arrayBuffer();
+  try { return parseWav(ab); } catch (e) { return { blob: new Blob([ab], { type: res.headers.get('content-type') || 'audio/wav' }) }; }
 }
 async function speakOrpheus(text, seq, m) {
   const dir = '[' + (ORPH_DIR[m] || 'casual') + '] ';
@@ -673,10 +674,10 @@ async function speakOrpheus(text, seq, m) {
   try {
     const jobs = chunks.map((c, i) => i === 0 ? fetchOrpheus(dir + c.slice(0, 190)) : null);
     for (let i = 0; i < chunks.length; i++) {
-      const { f, sr } = await (jobs[i] || fetchOrpheus(dir + chunks[i].slice(0, 190)));
+      const got = await (jobs[i] || fetchOrpheus(dir + chunks[i].slice(0, 190)));
       if (i + 1 < chunks.length) jobs[i + 1] = fetchOrpheus(dir + chunks[i + 1].slice(0, 190)); // fetch the next while this one plays
       if (seq !== speakSeq) return;
-      await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.05);
+      if (got.blob) await playBlob(got.blob, seq); else await playPCM(got.f, got.sr, seq, S.animePitch === false ? 1 : 1.05);
     }
   } finally { playPCM.totalEst = 0; }
   if (seq === speakSeq) stopLip();
@@ -701,15 +702,32 @@ function wavFromFloat(f, sr) {
   for (let i = 0; i < n; i++) { const x = Math.max(-1, Math.min(1, f[i])); v.setInt16(44 + i * 2, x < 0 ? x * 32768 : x * 32767, true); }
   return new Blob([buf], { type: 'audio/wav' });
 }
-function parseWav(ab) { // 16-bit PCM WAV -> Float32
-  const v = new DataView(ab); let o = 12, sr = 24000, data = null, bits = 16, ch = 1;
-  while (o + 8 <= v.byteLength) { const id = String.fromCharCode(v.getUint8(o), v.getUint8(o + 1), v.getUint8(o + 2), v.getUint8(o + 3)); const size = v.getUint32(o + 4, true);
-    if (id === 'fmt ') { ch = v.getUint16(o + 10, true); sr = v.getUint32(o + 12, true); bits = v.getUint16(o + 22, true); }
-    if (id === 'data') { data = [o + 8, size]; break; } o += 8 + size + (size & 1); }
-  if (!data) throw new Error('bad audio from voice');
-  const n = Math.floor(data[1] / (bits / 8) / ch), f = new Float32Array(n);
-  for (let i = 0; i < n; i++) { const p = data[0] + i * ch * (bits / 8); f[i] = bits === 16 ? v.getInt16(p, true) / 32768 : (v.getFloat32(p, true)); }
+function parseWav(ab) { // any common WAV (16/24/32-bit int or 32-bit float), tolerant of streamed headers with unknown sizes
+  const v = new DataView(ab); if (v.byteLength < 44) throw new Error('audio too short');
+  let o = 12, sr = 24000, bits = 16, ch = 1, fmt = 1, data = null;
+  while (o + 8 <= v.byteLength) {
+    const id = String.fromCharCode(v.getUint8(o), v.getUint8(o + 1), v.getUint8(o + 2), v.getUint8(o + 3)); let size = v.getUint32(o + 4, true);
+    if (id === 'fmt ') { fmt = v.getUint16(o + 8, true); ch = v.getUint16(o + 10, true) || 1; sr = v.getUint32(o + 12, true) || 24000; bits = v.getUint16(o + 22, true) || 16; if (fmt === 0xFFFE && size >= 40) fmt = v.getUint16(o + 32, true); }
+    if (id === 'data') { const start = o + 8; size = Math.min(size || Infinity, v.byteLength - start); data = [start, size]; break; }
+    if (!size || o + 8 + size > v.byteLength) break; o += 8 + size + (size & 1);
+  }
+  if (!data) { data = [44, v.byteLength - 44]; }
+  const bps = bits / 8, frame = bps * ch, n = Math.floor(data[1] / frame), f = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const p = data[0] + i * frame;
+    f[i] = fmt === 3 ? v.getFloat32(p, true) : bits === 16 ? v.getInt16(p, true) / 32768 : bits === 24 ? ((v.getUint8(p) | (v.getUint8(p + 1) << 8) | (v.getInt8(p + 2) << 16)) / 8388608) : bits === 32 ? v.getInt32(p, true) / 2147483648 : (v.getUint8(p) - 128) / 128; }
   return { f, sr };
+}
+// last resort: let the phone play the file as-is (mouth moves generically)
+function playBlobDirect(blob, seq) {
+  return new Promise(async (resolve, reject) => {
+    if (seq !== speakSeq) return resolve(false);
+    const url = URL.createObjectURL(blob); voiceEl.src = url; voiceEl.playbackRate = 1; const token = {}; curSrc = token;
+    try { await voiceEl.play(); } catch (e) { curSrc = null; URL.revokeObjectURL(url); return reject(new Error('could not play audio: ' + (e.message || e))); }
+    if (!speaking) startLip(); if (onVoiceStart) onVoiceStart(voiceEl.duration && isFinite(voiceEl.duration) ? voiceEl.duration : 3);
+    const flap = setInterval(() => { rig.mouthT = Math.random() < .25 ? .1 : .3 + Math.random() * .6; }, 95);
+    const done = () => { clearInterval(flap); voiceEl.removeEventListener('ended', done); voiceEl.removeEventListener('error', done); if (curSrc === token) curSrc = null; URL.revokeObjectURL(url); resolve(seq === speakSeq); };
+    voiceEl.addEventListener('ended', done); voiceEl.addEventListener('error', done);
+  });
 }
 async function playPCM(f, sr, seq, rate = 1) {
   if (seq !== speakSeq) return false;
