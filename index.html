@@ -193,13 +193,24 @@ nav button.on{color:var(--crimson2)}
 nav button{padding:4px 10px!important}
 
 @keyframes bodyFloat{50%{transform:translateY(-4px) scale(1.004)}}
+
+#dlBox{padding:4px 14px 14px}
+.dlTrack{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:6px 0 8px}
+#dlBar{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--crimson),var(--crimson2));transition:width .25s}
+#dlBox[data-state=ready] #dlBar{background:#3ccf7a}
+#dlBox[data-state=error] #dlBar{background:#777}
+#dlText{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+#dlBox small{display:block;color:var(--mute);font-size:12px;margin-top:4px}
+#dlBox[data-state=ready] small,#dlBox[data-state=error] small{display:none}
+#dlPill{background:var(--crimson);color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.btn:disabled{opacity:.7}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <h1 class="logo">Cerise</h1>
-    <div class="status"><span class="dot" id="dot"></span><span id="statusText">Online</span></div>
+    <span id="dlPill" hidden></span><div class="status"><span class="dot" id="dot"></span><span id="statusText">Online</span></div>
   </header>
   <main>
     <section class="view on" id="v-home">
@@ -237,7 +248,7 @@ nav button{padding:4px 10px!important}
     <section class="view" id="v-her">
       <div id="herStage">
         <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126185440"></div>
+        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126185614"></div>
       </div>
       <div class="card" id="herCard">
         <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div></div>
@@ -270,10 +281,15 @@ nav button{padding:4px 10px!important}
           <select id="s-lang"><option value="en-US">English</option><option value="fr-FR">Français</option><option value="ar-LB">العربية</option></select>
           <small>Used by the mic. She understands all three when you type.</small></div>
         <div class="field"><label for="s-engine">Voice engine</label>
-          <select id="s-engine"><option value="auto">AI voice, phone voice when the limit runs out</option><option value="phone">Phone voice only</option></select>
-          <small>The Gemini AI voice is the most expressive but has a free daily limit. When it runs out she uses the phone voice until it resets. If you hear nothing, turn off silent mode.</small></div>
+          <select id="s-engine"><option value="auto">Auto: AI voice, then unlimited voice (recommended)</option><option value="ai">Gemini AI voice only</option><option value="local">Unlimited on-device voice only</option><option value="phone">Phone voice</option></select>
+          <small>The Gemini AI voice is the most expressive but has a free daily limit. The unlimited voice runs on your phone after a one-time download, free forever, English only. If you hear nothing, turn off silent mode.</small></div>
         <div class="field"><label for="s-tts">Her voice</label>
           <select id="s-tts"><option value="Leda">Leda (youthful)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
+        <div class="field"><label for="s-local">Her unlimited voice</label>
+          <select id="s-local"><option value="af_bella">Bella (bright, youthful)</option><option value="af_nicole">Nicole (soft, whispery)</option><option value="af_sky">Sky (light)</option><option value="af_heart">Heart (warm)</option><option value="af_nova">Nova (clear)</option><option value="af_aoede">Aoede (smooth)</option><option value="bf_emma">Emma (British)</option><option value="bf_isabella">Isabella (British, cool)</option></select></div>
+        <div class="field switch"><label for="s-pitch">Anime pitch (slightly higher voice)</label><input id="s-pitch" type="checkbox"></div>
+        <button class="btn" id="s-dl" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Download unlimited voice (≈90 MB, once)</button>
+        <div id="dlBox" hidden><div class="dlTrack"><div id="dlBar"></div></div><div id="dlText"></div><small>Keep the app open until it finishes. Wi-Fi recommended.</small></div>
         <button class="btn ghost" id="s-test" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test her voice</button>
       </div>
       <div class="group"><h3>Connections</h3>
@@ -289,7 +305,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126185440 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126185614 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -308,14 +324,13 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126185440';
+const VER = '20261126185614';
 
 // ---------- state ----------
 const DEF = {key:'', groqKey:'', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 if (S.v !== 2) { S.v = 2; if (S.voiceEngine === 'ai') S.voiceEngine = 'auto'; }
-if (S.voiceEngine === 'local' || S.voiceEngine === 'ai') S.voiceEngine = 'auto';
 const save = () => { try { localStorage.setItem('cerise.v1', JSON.stringify(S)); } catch (e) {} };
 
 // ---------- avatar: one living face (WebGL rig) + mood reactions ----------
@@ -565,22 +580,112 @@ function playPCM(f, sr, seq, rate = 1) {
     src.start(0);
   });
 }
+// ---- unlimited on-device voice (Kokoro, runs inside the phone) ----
+const KOKORO_URL = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
+const KOKORO_MODEL = 'onnx-community/Kokoro-82M-v1.0-ONNX';
+const LOCAL = { worker: null, ready: false, loading: null, jobs: {}, id: 0, files: {}, mode: 'worker', tts: null, started: 0 };
+function dlUI(state, text, pct) {
+  const box = $('#dlBox'); if (!box) return; box.hidden = false;
+  $('#dlText').textContent = text; const bar = $('#dlBar');
+  bar.style.width = (pct == null ? 0 : Math.max(2, Math.min(100, pct))) + '%';
+  box.dataset.state = state; $('#s-dl').disabled = state === 'loading';
+  $('#s-dl').textContent = state === 'ready' ? 'Unlimited voice ready ✓' : state === 'loading' ? 'Downloading…' : state === 'error' ? 'Try again' : 'Download unlimited voice (≈90 MB, once)';
+  const pill = $('#dlPill'); if (pill) { pill.hidden = state !== 'loading'; pill.textContent = 'Voice ' + Math.round(pct || 0) + '%'; }
+}
+function onProgress(p) {
+  if (!p) return;
+  if (p.status === 'initiate') { LOCAL.files[p.file] = LOCAL.files[p.file] || { loaded: 0, total: 0 }; dlUI('loading', 'Connecting… (' + p.file + ')', 1); }
+  else if (p.status === 'progress' && p.total) {
+    LOCAL.files[p.file] = { loaded: p.loaded, total: p.total };
+    const fs = Object.values(LOCAL.files); const loaded = fs.reduce((x, f) => x + f.loaded, 0), total = fs.reduce((x, f) => x + f.total, 0);
+    const mb = (v) => (v / 1048576).toFixed(1);
+    const secs = (performance.now() - LOCAL.started) / 1000; const speed = loaded / Math.max(1, secs);
+    const eta = speed > 0 ? Math.round((total - loaded) / speed) : 0;
+    dlUI('loading', `Downloading her voice: ${mb(loaded)} / ${mb(total)} MB` + (eta > 1 ? ` · about ${eta < 60 ? eta + 's' : Math.ceil(eta / 60) + ' min'} left` : ''), total ? loaded / total * 100 : 0);
+  }
+  else if (p.status === 'done') { const fs = Object.values(LOCAL.files); if (fs.length && fs.every(f => f.total && f.loaded >= f.total)) dlUI('loading', 'Preparing her voice…', 100); }
+}
+function localReady() { LOCAL.ready = true; S.localReady = true; save(); dlUI('ready', '✓ Unlimited voice ready. Works offline, no limits.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
+function localFail(msg) { if (LOCAL.loadReject) LOCAL.loadReject(new Error(msg)); LOCAL.loading = null; dlUI('error', '✗ ' + msg, 0); }
+const KOKORO_WORKER = `
+import { KokoroTTS } from '${KOKORO_URL}';
+let tts = null, loading = null;
+function load() {
+  if (!loading) loading = KokoroTTS.from_pretrained('${KOKORO_MODEL}', { dtype: 'q8', device: 'wasm', progress_callback: (p) => self.postMessage({ type: 'progress', p: { status: p.status, file: p.file, loaded: p.loaded, total: p.total } }) })
+    .then((t) => { tts = t; self.postMessage({ type: 'ready' }); return t; });
+  return loading;
+}
+self.onmessage = async (e) => {
+  const d = e.data;
+  try {
+    if (d.type === 'load') { await load(); return; }
+    if (d.type === 'say') { const t = await load(); const a = await t.generate(d.text, { voice: d.voice, speed: d.speed || 1 }); const f = a.audio; self.postMessage({ type: 'audio', id: d.id, audio: f, sr: a.sampling_rate }, [f.buffer]); }
+  } catch (err) { self.postMessage({ type: 'error', id: d.id, error: String((err && err.message) || err) }); if (d.type === 'load') loading = null; }
+};`;
+async function loadMainThread() { // backup: run the voice on the page itself
+  LOCAL.mode = 'main'; dlUI('loading', 'Trying the backup loader…', 1);
+  const mod = await import(KOKORO_URL);
+  LOCAL.tts = await mod.KokoroTTS.from_pretrained(KOKORO_MODEL, { dtype: 'q8', device: 'wasm', progress_callback: onProgress });
+  localReady();
+}
+function localWorker() {
+  if (LOCAL.worker) return LOCAL.worker;
+  const w = new Worker(URL.createObjectURL(new Blob([KOKORO_WORKER], { type: 'text/javascript' })), { type: 'module' });
+  w.onmessage = (e) => {
+    const d = e.data;
+    if (d.type === 'progress') onProgress(d.p);
+    else if (d.type === 'ready') localReady();
+    else if (d.type === 'audio') { const j = LOCAL.jobs[d.id]; delete LOCAL.jobs[d.id]; j && j.resolve({ f: d.audio, sr: d.sr }); }
+    else if (d.type === 'error') { const j = LOCAL.jobs[d.id]; if (j) { delete LOCAL.jobs[d.id]; j.reject(new Error(d.error)); } else { w.terminate(); LOCAL.worker = null; loadMainThread().catch(e2 => localFail('Download failed: ' + (e2.message || e2) + '. Check your connection and try again.')); } }
+  };
+  w.onerror = (e) => { e.preventDefault && e.preventDefault(); w.terminate(); LOCAL.worker = null; if (!LOCAL.ready) loadMainThread().catch(e2 => localFail('This phone could not load the voice: ' + (e2.message || e2))); };
+  return LOCAL.worker = w;
+}
+function loadLocal() {
+  if (LOCAL.ready) return Promise.resolve();
+  if (!LOCAL.loading) {
+    LOCAL.started = performance.now(); LOCAL.files = {}; dlUI('loading', 'Starting download…', 1);
+    LOCAL.loading = new Promise((res, rej) => { LOCAL.loadResolve = res; LOCAL.loadReject = rej;
+      try { localWorker().postMessage({ type: 'load' }); } catch (e) { loadMainThread().catch(e2 => localFail(String(e2.message || e2))); } });
+    LOCAL.loading.catch(() => {});
+  }
+  return LOCAL.loading;
+}
+function localSay(text) {
+  if (LOCAL.mode === 'main' && LOCAL.tts) return LOCAL.tts.generate(text, { voice: S.localVoice || 'af_bella', speed: 1.02 }).then(a => ({ f: a.audio, sr: a.sampling_rate }));
+  return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: 1.02 }); });
+}
+async function speakLocal(text, seq) {
+  const parts = (text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]).map(s => s.trim()).filter(Boolean);
+  let played = false;
+  if (LOCAL.mode === 'main') { for (const p of parts) { const { f, sr } = await localSay(p); if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); } }
+  else { const jobs = parts.map(p => localSay(p)); for (const j of jobs) { const { f, sr } = await j; if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); } }
+  if (seq === speakSeq) stopLip();
+  return played;
+}
 async function speak(text, lang = 'en', m = 'neutral') {
   const seq = ++speakSeq; if (curSrc) { try { curSrc.stop(); } catch (e) {} curSrc = null; }
   if (!S.speak || !text) return;
   text = text.replace(/[*_#`~]/g, '');
   const engine = S.voiceEngine || 'auto';
   // 1) expressive Gemini AI voice (free daily limit)
-  if (engine !== 'phone' && S.key && Date.now() > ttsCooldownUntil && audioCtx()) {
+  if ((engine === 'auto' || engine === 'ai') && S.key && Date.now() > ttsCooldownUntil && audioCtx()) {
     try {
       status('think', 'Voice'); const { f, rate } = await fetchTTS(text, m); status('', 'Online');
       if (seq !== speakSeq) return;
       await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); return;
     } catch (e) {
       status('', 'Online'); if (seq !== speakSeq) return;
-      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; if (!ttsNoticeShown) { ttsNoticeShown = true; toast('AI voice limit reached, using the phone voice for now'); } }
+      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; if (!ttsNoticeShown) { ttsNoticeShown = true; toast(engine === 'auto' ? (LOCAL.ready ? 'AI voice limit reached, switching to her unlimited voice' : 'AI voice limit reached. Download her unlimited voice in Settings') : 'AI voice limit reached, using phone voice'); } }
       else console.warn('TTS failed', e);
     }
+  }
+  // 2) unlimited on-device voice (English)
+  if ((engine === 'auto' || engine === 'local') && lang === 'en' && audioCtx()) {
+    if (LOCAL.ready) {
+      try { status('think', 'Voice'); await speakLocal(text, seq); status('', 'Online'); return; }
+      catch (e) { status('', 'Online'); console.warn('local voice failed', e); if (seq !== speakSeq) return; }
+    } else if (engine === 'local') { if (!LOCAL.loading) toast('Downloading her unlimited voice… phone voice until it\'s ready'); loadLocal().catch(() => {}); }
   }
   // 3) phone voice
   phoneSpeak(text, lang, seq);
@@ -949,7 +1054,7 @@ function bind(id, key, type) {
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
 bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
-bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice');
+bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-pitch', 'animePitch', 'check');
 $('#s-ping').onclick = async () => {
   const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
   if (!S.key && !S.groqKey) { out.textContent = 'Paste a key first.'; return; }
@@ -957,6 +1062,7 @@ $('#s-ping').onclick = async () => {
   try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
+$('#s-dl').onclick = () => { unlockAudio(); loadLocal().catch(() => {}); };
 $('#s-test').onclick = () => { unlockAudio(); herSays(`Testing? Fine. I'm Cerise${S.name ? ', and you are ' + S.name : ''}. Try not to bore me.`, 'smug', 'en', []); };
 $('#s-clear').onclick = () => { if (confirm('Clear the whole chat history?')) { S.history = []; save(); renderLog(); toast('Chat cleared'); } };
 function renderMem() {
@@ -991,6 +1097,7 @@ function openHer() { $('#stMood').textContent = mood; $('#stMem').textContent = 
 
 // ---------- start ----------
 show('neutral', 1); renderLog(); renderMem(); renderTodos();
+if (S.localReady) { dlUI('loading', 'Loading her saved voice…', 100); setTimeout(() => loadLocal().catch(() => {}), 2500); }
 // intro
 setTimeout(() => { $('#intro').classList.add('gone'); sway.classList.add('drop'); setTimeout(() => sway.classList.remove('drop'), 1000); }, 1500);
 // falling flower petals and sparkles
