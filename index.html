@@ -251,7 +251,7 @@ nav button{padding:4px 10px!important}
     <section class="view" id="v-her">
       <div id="herStage">
         <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126190756"></div>
+        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126191139"></div>
       </div>
       <div class="card" id="herCard">
         <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div></div>
@@ -297,6 +297,7 @@ nav button{padding:4px 10px!important}
         <div id="dlBox" hidden><div class="dlTrack"><div id="dlBar"></div></div><div id="dlText"></div><small>Keep the app open until it finishes. Wi-Fi recommended.</small></div>
         <button class="btn ghost" id="s-testLocal" type="button" style="width:calc(100% - 28px);margin:0 14px 6px">Test unlimited voice</button>
         <div id="s-tlout" style="padding:0 14px 12px;font-size:13px;color:var(--mute);white-space:pre-wrap;word-break:break-word"></div>
+        <div id="s-vlog" style="padding:0 14px 14px;font-size:12px;color:var(--mute);word-break:break-word"></div>
         <button class="btn ghost" id="s-test" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test her voice</button>
       </div>
       <div class="group"><h3>Connections</h3>
@@ -312,7 +313,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126190756 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126191139 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -331,7 +332,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126190756';
+const VER = '20261126191139';
 
 // ---------- state ----------
 // re-download needed when the voice engine changes
@@ -538,7 +539,18 @@ function unlockAudio() {
   lastActive = Date.now();
   try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
   const c = audioCtx(); if (c) { const b = c.createBuffer(1, 1, 22050); const s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); }
+  // iOS only lets the phone voice talk after it has spoken once during a tap
+  if ('speechSynthesis' in window && !window.__ssUnlocked) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); window.__ssUnlocked = true; } catch (e) {} }
 }
+// after using the mic, iOS can leave audio in "recording" mode (quiet earpiece / muted); switch it back
+async function ensureAudio() {
+  try { if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
+  const c = audioCtx(); if (!c) return null;
+  if (c.state !== 'running') { try { await c.resume(); } catch (e) {} }
+  if (c.state !== 'running') await new Promise(r => setTimeout(r, 300));
+  return c;
+}
+function vlog(msg) { S.lastVoice = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' · ' + msg; save(); const el = document.getElementById('s-vlog'); if (el) el.textContent = 'Last time she spoke: ' + S.lastVoice; }
 const VOICE_STYLE = {
   neutral: 'cool, unbothered and a little bored', cold: 'cold, flat and unimpressed', smug: 'smug and teasing, with a little laugh in the voice',
   smirk: 'scheming and playful', laugh: 'laughing, amused', giggle: 'softly pleased, trying to hide a smile', annoyed: 'annoyed and sharp',
@@ -570,7 +582,9 @@ async function fetchTTS(text, m) {
 let speakSeq = 0;
 function stopSpeaking() { speakSeq++; try { curSrc && curSrc.stop(); } catch (e) {} curSrc = null; if ('speechSynthesis' in window) speechSynthesis.cancel(); stopLip(); }
 // play raw PCM through the analyser so her mouth follows the real audio
-function playPCM(f, sr, seq, rate = 1) {
+async function playPCM(f, sr, seq, rate = 1) {
+  const c0 = await ensureAudio();
+  if (!c0 || c0.state !== 'running') throw new Error('audio is blocked by the phone (' + (c0 ? c0.state : 'no audio') + ')');
   return new Promise((resolve) => {
     if (seq !== speakSeq) return resolve(false);
     const c = audioCtx(); const buf = c.createBuffer(1, f.length, sr);
@@ -703,27 +717,29 @@ async function speak(text, lang = 'en', m = 'neutral') {
   const seq = ++speakSeq; if (curSrc) { try { curSrc.stop(); } catch (e) {} curSrc = null; }
   if (!S.speak || !text) return;
   text = text.replace(/[*_#`~]/g, '');
-  const engine = S.voiceEngine || 'auto';
+  const engine = S.voiceEngine || 'auto'; const why = [];
   // 1) expressive Gemini AI voice (free daily limit)
-  if ((engine === 'auto' || engine === 'ai') && S.key && Date.now() > ttsCooldownUntil && audioCtx()) {
+  if ((engine === 'auto' || engine === 'ai') && S.key && Date.now() > ttsCooldownUntil) {
     try {
       status('think', 'Voice'); const { f, rate } = await fetchTTS(text, m); status('', 'Online');
       if (seq !== speakSeq) return;
-      await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); return;
+      await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); vlog('AI voice ✓'); return;
     } catch (e) {
-      status('', 'Online'); if (seq !== speakSeq) return;
-      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; if (!ttsNoticeShown) { ttsNoticeShown = true; toast(engine === 'auto' ? (LOCAL.ready ? 'AI voice limit reached, switching to her unlimited voice' : 'AI voice limit reached. Download her unlimited voice in Settings') : 'AI voice limit reached, using phone voice'); } }
-      else console.warn('TTS failed', e);
+      status('', 'Online'); if (seq !== speakSeq) return; stopLip();
+      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('AI voice: daily limit reached'); if (!ttsNoticeShown) { ttsNoticeShown = true; toast(engine === 'auto' ? 'AI voice limit reached, switching to her unlimited voice' : 'AI voice limit reached, using phone voice'); } }
+      else why.push('AI voice: ' + (e.message || e));
     }
-  }
+  } else if (engine === 'auto' || engine === 'ai') why.push(S.key ? 'AI voice: resting after hitting its limit' : 'AI voice: no Gemini key');
   // 2) unlimited on-device voice (English)
-  if ((engine === 'auto' || engine === 'local') && lang === 'en' && audioCtx()) {
+  if ((engine === 'auto' || engine === 'local') && lang === 'en') {
+    if (!LOCAL.ready && (LOCAL.loading || S.localReady)) { status('think', 'Loading voice'); loadLocal().catch(() => {}); await Promise.race([LOCAL.loading, new Promise(r => setTimeout(r, 20000))]).catch(() => {}); status('', 'Online'); if (seq !== speakSeq) return; }
     if (LOCAL.ready) {
-      try { status('think', 'Voice'); await speakLocal(text, seq); status('', 'Online'); return; }
-      catch (e) { status('', 'Online'); toast('Unlimited voice error: ' + (e.message || e)); if (seq !== speakSeq) return; }
-    } else if (engine === 'local') { if (!LOCAL.loading) toast('Downloading her unlimited voice… phone voice until it\'s ready'); loadLocal().catch(() => {}); }
-  }
+      try { status('think', 'Voice'); await speakLocal(text, seq); status('', 'Online'); vlog('Unlimited voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); return; }
+      catch (e) { status('', 'Online'); stopLip(); why.push('Unlimited voice: ' + (e.message || e)); if (seq !== speakSeq) return; }
+    } else why.push('Unlimited voice: not downloaded yet');
+  } else if (engine === 'auto' || engine === 'local') why.push('Unlimited voice: English only');
   // 3) phone voice
+  vlog('Phone voice' + (why.length ? ' (' + why.join('; ') + ')' : ''));
   phoneSpeak(text, lang, seq);
 }
 // fallback: built-in phone voice (mouth animated from word timing)
@@ -763,6 +779,7 @@ $('#mic').addEventListener('click', () => {
   };
   rec.onerror = (e) => { if (e.error === 'not-allowed') toast('Allow microphone access for Cerise in Settings.'); };
   rec.onend = () => {
+    ensureAudio();
     $('#stage').classList.remove('listen'); listening = false; $('#mic').classList.remove('on'); status('', 'Online');
     const t = (finalText || $('#input').value).trim(); if (t) { $('#input').value = ''; send(t); }
   };
@@ -1148,6 +1165,7 @@ function openHer() { $('#stMood').textContent = mood; $('#stMem').textContent = 
 
 // ---------- start ----------
 show('neutral', 1); renderLog(); renderMem(); renderTodos();
+if (S.lastVoice) $('#s-vlog').textContent = 'Last time she spoke: ' + S.lastVoice;
 if (S.localReady && S.localKind === LOCAL.kind) { dlUI('loading', 'Loading her saved voice…', 100); setTimeout(() => loadLocal().catch(() => {}), 2500); }
 // intro
 setTimeout(() => { $('#intro').classList.add('gone'); sway.classList.add('drop'); setTimeout(() => sway.classList.remove('drop'), 1000); }, 1500);
