@@ -8,11 +8,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cerise">
-<meta name="theme-color" content="#14060b">
+<meta name="theme-color" content="#0b0408">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#14060b; --ink2:#1f0a12; --card:#2a0f19; --line:#4a1a2b;
@@ -151,11 +152,6 @@ nav button.on{color:var(--crimson2)}
 #fx{position:absolute;inset:0;pointer-events:none}
 .fx{position:absolute;width:44px;height:44px;animation:pop 1.6s ease-out forwards}
 @keyframes pop{0%{transform:scale(0) rotate(-20deg);opacity:0}15%{transform:scale(1.25);opacity:1}30%{transform:scale(1)}80%{opacity:1}100%{transform:translateY(-24px) scale(.9);opacity:0}}
-#bubble{z-index:6;top:34px!important;left:20%!important;right:6%!important;border-radius:22px!important;
-  background:linear-gradient(180deg,rgba(42,15,25,.95),rgba(26,8,15,.95))!important;border:1px solid rgba(255,61,110,.35)!important;
-  transform-origin:20% 100%;animation:bubin .35s cubic-bezier(.2,1.3,.4,1)}
-#bubble::after{content:"";position:absolute;left:28px;bottom:-9px;width:16px;height:16px;transform:rotate(45deg);
-  background:rgba(26,8,15,.95);border-right:1px solid rgba(255,61,110,.35);border-bottom:1px solid rgba(255,61,110,.35)}
 #bubble.pop{animation:bubin .35s cubic-bezier(.2,1.3,.4,1)}
 @keyframes bubin{0%{transform:scale(.85);opacity:0}100%{transform:none;opacity:1}}
 #dots{display:none;gap:5px;padding:4px 0}
@@ -262,42 +258,162 @@ nav button{padding:4px 10px!important}
 .galGrid img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 40%;display:block}
 .galGrid span{font-size:10px;color:var(--mute);padding:4px 2px 6px;text-transform:capitalize}
 .galHint{color:var(--mute);font-size:12px;text-align:center;margin:8px 0 0}
+
+/* ================= ANIME GAME UI THEME ================= */
+:root{--c:#e01b52;--c2:#ff4d7d;--c3:#8d0b31;--ink:#0b0408;--ink2:#130710;--card:#1a0a11;--line:rgba(255,77,125,.28);
+  --crimson:#e01b52;--crimson2:#ff4d7d;--text:#fff2f5;--mute:#b7949f;
+  --cut:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  --cutS:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  --para:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);
+  --hexa:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  --grad:linear-gradient(160deg,#ff4d7d,#8d0b31)}
+html,body{font-family:Montserrat,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0b0408}
+body{background-color:#0b0408;background-size:auto;background-position:0 0;background-image:
+  linear-gradient(115deg,transparent 0 44%,rgba(224,27,82,.10) 44% 45.2%,transparent 45.2% 100%),
+  linear-gradient(115deg,transparent 0 61%,rgba(224,27,82,.07) 61% 64%,transparent 64% 100%),
+  repeating-linear-gradient(115deg,rgba(255,255,255,.022) 0 1px,transparent 1px 14px),
+  radial-gradient(ellipse 90% 50% at 70% 22%,rgba(224,27,82,.26),transparent 70%),
+  linear-gradient(160deg,#24060f,#0b0408 55%)}
+#grain{position:fixed;inset:0;z-index:8;pointer-events:none;background:url(img/grain.png) 0 0/180px 180px;opacity:.55}
+/* header HUD */
+header{padding:10px 14px 8px;gap:10px;position:relative;z-index:5}
+.hud{display:flex;align-items:center;gap:10px;min-width:0}
+.hex{width:42px;height:46px;flex:none;clip-path:var(--hexa);background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff}
+.hudTxt{min-width:0}
+.hudTxt b{display:block;font-weight:900;font-size:18px;letter-spacing:.16em;line-height:1.1}
+.hudTxt span{display:block;font-size:9.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48vw;margin-top:3px}
+.hudBar{width:120px;height:5px;margin-top:6px;background:rgba(255,255,255,.1);clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)}
+.hudBar i{display:block;height:100%;width:22%;background:linear-gradient(90deg,var(--c),var(--c2));transition:width .09s linear}
+.status{margin-left:auto;border-radius:0;background:rgba(224,27,82,.16);border:1px solid rgba(255,77,125,.5);clip-path:var(--para);padding:8px 16px;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#fff}
+#dlPill{border-radius:0;clip-path:var(--para);padding:7px 14px;background:var(--grad)}
+/* home stage */
+.stageBg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 75% 55% at 55% 36%,rgba(224,27,82,.42),transparent 70%)}
+.vName{position:absolute;left:-2px;top:0;writing-mode:vertical-rl;transform:rotate(180deg);font-weight:900;font-size:min(23vw,98px);letter-spacing:.04em;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,77,125,.34);pointer-events:none;white-space:nowrap;z-index:0}
+#petals{z-index:1}
+#rig{bottom:96px}
+#sway{width:min(118vw,480px,calc((100dvh - 380px)*1.25))}
+#stage .vig{position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse 72% 44% at 50% 72%,transparent 60%,rgba(11,4,8,.5) 90%,rgba(11,4,8,.6) 100%);-webkit-mask-image:linear-gradient(180deg,transparent 18%,#000 48%);mask-image:linear-gradient(180deg,transparent 18%,#000 48%)}
+.vName{z-index:4}
+#sway::before{display:none}
+#avBloom{position:absolute;left:0;top:0;width:100%;height:auto;aspect-ratio:1228/1024;z-index:0;pointer-events:none;filter:blur(20px) brightness(1.25) saturate(1.4);opacity:.42;transform:scale(1.05)}
+#dlg{position:absolute;left:12px;right:12px;bottom:8px;z-index:6}
+#dlg .who{position:absolute;left:0;top:-15px;z-index:2;padding:6px 24px 6px 14px;background:linear-gradient(90deg,var(--c),var(--c3));font-weight:800;font-size:12px;letter-spacing:.26em;color:#fff;clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%);margin:0}
+#bubble{position:relative;inset:auto;margin:0;padding:22px 18px 20px;max-height:min(36vh,240px);min-height:86px;overflow:auto;border:0;border-radius:0;box-shadow:none;
+  background:linear-gradient(180deg,rgba(30,8,16,.9),rgba(13,4,8,.95));border-top:2px solid var(--c);clip-path:var(--cut);font-size:16px;line-height:1.5;font-weight:500}
+#bubble::after{display:none}
+#dlg .next{position:absolute;right:20px;bottom:14px;width:9px;height:9px;border-right:2px solid var(--c2);border-bottom:2px solid var(--c2);transform:rotate(45deg);animation:nextBob 1.2s ease-in-out infinite;pointer-events:none}
+@keyframes nextBob{50%{transform:translateY(3px) rotate(45deg)}}
+#bubble.thinking ~ .next{display:none}
+#dots i{border-radius:0;width:12px;height:6px;clip-path:polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%);background:var(--c2)}
+#voiceNote{color:#ff9fb7;font-weight:600}
+.act{border-radius:0;clip-path:var(--para);background:var(--grad);padding:10px 20px;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+#timers{top:8px;right:10px;bottom:auto;z-index:6}
+.timer{border-radius:0;clip-path:var(--para);background:rgba(22,7,13,.92);border:0;border-top:2px solid var(--c);padding:7px 18px;font-weight:800}
+/* composer */
+.composer{padding:6px 12px 10px;gap:8px}
+.inWrap{flex:1;min-width:0;height:50px;padding:1px;background:linear-gradient(90deg,rgba(255,77,125,.6),rgba(255,77,125,.18));clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+.inWrap:focus-within{background:linear-gradient(90deg,var(--c2),var(--c))}
+.composer .inWrap input{width:100%;height:100%;border:0;border-radius:0;background:#12070d;padding:0 22px;font-weight:500;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+.composer input::placeholder{color:#8e6f79}
+.round{border-radius:0;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)}
+.send{width:50px;height:50px;background:rgba(255,255,255,.08)}
+.mic{width:64px;height:50px;background:var(--grad);box-shadow:none}
+.mic.on{background:#fff;color:var(--c);animation:micPulse 1s infinite!important;box-shadow:none}
+@keyframes micPulse{50%{background:#ffc9d8}}
+/* nav */
+nav{border-top:0;background:linear-gradient(180deg,rgba(11,4,8,0),#0b0408 40%);padding:8px 10px calc(8px + var(--safe-b));gap:6px;justify-content:space-between;-webkit-backdrop-filter:none;backdrop-filter:none}
+nav button{flex:1;height:42px;padding:0!important;display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.18em;color:#8a6a74;background:rgba(255,255,255,.05);clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);transition:color .2s}
+nav button.on{background:var(--grad);color:#fff}
+nav button svg{display:none}
+/* chat log */
+#log{padding:14px 12px 22px;gap:12px}
+.msg{border-radius:0!important;font-size:15px;line-height:1.45;font-weight:500;padding:11px 16px}
+.msg.me{background:var(--grad);clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
+.msg.her{background:rgba(26,9,15,.94);border:0;border-left:3px solid var(--c);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
+.msg.sys{font-weight:600;letter-spacing:.04em}
+.row img{border-radius:0;clip-path:var(--hexa);width:36px;height:40px}
+.empty{font-weight:600;letter-spacing:.06em}
+/* settings */
+#settings{padding:12px 12px 30px}
+.group{border:0;border-radius:0;background:rgba(20,7,12,.93);clip-path:var(--cut);margin:16px 0;border-top:2px solid var(--c)}
+.group h3{display:inline-block;margin:0 0 4px;padding:7px 24px 7px 14px;background:linear-gradient(90deg,var(--c),var(--c3));color:#fff;font-size:11px;font-weight:800;letter-spacing:.22em;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+.field{border-top:1px solid rgba(255,77,125,.08)}
+.field label{font-weight:700;font-size:13px;letter-spacing:.02em}
+.field small{color:#a88d96}
+.field input,.field select,.field textarea,.todoAdd input{border-radius:2px;border:1px solid rgba(255,77,125,.26);background:#0e0509;font-weight:500}
+.field input:focus,.field select:focus,.field textarea:focus,.todoAdd input:focus{outline:none;border-color:var(--c2);box-shadow:0 0 0 3px rgba(255,77,125,.18)}
+.field select{-webkit-appearance:none;appearance:none;padding-right:40px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff4d7d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:15px}
+.switch input{-webkit-appearance:none;appearance:none;width:50px;height:26px;transform:none;background:rgba(255,255,255,.13);clip-path:var(--para);position:relative;cursor:pointer;transition:background .2s;flex:none;margin:0;border:0}
+.switch input::before{content:"";position:absolute;top:4px;left:8px;width:16px;height:18px;background:#fff;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%);transition:left .2s}
+.switch input:checked{background:var(--grad)}
+.switch input:checked::before{left:26px}
+.btn{border-radius:0;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);background:var(--grad);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12.5px;height:48px}
+.btn.ghost{background:rgba(255,255,255,.075);color:#ffd1de}
+.todoAdd button{border-radius:0;clip-path:var(--para);background:var(--grad);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+.mem button{font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:11px}
+.dlTrack,#dlBar{border-radius:0}
+/* Her: wardrobe card */
+#v-her{background:transparent}
+.hsBg{background:radial-gradient(ellipse 75% 55% at 55% 40%,rgba(224,27,82,.34),transparent 70%)}
+.hsName{left:-2px;top:0;transform:rotate(180deg);writing-mode:vertical-rl;font-family:inherit;font-weight:900;font-size:min(23vw,98px);letter-spacing:.04em;-webkit-text-stroke:1px rgba(255,77,125,.32);animation:none}
+.mirGlow{position:absolute;left:50%;top:50%;width:90%;height:80%;transform:translate(-50%,-52%);background:radial-gradient(ellipse at center,rgba(255,77,125,.35),transparent 65%);pointer-events:none;z-index:0}
+#mirror{border:0;border-radius:0;box-shadow:none;background:var(--grad);clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,26px 100%,0 calc(100% - 26px));height:calc(100% - 28px);aspect-ratio:.62;margin:0 0 14px}
+.mirIn{inset:3px;border-radius:0;clip-path:polygon(0 0,calc(100% - 25px) 0,100% 25px,100% 100%,25px 100%,0 calc(100% - 25px));background:radial-gradient(ellipse 82% 72% at 50% 56%,#f9edf2 66%,#f1dce5 100%)}
+.mirTag{position:absolute;left:3px;top:3px;z-index:3;padding:6px 22px 6px 12px;background:linear-gradient(90deg,var(--c),var(--c3));color:#fff;font-size:10px;font-weight:800;letter-spacing:.24em;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+#lookLabel{left:3px;bottom:3px;transform:none;border:0;border-radius:0;box-shadow:none;background:linear-gradient(90deg,var(--c),var(--c3));clip-path:polygon(0 0,calc(100% - 12px) 0,100% 100%,0 100%);padding:8px 26px 8px 14px;font-weight:800;font-size:11px;letter-spacing:.18em}
+#lookLabel small{font-family:inherit;font-weight:900;color:#ffd1de;font-size:11px;letter-spacing:.06em}
+#wardrobe{gap:8px;padding:4px 12px 6px}
+#wardrobe button{width:58px;height:84px;border:0!important;border-radius:0;padding:2px;background:rgba(255,77,125,.24);clip-path:var(--cutS);box-shadow:none!important}
+#wardrobe button img{background:#f9edf2;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
+#wardrobe button.on{background:var(--grad)}
+#wardrobe button.auto{background:linear-gradient(160deg,#2c0a17,#14060c);color:#ffd1de;font-weight:800;letter-spacing:.12em;font-size:10px}
+#wardrobe button.auto b{color:var(--c2)}
+.card{border:0;border-radius:0;background:rgba(20,7,12,.93);clip-path:var(--cut);border-top:2px solid var(--c);margin:6px 12px 10px;padding:14px}
+.cFace{border:0;border-radius:0;clip-path:var(--hexa);width:46px;height:52px;background:#2a0f19}
+.cName{font-family:inherit;font-weight:900;letter-spacing:.16em;font-size:19px;background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#fff}
+.cSub{font-size:11px;letter-spacing:.04em;font-weight:600}
+.pillBtn{border:0;border-radius:0;clip-path:var(--para);background:var(--grad);color:#fff;font-weight:800;letter-spacing:.1em;font-size:11px;text-transform:uppercase;padding:10px 18px}
+.stats div{border-radius:0!important;clip-path:var(--cutS);background:rgba(255,255,255,.055)}
+.stats b{font-weight:800}
+.stats span{text-transform:uppercase;letter-spacing:.16em;font-size:9.5px;font-weight:700}
+/* gallery, toast, intro */
+#gallery{background:rgba(11,4,8,.97)}
+.galTop b{font-weight:900;letter-spacing:.14em;text-transform:uppercase;font-size:16px}
+.galTop button{border-radius:0;clip-path:var(--para);background:var(--grad);padding:10px 22px;text-transform:uppercase;font-size:12px;font-weight:800;letter-spacing:.14em}
+.galGrid button{border-radius:0;clip-path:var(--cutS);background:#1a0a11}
+.galGrid span{font-weight:700;letter-spacing:.06em}
+#toast{border-radius:0;clip-path:var(--para);background:linear-gradient(160deg,#2c0a17,#14060c);color:#fff;border-top:2px solid var(--c);padding:12px 26px;font-weight:700;font-size:13px}
+#intro{background:#0b0408;overflow:hidden}
+#intro::before{content:"";position:absolute;left:-30%;right:-30%;top:calc(50% - 70px);height:140px;background:linear-gradient(90deg,transparent,rgba(224,27,82,.6) 40%,rgba(255,77,125,.75) 50%,rgba(224,27,82,.6) 60%,transparent);transform:skewY(-12deg);animation:slashIn 1s cubic-bezier(.2,1,.3,1) both}
+@keyframes slashIn{0%{transform:skewY(-12deg) translateX(-110%)}100%{transform:skewY(-12deg) translateX(0)}}
+#intro .title{position:relative;font-family:Montserrat,sans-serif;font-weight:900;font-style:italic;font-size:56px;letter-spacing:.12em;background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#fff;text-shadow:0 0 28px rgba(255,77,125,.75)}
+#intro .diamonds{position:relative;width:150px;height:5px;background:linear-gradient(90deg,var(--c),var(--c2));clip-path:var(--para)}
+#intro .sub{position:relative;font-weight:800;letter-spacing:.42em;font-size:11px;color:#ffd1de}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <h1 class="logo">Cerise</h1>
+    <div class="hud"><div class="hex" id="hudNo">01</div><div class="hudTxt"><b id="hudName">CERISE</b><span id="hudSub">Crimson Jester · cold</span><div class="hudBar"><i id="hudBar"></i></div></div></div>
     <span id="dlPill" hidden></span><div class="status"><span class="dot" id="dot"></span><span id="statusText">Online</span></div>
   </header>
   <main>
     <section class="view on" id="v-home">
       <div id="stage">
-        <div class="beam"></div>
+        <div class="stageBg"></div>
+        <div class="vName" aria-hidden="true">CERISE</div>
         <canvas id="petals"></canvas>
-        <div class="curtain l"></div><div class="curtain r"></div><div class="valance"></div>
-        <div class="floor"></div>
         <div id="rig"><div id="sway">
+          <img id="avBloom" alt="" aria-hidden="true" src="img/A00.webp">
           <canvas id="avatar" role="img" aria-label="Cerise"></canvas><img id="avatarImg" alt="Cerise" src="img/A00.webp">
           <div id="fx"></div>
         </div></div>
-        <div id="bubble"><div class="who">CERISE</div><div id="bubbleText">…</div><div id="dots"><i></i><i></i><i></i></div><div id="voiceNote" hidden></div><div class="acts" id="bubbleActs"></div></div>
+        <div class="vig"></div>
+        <div id="dlg"><div class="who">CERISE</div><div id="bubble"><div id="bubbleText">…</div><div id="dots"><i></i><i></i><i></i></div><div id="voiceNote" hidden></div><div class="acts" id="bubbleActs"></div></div><i class="next" aria-hidden="true"></i></div>
         <div id="timers"></div>
       </div>
-      <div id="chips">
-        <button class="chip">What's the weather?</button>
-        <button class="chip">Set a 25 minute focus timer</button>
-        <button class="chip">Play something on Spotify</button>
-        <button class="chip">What's in the news today?</button>
-        <button class="chip">Remind me tomorrow at 9 to study</button>
-        <button class="chip">What did I push to GitHub lately?</button>
-        <button class="chip">What's on my to-do list?</button>
-        <button class="chip">Roast me</button>
-        <button class="chip">Bonjour Cerise, ça va ?</button>
-        <button class="chip">مرحبا سيريز</button>
-      </div>
       <form class="composer" id="form">
-        <input id="input" placeholder="Talk to her…" autocomplete="off" enterkeyhint="send">
+        <div class="inWrap"><input id="input" placeholder="Speak to her…" autocomplete="off" enterkeyhint="send"></div>
         <button type="submit" class="round send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         <button type="button" class="round mic" id="mic" aria-label="Talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       </form>
@@ -307,12 +423,13 @@ nav button{padding:4px 10px!important}
       <div id="herStage">
         <div class="hsBg"></div>
         <div class="hsName" aria-hidden="true">CERISE</div>
+        <div class="mirGlow"></div>
         <div class="hsPetals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div id="mirror">
-          <svg class="mirBow" viewBox="0 0 46 30" aria-hidden="true"><path d="M23 15C17 6 6 1 3 6s2 15 10 14c4-.5 8-3 10-5zM23 15c6-9 17-14 20-9s-2 15-10 14c-4-.5-8-3-10-5z" fill="#9b0f37" stroke="#ff8fb0" stroke-width="1.2"/><path d="M21 15l-6 14 5-2 3 3zM25 15l6 14-5-2-3 3z" fill="#7a0b2b" stroke="#ff8fb0" stroke-width="1"/><ellipse cx="23" cy="15" rx="4.2" ry="4.6" fill="#d1194a" stroke="#ffc2d4" stroke-width="1.2"/></svg>
+          <div class="mirTag">WARDROBE</div>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126223018">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126224814">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -401,19 +518,20 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126223018 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126224814 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
-    <button class="on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>Cerise</button>
-    <button data-v="her"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><path d="M12 8v6M8 22l4-8 4 8M7 11h10"/></svg>Her</button>
-    <button data-v="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Chat</button>
-    <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+    <button class="on" data-v="home"><span>HER</span></button>
+    <button data-v="her"><span>LOOKS</span></button>
+    <button data-v="chat"><span>LOG</span></button>
+    <button data-v="settings"><span>SETUP</span></button>
   </nav>
 </div>
+<div id="grain" aria-hidden="true"></div>
 <div id="toast"></div>
 <div id="gallery" hidden><div class="galTop"><b>Her 40 expressions</b><button type="button" id="galClose" aria-label="Close">Close</button></div><div class="galGrid" id="galGrid"></div><p class="galHint">Tap a face and she'll make it.</p></div>
-<div id="intro"><div class="diamonds"></div><div class="title">CERISE</div><div class="sub">your pocket jester</div></div>
+<div id="intro"><div class="title">CERISE</div><div class="diamonds"></div><div class="sub">your pocket jester</div></div>
 
 <script>
 const $ = (s) => document.querySelector(s);
@@ -421,7 +539,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126223018';
+const VER = '20261126224814';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature', src: 'img/body_front.webp',
@@ -600,7 +718,7 @@ let wantFace = 'neutral';
 function show(name, ms = 320) {
   if (!IMG[name] || shown === name) return; wantFace = name;
   const p = pic(name);
-  const go = () => { if (wantFace !== name) return; shown = name; if (R) R.to(name, ms); else fallback.src = IMG[name]; };
+  const go = () => { if (wantFace !== name) return; shown = name; if (R) R.to(name, ms); else fallback.src = IMG[name]; const bl = document.getElementById('avBloom'); if (bl) bl.src = IMG[name]; };
   if (p.complete && p.naturalWidth) go(); else p.addEventListener('load', go, { once: true });
 }
 let lastVariant = {};
@@ -1539,26 +1657,35 @@ const voiceBanned = (S.voiceKindBan || []).includes(LOCAL.kind);
 voiceIsSaved().then(saved => { LOCAL.cached = saved; if (saved && !voiceBanned && crashedKind !== LOCAL.kind) setTimeout(() => loadLocal().catch(() => {}), 1500); else if (S.localReady && !saved) dlUI('error', 'Her saved voice isn\'t on this phone anymore (iOS may have cleared it). Tap download to get it back.', 0); });
 // intro
 setTimeout(() => { $('#intro').classList.add('gone'); sway.classList.add('drop'); setTimeout(() => sway.classList.remove('drop'), 1000); }, 1500);
-// falling flower petals and sparkles
-(function petals() {
+// floating light dust and rising embers
+(function dust() {
   const c = $('#petals'), ctx = c.getContext('2d'); let W, H, P = [];
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   function size() { W = c.clientWidth; H = c.clientHeight; c.width = W * dpr; c.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
-  function spawn(y) { return { x: Math.random() * W, y: y ?? -20, r: 3 + Math.random() * 4, vy: .25 + Math.random() * .5, vx: (Math.random() - .5) * .3, a: Math.random() * 6, va: (Math.random() - .5) * .03, k: Math.random() < .3 ? 's' : 'f', ph: Math.random() * 6 }; }
-  function flower(p) {
-    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.globalAlpha = .75; ctx.fillStyle = '#ffd9c7';
-    for (let i = 0; i < 5; i++) { ctx.rotate(Math.PI * 2 / 5); ctx.beginPath(); ctx.ellipse(0, -p.r, p.r * .55, p.r, 0, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = '#ff7aa0'; ctx.beginPath(); ctx.arc(0, 0, p.r * .4, 0, 7); ctx.fill(); ctx.restore();
-  }
-  function star(p, t) {
-    const s = p.r * (0.6 + 0.4 * Math.sin(t / 300 + p.ph)); ctx.save(); ctx.translate(p.x, p.y); ctx.globalAlpha = .8; ctx.fillStyle = '#fff0f5';
-    ctx.beginPath(); ctx.moveTo(0, -s * 1.6); ctx.lineTo(s * .35, -s * .35); ctx.lineTo(s * 1.6, 0); ctx.lineTo(s * .35, s * .35); ctx.lineTo(0, s * 1.6); ctx.lineTo(-s * .35, s * .35); ctx.lineTo(-s * 1.6, 0); ctx.lineTo(-s * .35, -s * .35); ctx.closePath(); ctx.fill(); ctx.restore();
-  }
+  function spawn(y) { const ember = Math.random() < .35; return { x: Math.random() * W, y: y ?? H + 10, r: ember ? 1.4 + Math.random() * 1.6 : .7 + Math.random() * 1.3, vy: -(.12 + Math.random() * (ember ? .5 : .22)), vx: (Math.random() - .5) * .15, ph: Math.random() * 6, ember }; }
   function tick(t) {
     if (!c.clientWidth) { requestAnimationFrame(tick); return; }
-    if (W !== c.clientWidth || H !== c.clientHeight) { size(); P = Array.from({ length: 18 }, () => spawn(Math.random() * H)); }
+    if (W !== c.clientWidth || H !== c.clientHeight) { size(); P = Array.from({ length: 26 }, () => spawn(Math.random() * H)); }
     ctx.clearRect(0, 0, W, H);
-    for (const p of P) { p.y += p.vy; p.x += p.vx + Math.sin(t / 900 + p.ph) * .25; p.a += p.va; if (p.y > H + 20) Object.assign(p, spawn()); p.k === 'f' ? flower(p) : star(p, t); }
+    for (const p of P) {
+      p.y += p.vy; p.x += p.vx + Math.sin(t / 1100 + p.ph) * .18; if (p.y < -10) Object.assign(p, spawn());
+      const a = (p.ember ? .75 : .45) * (0.55 + 0.45 * Math.sin(t / 500 + p.ph)) * Math.min(1, (H - p.y) / 80, p.y / 60 + .2);
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+      g.addColorStop(0, p.ember ? `rgba(255,120,150,${a})` : `rgba(255,236,240,${a})`); g.addColorStop(1, 'rgba(255,77,125,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, 7); ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+// header HUD: current look and mood, and a live voice meter
+(function hud() {
+  let last = '', lvl = 0;
+  function tick() {
+    const txt = outfitOf(S.outfit).short + ' · ' + mood;
+    if (txt !== last) { last = txt; $('#hudSub').textContent = txt; }
+    lvl += ((speaking ? 0.25 + rig.mouthT * 0.75 : 0.22) - lvl) * 0.35;
+    $('#hudBar').style.width = Math.round(lvl * 100) + '%';
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);

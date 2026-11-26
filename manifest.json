@@ -1,1 +1,1 @@
-{"name": "Cerise", "short_name": "Cerise", "start_url": "./", "display": "standalone", "background_color": "#14060b", "theme_color": "#14060b", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}
+{"name": "Cerise", "short_name": "Cerise", "start_url": "./", "display": "standalone", "background_color": "#0b0408", "theme_color": "#0b0408", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}
