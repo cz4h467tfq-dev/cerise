@@ -248,7 +248,7 @@ nav button{padding:4px 10px!important}
     <section class="view" id="v-her">
       <div id="herStage">
         <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126185614"></div>
+        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126185924"></div>
       </div>
       <div class="card" id="herCard">
         <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div></div>
@@ -290,6 +290,8 @@ nav button{padding:4px 10px!important}
         <div class="field switch"><label for="s-pitch">Anime pitch (slightly higher voice)</label><input id="s-pitch" type="checkbox"></div>
         <button class="btn" id="s-dl" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Download unlimited voice (≈90 MB, once)</button>
         <div id="dlBox" hidden><div class="dlTrack"><div id="dlBar"></div></div><div id="dlText"></div><small>Keep the app open until it finishes. Wi-Fi recommended.</small></div>
+        <button class="btn ghost" id="s-testLocal" type="button" style="width:calc(100% - 28px);margin:0 14px 6px">Test unlimited voice</button>
+        <div id="s-tlout" style="padding:0 14px 12px;font-size:13px;color:var(--mute);white-space:pre-wrap;word-break:break-word"></div>
         <button class="btn ghost" id="s-test" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test her voice</button>
       </div>
       <div class="group"><h3>Connections</h3>
@@ -305,7 +307,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126185614 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126185924 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -324,7 +326,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126185614';
+const VER = '20261126185924';
 
 // ---------- state ----------
 const DEF = {key:'', groqKey:'', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
@@ -652,6 +654,10 @@ function loadLocal() {
   return LOCAL.loading;
 }
 function localSay(text) {
+  const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('voice generation took longer than 45s')), 45000));
+  return Promise.race([localSayRaw(text), timeout]).then(r => { if (!r || !r.f || !r.f.length) throw new Error('voice came back empty'); return r; });
+}
+function localSayRaw(text) {
   if (LOCAL.mode === 'main' && LOCAL.tts) return LOCAL.tts.generate(text, { voice: S.localVoice || 'af_bella', speed: 1.02 }).then(a => ({ f: a.audio, sr: a.sampling_rate }));
   return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: 1.02 }); });
 }
@@ -684,7 +690,7 @@ async function speak(text, lang = 'en', m = 'neutral') {
   if ((engine === 'auto' || engine === 'local') && lang === 'en' && audioCtx()) {
     if (LOCAL.ready) {
       try { status('think', 'Voice'); await speakLocal(text, seq); status('', 'Online'); return; }
-      catch (e) { status('', 'Online'); console.warn('local voice failed', e); if (seq !== speakSeq) return; }
+      catch (e) { status('', 'Online'); toast('Unlimited voice error: ' + (e.message || e)); if (seq !== speakSeq) return; }
     } else if (engine === 'local') { if (!LOCAL.loading) toast('Downloading her unlimited voice… phone voice until it\'s ready'); loadLocal().catch(() => {}); }
   }
   // 3) phone voice
@@ -1063,6 +1069,20 @@ $('#s-ping').onclick = async () => {
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
 $('#s-dl').onclick = () => { unlockAudio(); loadLocal().catch(() => {}); };
+$('#s-testLocal').onclick = async () => {
+  unlockAudio(); const out = $('#s-tlout'); out.style.color = 'var(--mute)';
+  const log = (t) => { out.textContent = t; };
+  try {
+    if (!LOCAL.ready) { log('Loading the voice first…'); await loadLocal(); }
+    log('Generating speech on your phone… (mode: ' + LOCAL.mode + ')'); const t0 = performance.now();
+    const { f, sr } = await localSay("Hmph. So this is my unlimited voice. Happy now?");
+    let peak = 0; for (let i = 0; i < f.length; i += 50) peak = Math.max(peak, Math.abs(f[i]));
+    const c = audioCtx();
+    log(`Generated ${(f.length / sr).toFixed(1)}s of audio in ${((performance.now() - t0) / 1000).toFixed(1)}s (loudness ${peak.toFixed(2)}). Playing… audio: ${c ? c.state : 'none'}`);
+    const seq = ++speakSeq; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); stopLip();
+    out.style.color = '#59e08b'; log(out.textContent.replace('Playing…', '✓ Played.') + (peak < 0.01 ? '\nThe audio is silent, tell Claude.' : '\nNo sound? Turn off silent mode and turn the volume up.'));
+  } catch (e) { out.style.color = '#ff6b8a'; log('✗ ' + (e.message || e)); }
+};
 $('#s-test').onclick = () => { unlockAudio(); herSays(`Testing? Fine. I'm Cerise${S.name ? ', and you are ' + S.name : ''}. Try not to bore me.`, 'smug', 'en', []); };
 $('#s-clear').onclick = () => { if (confirm('Clear the whole chat history?')) { S.history = []; save(); renderLog(); toast('Chat cleared'); } };
 function renderMem() {
