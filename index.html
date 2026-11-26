@@ -179,21 +179,20 @@ nav button.on{color:var(--crimson2)}
 #herStage{flex:1;position:relative;min-height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
 #bodyWrap{position:relative;height:calc(100% - 12px);display:flex;align-items:flex-end;justify-content:center;transition:transform .16s ease-in;z-index:2}
 #bodyWrap.turn{transform:scaleX(0)}
-#bodyCv{height:100%;width:auto;display:block;filter:drop-shadow(0 10px 30px rgba(0,0,0,.6)) drop-shadow(0 0 20px rgba(255,61,110,.25))}
+#bodyImg{height:100%;width:auto;display:block;animation:bodyFloat 5s ease-in-out infinite;transform-origin:50% 100%;filter:drop-shadow(0 10px 30px rgba(0,0,0,.6)) drop-shadow(0 0 20px rgba(255,61,110,.25))}
 #viewName{position:absolute;top:12px;left:14px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--mute);
   background:rgba(255,255,255,.06);padding:5px 12px;border-radius:999px;z-index:3}
 .card{margin:8px 14px 12px;background:linear-gradient(180deg,rgba(42,15,25,.95),rgba(26,8,15,.95));border:1px solid rgba(255,61,110,.3);border-radius:22px;padding:14px 16px}
 .cardTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .cName{font-family:"Cinzel Decorative",Georgia,serif;font-size:22px;background:linear-gradient(180deg,#fff,#ffb3c8 60%,#ff3d6e);-webkit-background-clip:text;background-clip:text;color:transparent}
 .cSub{font-size:13px;color:var(--mute);margin-top:2px}
-.turnBtn{display:flex;align-items:center;gap:6px;background:var(--crimson);border:0;border-radius:999px;padding:10px 16px;font-weight:700;font-size:14px;min-height:44px}
-.turnBtn svg{width:18px;height:18px}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .stats div{background:rgba(255,255,255,.05);border-radius:14px;padding:10px;text-align:center}
 .stats b{display:block;font-size:17px;color:#fff;text-transform:capitalize}
 .stats span{font-size:11px;color:var(--mute);letter-spacing:.06em}
 nav button{padding:4px 10px!important}
 
+@keyframes bodyFloat{50%{transform:translateY(-4px) scale(1.004)}}
 </style>
 </head>
 <body>
@@ -238,12 +237,10 @@ nav button{padding:4px 10px!important}
     <section class="view" id="v-her">
       <div id="herStage">
         <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><canvas id="bodyCv" role="img" aria-label="Cerise full body"></canvas></div>
-        <div id="viewName">Front</div>
+        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126185440"></div>
       </div>
       <div class="card" id="herCard">
-        <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div>
-          <button class="turnBtn" id="turnBtn" type="button" aria-label="Turn around"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>Turn</button></div>
+        <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div></div>
         <div class="stats"><div><b id="stMood">cold</b><span>mood</span></div><div><b id="stMem">0</b><span>memories</span></div><div><b id="stMsg">0</b><span>messages</span></div></div>
       </div>
     </section>
@@ -273,15 +270,10 @@ nav button{padding:4px 10px!important}
           <select id="s-lang"><option value="en-US">English</option><option value="fr-FR">Français</option><option value="ar-LB">العربية</option></select>
           <small>Used by the mic. She understands all three when you type.</small></div>
         <div class="field"><label for="s-engine">Voice engine</label>
-          <select id="s-engine"><option value="auto">Auto: AI voice, then unlimited voice (recommended)</option><option value="ai">Gemini AI voice only</option><option value="local">Unlimited on-device voice only</option><option value="phone">Phone voice</option></select>
-          <small>The Gemini AI voice is the most expressive but has a free daily limit. The unlimited voice runs on your phone, free forever, English only. If you hear nothing, turn off silent mode.</small></div>
+          <select id="s-engine"><option value="auto">AI voice, phone voice when the limit runs out</option><option value="phone">Phone voice only</option></select>
+          <small>The Gemini AI voice is the most expressive but has a free daily limit. When it runs out she uses the phone voice until it resets. If you hear nothing, turn off silent mode.</small></div>
         <div class="field"><label for="s-tts">Her voice</label>
           <select id="s-tts"><option value="Leda">Leda (youthful)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
-        <div class="field"><label for="s-local">Her unlimited voice</label>
-          <select id="s-local"><option value="af_bella">Bella (bright, youthful)</option><option value="af_nicole">Nicole (soft, whispery)</option><option value="af_sky">Sky (light)</option><option value="af_heart">Heart (warm)</option><option value="af_nova">Nova (clear)</option><option value="af_aoede">Aoede (smooth)</option><option value="bf_emma">Emma (British)</option><option value="bf_isabella">Isabella (British, cool)</option></select></div>
-        <div class="field switch"><label for="s-pitch">Anime pitch (slightly higher voice)</label><input id="s-pitch" type="checkbox"></div>
-        <button class="btn" id="s-dl" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Download unlimited voice (≈90 MB, once)</button>
-        <div id="s-dlout" style="padding:0 14px 12px;font-size:13px;color:var(--mute)"></div>
         <button class="btn ghost" id="s-test" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test her voice</button>
       </div>
       <div class="group"><h3>Connections</h3>
@@ -297,7 +289,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126184737 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126185440 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -316,13 +308,14 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126184737';
+const VER = '20261126185440';
 
 // ---------- state ----------
 const DEF = {key:'', groqKey:'', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 if (S.v !== 2) { S.v = 2; if (S.voiceEngine === 'ai') S.voiceEngine = 'auto'; }
+if (S.voiceEngine === 'local' || S.voiceEngine === 'ai') S.voiceEngine = 'auto';
 const save = () => { try { localStorage.setItem('cerise.v1', JSON.stringify(S)); } catch (e) {} };
 
 // ---------- avatar: one living face (WebGL rig) + mood reactions ----------
@@ -572,79 +565,22 @@ function playPCM(f, sr, seq, rate = 1) {
     src.start(0);
   });
 }
-// ---- unlimited on-device voice (Kokoro, runs inside the phone) ----
-const LOCAL = { worker: null, ready: false, loading: null, jobs: {}, id: 0, progress: 0 };
-const KOKORO_WORKER = `
-import { KokoroTTS } from 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
-let tts = null, loading = null;
-function load() {
-  if (!loading) loading = KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8', device: 'wasm',
-    progress_callback: (p) => { if (p && p.status === 'progress' && p.total) self.postMessage({ type: 'progress', loaded: p.loaded, total: p.total, file: p.file }); } })
-    .then((t) => { tts = t; self.postMessage({ type: 'ready' }); return t; });
-  return loading;
-}
-self.onmessage = async (e) => {
-  const d = e.data;
-  try {
-    if (d.type === 'load') { await load(); return; }
-    if (d.type === 'say') { const t = await load(); const a = await t.generate(d.text, { voice: d.voice, speed: d.speed || 1 }); const f = a.audio; self.postMessage({ type: 'audio', id: d.id, audio: f, sr: a.sampling_rate }, [f.buffer]); }
-  } catch (err) { self.postMessage({ type: 'error', id: d.id, error: String((err && err.message) || err) }); if (d.type === 'load') loading = null; }
-};`;
-function localWorker() {
-  if (LOCAL.worker) return LOCAL.worker;
-  const w = new Worker(URL.createObjectURL(new Blob([KOKORO_WORKER], { type: 'text/javascript' })), { type: 'module' });
-  w.onmessage = (e) => {
-    const d = e.data;
-    if (d.type === 'progress') { LOCAL.progress = d.total ? d.loaded / d.total : 0; const el = $('#s-dlout'); if (el && !LOCAL.ready) el.textContent = 'Downloading her voice… ' + Math.round(LOCAL.progress * 100) + '%'; }
-    else if (d.type === 'ready') { LOCAL.ready = true; S.localReady = true; save(); const el = $('#s-dlout'); if (el) el.textContent = '✓ Unlimited voice ready (works offline)'; if (LOCAL.loadResolve) LOCAL.loadResolve(); }
-    else if (d.type === 'audio') { const j = LOCAL.jobs[d.id]; delete LOCAL.jobs[d.id]; j && j.resolve({ f: d.audio, sr: d.sr }); }
-    else if (d.type === 'error') { const j = LOCAL.jobs[d.id]; if (j) { delete LOCAL.jobs[d.id]; j.reject(new Error(d.error)); } else { if (LOCAL.loadReject) LOCAL.loadReject(new Error(d.error)); const el = $('#s-dlout'); if (el) el.textContent = '✗ ' + d.error; } }
-  };
-  w.onerror = (e) => { if (LOCAL.loadReject) LOCAL.loadReject(new Error('worker failed')); LOCAL.worker = null; const el = $('#s-dlout'); if (el) el.textContent = '✗ This phone could not start the on-device voice.'; console.warn(e); };
-  return LOCAL.worker = w;
-}
-function loadLocal() {
-  if (LOCAL.ready) return Promise.resolve();
-  if (!LOCAL.loading) LOCAL.loading = new Promise((res, rej) => { LOCAL.loadResolve = res; LOCAL.loadReject = rej; try { localWorker().postMessage({ type: 'load' }); } catch (e) { rej(e); } }).catch((e) => { LOCAL.loading = null; throw e; });
-  return LOCAL.loading;
-}
-function localSay(text) {
-  return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: 1.02 }); });
-}
-async function speakLocal(text, seq) {
-  const parts = (text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]).map(s => s.trim()).filter(Boolean);
-  const jobs = parts.map(p => localSay(p)); // generate all, play in order as they finish
-  let played = false;
-  for (const j of jobs) {
-    const { f, sr } = await j; if (seq !== speakSeq) return true;
-    played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07);
-  }
-  if (seq === speakSeq) stopLip();
-  return played;
-}
 async function speak(text, lang = 'en', m = 'neutral') {
   const seq = ++speakSeq; if (curSrc) { try { curSrc.stop(); } catch (e) {} curSrc = null; }
   if (!S.speak || !text) return;
   text = text.replace(/[*_#`~]/g, '');
   const engine = S.voiceEngine || 'auto';
   // 1) expressive Gemini AI voice (free daily limit)
-  if ((engine === 'auto' || engine === 'ai') && S.key && Date.now() > ttsCooldownUntil && audioCtx()) {
+  if (engine !== 'phone' && S.key && Date.now() > ttsCooldownUntil && audioCtx()) {
     try {
       status('think', 'Voice'); const { f, rate } = await fetchTTS(text, m); status('', 'Online');
       if (seq !== speakSeq) return;
       await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); return;
     } catch (e) {
       status('', 'Online'); if (seq !== speakSeq) return;
-      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; if (!ttsNoticeShown) { ttsNoticeShown = true; toast(engine === 'auto' ? (LOCAL.ready ? 'AI voice limit reached, switching to her unlimited voice' : 'AI voice limit reached. Downloading her unlimited voice, phone voice for now') : 'AI voice limit reached, using phone voice'); } }
+      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; if (!ttsNoticeShown) { ttsNoticeShown = true; toast('AI voice limit reached, using the phone voice for now'); } }
       else console.warn('TTS failed', e);
     }
-  }
-  // 2) unlimited on-device voice (English)
-  if ((engine === 'auto' || engine === 'local') && lang === 'en' && audioCtx()) {
-    if (LOCAL.ready) {
-      try { status('think', 'Voice'); await speakLocal(text, seq); status('', 'Online'); return; }
-      catch (e) { status('', 'Online'); console.warn('local voice failed', e); if (seq !== speakSeq) return; }
-    } else { if (engine === 'local' && !LOCAL.loading) toast('Downloading her unlimited voice… using phone voice until it\'s ready'); loadLocal().catch(() => {}); }
   }
   // 3) phone voice
   phoneSpeak(text, lang, seq);
@@ -1013,7 +949,7 @@ function bind(id, key, type) {
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
 bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
-bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-pitch', 'animePitch', 'check');
+bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice');
 $('#s-ping').onclick = async () => {
   const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
   if (!S.key && !S.groqKey) { out.textContent = 'Paste a key first.'; return; }
@@ -1021,7 +957,6 @@ $('#s-ping').onclick = async () => {
   try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
-$('#s-dl').onclick = () => { unlockAudio(); $('#s-dlout').textContent = 'Starting download…'; loadLocal().catch(() => {}); };
 $('#s-test').onclick = () => { unlockAudio(); herSays(`Testing? Fine. I'm Cerise${S.name ? ', and you are ' + S.name : ''}. Try not to bore me.`, 'smug', 'en', []); };
 $('#s-clear').onclick = () => { if (confirm('Clear the whole chat history?')) { S.history = []; save(); renderLog(); toast('Chat cleared'); } };
 function renderMem() {
@@ -1046,57 +981,9 @@ document.querySelectorAll('.chip').forEach(c => c.onclick = () => send(c.textCon
 $('#rig').addEventListener('click', () => { if (busy || speaking) return; const pokes = [["Don't poke me.", 'annoyed'], ["What. Do you need something or are you just staring?", 'cold'], ["Hehe… I mean. Stop that.", 'pout'], ["Touch me again and I'm deleting your homework.", 'smug']]; const p = pokes[Math.floor(Math.random() * pokes.length)]; unlockAudio(); herSays(p[0], p[1], 'en', []); });
 
 
-// ---------- full body ("Her" tab): breathing, hair + skirt sway, turnaround ----------
-const BODY = { views: ['front', 'side', 'back'], names: ['Front', 'Side', 'Back'], i: 0, imgs: {}, r: null, on: false };
-function bodyImg(v) { if (!BODY.imgs[v]) { const im = new Image(); im.src = 'img/body_' + v + '.webp?v=' + VER; BODY.imgs[v] = im; } return BODY.imgs[v]; }
-function bodyRenderer() {
-  const cv = $('#bodyCv'); const gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true });
-  if (!gl) return null;
-  const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}';
-  const fs = `precision highp float;uniform sampler2D A;uniform float t;varying vec2 v;
-  void main(){vec2 uv=v;float cx=abs(uv.x-.5);
-    float hair=smoothstep(.18,.45,cx)*smoothstep(.05,.45,uv.y)*(1.-smoothstep(.55,.75,uv.y));
-    uv.x+=(sin(uv.y*5.-t*1.2)*.007+sin(uv.y*12.-t*2.)*.0015)*hair;
-    float skirt=smoothstep(.3,.5,uv.y)*(1.-smoothstep(.72,.8,uv.y));
-    uv.x+=sin(uv.y*8.-t*1.5)*.0045*skirt*(.4+cx);
-    float chest=smoothstep(.12,.2,uv.y)*(1.-smoothstep(.3,.4,uv.y));uv.y-=sin(t*1.5)*.003*chest;
-    float head=1.-smoothstep(.08,.22,uv.y);uv.x+=sin(t*.55)*.004*head;uv.y+=sin(t*.43)*.002*head;
-    gl_FragColor=texture2D(A,uv);}`;
-  const sh = (ty, src) => { const x = gl.createShader(ty); gl.shaderSource(x, src); gl.compileShader(x); return x; };
-  const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr);
-  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null; gl.useProgram(pr);
-  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
-  const loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const uT = gl.getUniformLocation(pr, 't'); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-  const tex = {}; let cur = null;
-  function T(v) { if (tex[v]) return tex[v]; const im = bodyImg(v); if (!im.complete || !im.naturalWidth) return null;
-    const x = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, x); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
-    [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
-    [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); return tex[v] = x; }
-  function frame(now) {
-    if (BODY.on) {
-      const v = BODY.views[BODY.i]; const im = bodyImg(v); const tx = T(v);
-      if (tx) {
-        if (cur !== v) { cur = v; cv.style.aspectRatio = im.naturalWidth + '/' + im.naturalHeight; }
-        const dpr = Math.min(3, devicePixelRatio || 1), w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
-        if (w && (cv.width !== w || cv.height !== h)) { cv.width = w; cv.height = h; }
-        gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.bindTexture(gl.TEXTURE_2D, tx); gl.uniform1f(uT, now / 1000); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      }
-    }
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame); return true;
-}
-function openHer() {
-  BODY.on = true; BODY.views.forEach(bodyImg); if (!BODY.r) BODY.r = bodyRenderer();
-  $('#stMood').textContent = mood; $('#stMem').textContent = S.memory.length; $('#stMsg').textContent = S.history.length;
-}
-function turnAround() {
-  const w = $('#bodyWrap'); w.classList.add('turn');
-  setTimeout(() => { BODY.i = (BODY.i + 1) % 3; $('#viewName').textContent = BODY.names[BODY.i]; requestAnimationFrame(() => requestAnimationFrame(() => w.classList.remove('turn'))); }, 170);
-}
-$('#turnBtn').onclick = turnAround; $('#bodyWrap').onclick = turnAround;
+// ---------- Her tab ----------
+const BODY = { on: false };
+function openHer() { $('#stMood').textContent = mood; $('#stMem').textContent = S.memory.length; $('#stMsg').textContent = S.history.length; }
 
 // ---------- auto-update: always run the newest version ----------
 (async () => { try { const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }); const j = await r.json();
@@ -1104,7 +991,6 @@ $('#turnBtn').onclick = turnAround; $('#bodyWrap').onclick = turnAround;
 
 // ---------- start ----------
 show('neutral', 1); renderLog(); renderMem(); renderTodos();
-if (S.localReady && (S.voiceEngine === 'auto' || S.voiceEngine === 'local')) setTimeout(() => loadLocal().catch(() => {}), 2500);
 // intro
 setTimeout(() => { $('#intro').classList.add('gone'); sway.classList.add('drop'); setTimeout(() => sway.classList.remove('drop'), 1000); }, 1500);
 // falling flower petals and sparkles
