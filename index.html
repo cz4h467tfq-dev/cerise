@@ -389,6 +389,30 @@ nav button svg{display:none}
 #intro .title{position:relative;font-family:Montserrat,sans-serif;font-weight:900;font-style:italic;font-size:56px;letter-spacing:.12em;background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#fff;text-shadow:0 0 28px rgba(255,77,125,.75)}
 #intro .diamonds{position:relative;width:150px;height:5px;background:linear-gradient(90deg,var(--c),var(--c2));clip-path:var(--para)}
 #intro .sub{position:relative;font-weight:800;letter-spacing:.42em;font-size:11px;color:#ffd1de}
+
+/* ===== card window: her face at exactly one image pixel per screen pixel ===== */
+#rig{top:0;bottom:150px;align-items:flex-end;padding-bottom:clamp(14px,4vh,40px);animation:none!important;transform:none!important}
+#sway,#sway.drop,#sway.talk,#sway.react{animation:none!important;transform:none!important}
+#sway{width:var(--cw,320px);height:var(--ch,280px);flex:none;position:relative;opacity:0;transition:opacity .6s ease}
+#sway.ready{opacity:1}
+#win{position:absolute;inset:0;overflow:hidden;clip-path:polygon(0 0,calc(100% - 30px) 0,100% 30px,100% 100%,30px 100%,0 calc(100% - 30px));
+  background:radial-gradient(ellipse 80% 70% at 50% 35%,#4a1022,#16060d 75%)}
+#win #avatar,#win #avatarImg{position:absolute;max-width:none;aspect-ratio:auto;z-index:1}
+.winFrame{position:absolute;inset:-3px;pointer-events:none;z-index:2;background:linear-gradient(160deg,#ff4d7d,#8d0b31 60%,#ff4d7d);
+  clip-path:polygon(0 0,calc(100% - 32px) 0,100% 32px,100% 100%,32px 100%,0 calc(100% - 32px),0 0,3px 3px,3px calc(100% - 33px),33px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 33px,calc(100% - 33px) 3px,3px 3px);transition:opacity .2s}
+#sway.talk .winFrame{animation:frameTalk .5s ease-in-out infinite}
+@keyframes frameTalk{50%{opacity:.55}}
+#sway.react .winFrame{animation:frameHit .45s ease-out}
+@keyframes frameHit{0%{opacity:.2}40%{opacity:1}}
+.winTag{position:absolute;left:0;top:0;z-index:3;display:flex;align-items:center;gap:6px;padding:6px 20px 6px 11px;background:linear-gradient(90deg,var(--c),var(--c3));
+  font-size:10px;font-weight:800;letter-spacing:.24em;color:#fff;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+.winTag i{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.4s infinite}
+.winNo{position:absolute;right:0;bottom:0;z-index:3;padding:6px 11px 6px 20px;background:rgba(11,4,8,.85);font-size:10px;font-weight:800;letter-spacing:.2em;color:var(--c2);clip-path:polygon(12px 0,100% 0,100% 100%,0 100%)}
+#fx{z-index:4}
+.vName{z-index:1!important}
+#grain{z-index:0}
+#app{z-index:1}
+#bubble{max-height:min(26vh,190px)}
 </style>
 </head>
 <body>
@@ -404,11 +428,12 @@ nav button svg{display:none}
         <div class="vName" aria-hidden="true">CERISE</div>
         <canvas id="petals"></canvas>
         <div id="rig"><div id="sway">
-          <img id="avBloom" alt="" aria-hidden="true" src="img/A00.webp">
-          <canvas id="avatar" role="img" aria-label="Cerise"></canvas><img id="avatarImg" alt="Cerise" src="img/A00.webp">
+          <div id="win"><canvas id="avatar" role="img" aria-label="Cerise"></canvas><img id="avatarImg" alt="Cerise" src="img/A00.webp"></div>
+          <div class="winFrame" aria-hidden="true"></div>
+          <div class="winTag" aria-hidden="true"><i></i>LIVE</div>
+          <div class="winNo" aria-hidden="true">No.01</div>
           <div id="fx"></div>
         </div></div>
-        <div class="vig"></div>
         <div id="dlg"><div class="who">CERISE</div><div id="bubble"><div id="bubbleText">…</div><div id="dots"><i></i><i></i><i></i></div><div id="voiceNote" hidden></div><div class="acts" id="bubbleActs"></div></div><i class="next" aria-hidden="true"></i></div>
         <div id="timers"></div>
       </div>
@@ -429,7 +454,7 @@ nav button svg{display:none}
           <div class="mirTag">WARDROBE</div>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126224814">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126230502">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -518,7 +543,7 @@ nav button svg{display:none}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126224814 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126230502 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -539,7 +564,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126224814';
+const VER = '20261126230502';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature', src: 'img/body_front.webp',
@@ -601,12 +626,10 @@ const vec2 TS=vec2(307.,256.);
 const vec4 EL=vec4(122.5,141.,22.5,10.5);const vec4 ER=vec4(202.,140.,20.5,10.5);const vec4 MO=vec4(164.5,177.,8.,2.5);
 const vec3 SKIN=vec3(.93,.77,.82);const vec3 LASH=vec3(.22,.06,.12);
 vec2 warp(vec2 uv){
-  float side=smoothstep(.10,.46,abs(uv.x-.5));float low=smoothstep(.12,.95,uv.y);
+  float side=smoothstep(.27,.5,abs(uv.x-.5));float low=smoothstep(.12,.95,uv.y);
   uv.x+=(sin(uv.y*6.-t*1.25)*.0075+sin(uv.y*15.-t*2.3)*.0018)*side*low;
   uv.y+=sin(uv.x*4.+t*.9)*.0022*side;
-  float chest=smoothstep(.62,1.,uv.y);uv.y-=(sin(t*1.55)*.0055+k*sin(t*10.)*.0025)*chest;
-  float head=1.-smoothstep(.55,.9,uv.y);
-  uv.x+=(sin(t*.53)*.0022+sin(t*1.7)*.0005)*head;uv.y+=(sin(t*.41+1.)*.0015+k*sin(t*7.3)*.0012)*head;
+  float chest=smoothstep(.9,1.,uv.y);uv.y-=(sin(t*1.55)*.0055+k*sin(t*10.)*.0025)*chest;
   return uv;}
 float el(vec2 p,vec4 e){return length((p-e.xy)/e.zw);}
 vec3 lid(vec3 c,vec2 p,vec4 e){
@@ -669,7 +692,7 @@ void main(){
   let nextBlink = performance.now() + 2000, blinkStart = -1, dbl = false, nextLook = performance.now() + 1500;
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
-    const dpr = Math.min(3, window.devicePixelRatio || 1), w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
+    const dpr = window.devicePixelRatio || 1, w = cv.__w || Math.round(cv.clientWidth * dpr), h = cv.__h || Math.round(cv.clientHeight * dpr);
     if (w && (cv.width !== w || cv.height !== h)) { cv.width = w; cv.height = h; }
     gl.viewport(0, 0, cv.width, cv.height);
     // mood fade
@@ -694,7 +717,7 @@ void main(){
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tA);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tB);
       gl.uniform1f(u.m, moodName === 'neutral' ? 0 : mval); gl.uniform1f(u.t, now / 1000); gl.uniform1f(u.k, talk);
-      gl.uniform1f(u.bl, rig.force != null ? rig.force : rig.blink); gl.uniform1f(u.mo, Math.max(0, Math.min(1, rig.mouth))); gl.uniform2f(u.lk, rig.look[0], rig.look[1]);
+      gl.uniform1f(u.bl, rig.force != null ? rig.force : rig.blink); gl.uniform1f(u.mo, Math.max(0, Math.min(1, rig.mouth))); gl.uniform2f(u.lk, Math.round(rig.look[0] * 4) / 4, Math.round(rig.look[1] * 4) / 4);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
     requestAnimationFrame(frame);
@@ -713,12 +736,37 @@ void main(){
   };
 })();
 if (R) fallback.remove(); else cv.remove();
+// size the card so her picture shows at its real resolution (never enlarged), snapped to whole screen pixels
+const IW = 1228, IH = 1024, CROP = { l: .10, t: .06, w: .80, h: .84 };
+function layoutCard() {
+  const st = $('#stage'); if (!st || !st.clientWidth) return;
+  const dpr = window.devicePixelRatio || 1, el = R ? cv : fallback;
+  const aw = st.clientWidth - 36, ah = st.clientHeight - 150 - 70;
+  let P = Math.min(IW / dpr, aw / CROP.w, ah / (CROP.h * IH / IW));
+  P = Math.max(120, Math.floor(P * dpr) / dpr);              // picture width in css px (whole device pixels)
+  const PH = Math.round(P * IH / IW * dpr) / dpr;
+  const W = Math.round(P * CROP.w * dpr) / dpr, H = Math.round(PH * CROP.h * dpr) / dpr;
+  sway.style.setProperty('--cw', W + 'px'); sway.style.setProperty('--ch', H + 'px');
+  el.style.width = P + 'px'; el.style.height = PH + 'px';
+  if (R) { cv.__w = Math.round(P * dpr); cv.__h = Math.round(PH * dpr); }
+  const ox = -Math.round(P * CROP.l * dpr) / dpr, oy = -Math.round(PH * CROP.t * dpr) / dpr;
+  el.style.left = ox + 'px'; el.style.top = oy + 'px';
+  requestAnimationFrame(() => { // land the picture exactly on the screen's pixel grid
+    const r = $('#win').getBoundingClientRect();
+    const sx = (Math.round((r.left + ox) * dpr) / dpr) - r.left, sy = (Math.round((r.top + oy) * dpr) / dpr) - r.top;
+    el.style.left = sx + 'px'; el.style.top = sy + 'px'; sway.classList.add('ready');
+  });
+}
+addEventListener('resize', () => requestAnimationFrame(layoutCard));
+if (window.visualViewport) visualViewport.addEventListener('resize', () => requestAnimationFrame(layoutCard));
+document.fonts && document.fonts.ready.then(() => requestAnimationFrame(layoutCard));
+requestAnimationFrame(layoutCard);
 window.__rig = rig;
 let wantFace = 'neutral';
 function show(name, ms = 320) {
   if (!IMG[name] || shown === name) return; wantFace = name;
   const p = pic(name);
-  const go = () => { if (wantFace !== name) return; shown = name; if (R) R.to(name, ms); else fallback.src = IMG[name]; const bl = document.getElementById('avBloom'); if (bl) bl.src = IMG[name]; };
+  const go = () => { if (wantFace !== name) return; shown = name; if (R) R.to(name, ms); else fallback.src = IMG[name]; };
   if (p.complete && p.naturalWidth) go(); else p.addEventListener('load', go, { once: true });
 }
 let lastVariant = {};
@@ -1571,7 +1619,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
   if (b.dataset.v === 'chat') { const l = $('#log'); l.scrollTop = l.scrollHeight; }
-  BODY.on = false; if (b.dataset.v === 'her') openHer();
+  BODY.on = false; if (b.dataset.v === 'her') openHer(); if (b.dataset.v === 'home') requestAnimationFrame(layoutCard);
 });
 $('#form').addEventListener('submit', (e) => { e.preventDefault(); const t = $('#input').value; $('#input').value = ''; $('#input').blur(); send(t); });
 document.querySelectorAll('.chip').forEach(c => c.onclick = () => send(c.textContent));
