@@ -289,7 +289,7 @@ nav button{padding:4px 10px!important}
         <div class="hsPetals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="hsFloor"></div>
         <div id="bodyWrap">
-          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126192820">
+          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126193204">
         </div>
         <div class="hsTag"><span class="hsNo">No. 01</span><span>The Crimson Jester</span></div>
       </div>
@@ -356,7 +356,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126192820 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126193204 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -375,7 +375,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126192820';
+const VER = '20261126193204';
 
 // ---------- state ----------
 // re-download needed when the voice engine changes
@@ -708,7 +708,7 @@ function dlUI(state, text, pct) {
   bar.style.width = (pct == null ? 0 : Math.max(2, Math.min(100, pct))) + '%';
   box.dataset.state = state; $('#s-dl').disabled = state === 'loading';
   $('#s-dl').textContent = state === 'ready' ? 'Unlimited voice ready ✓' : state === 'loading' ? 'Downloading…' : state === 'error' ? 'Try again' : (LOCAL.kind === 'kokoro-gpu' ? 'Download HD unlimited voice (≈330 MB, once)' : 'Download unlimited voice (≈90 MB, once)');
-  const pill = $('#dlPill'); if (pill) { pill.hidden = state !== 'loading'; pill.textContent = 'Voice ' + Math.round(pct || 0) + '%'; }
+  const pill = $('#dlPill'); if (pill) { pill.hidden = state !== 'loading'; pill.textContent = (LOCAL.cached ? 'Loading voice ' : 'Voice ') + Math.round(pct || 0) + '%'; }
 }
 function onProgress(p) {
   if (!p) return;
@@ -719,11 +719,12 @@ function onProgress(p) {
     const mb = (v) => (v / 1048576).toFixed(1);
     const secs = (performance.now() - LOCAL.started) / 1000; const speed = loaded / Math.max(1, secs);
     const eta = speed > 0 ? Math.round((total - loaded) / speed) : 0;
-    dlUI('loading', `Downloading her voice: ${mb(loaded)} / ${mb(total)} MB` + (eta > 1 ? ` · about ${eta < 60 ? eta + 's' : Math.ceil(eta / 60) + ' min'} left` : ''), total ? loaded / total * 100 : 0);
+    if (LOCAL.cached) dlUI('loading', `Loading her saved voice from your phone… ${total ? Math.round(loaded / total * 100) : 0}%`, total ? loaded / total * 100 : 0);
+    else dlUI('loading', `Downloading her voice: ${mb(loaded)} / ${mb(total)} MB` + (eta > 1 ? ` · about ${eta < 60 ? eta + 's' : Math.ceil(eta / 60) + ' min'} left` : ''), total ? loaded / total * 100 : 0);
   }
   else if (p.status === 'done') { const fs = Object.values(LOCAL.files); if (fs.length && fs.every(f => f.total && f.loaded >= f.total)) dlUI('loading', 'Preparing her voice…', 100); }
 }
-function localReady() { LOCAL.ready = true; S.localReady = true; S.localKind = LOCAL.kind; save(); dlUI('ready', '✓ Unlimited voice ready. Works offline, no limits.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
+function localReady() { LOCAL.ready = true; S.localReady = true; S.localKind = LOCAL.kind; save(); keepVoiceSaved(); dlUI('ready', '✓ Unlimited voice saved on your phone. No re-download, works offline.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
 function localFail(msg) { if (LOCAL.loadReject) LOCAL.loadReject(new Error(msg)); LOCAL.loading = null; dlUI('error', '✗ ' + msg, 0); }
 const KOKORO_WORKER = `
 import { KokoroTTS } from '${KOKORO_URL}';
@@ -767,10 +768,18 @@ function localWorker() {
   w.onerror = (e) => { e.preventDefault && e.preventDefault(); w.terminate(); LOCAL.worker = null; if (!LOCAL.ready) loadMainThread().catch(e2 => localFail('This phone could not load the voice: ' + (e2.message || e2))); };
   return LOCAL.worker = w;
 }
+async function voiceIsSaved() {
+  try { if (!('caches' in window)) return false; const c = await caches.open('transformers-cache'); const keys = await c.keys();
+    const has = (f) => keys.some(r => r.url.includes('Kokoro-82M') && r.url.endsWith(f));
+    if (navigator.gpu && has('onnx/model.onnx')) { LOCAL.kind = 'kokoro-gpu'; return true; }
+    if (has('onnx/model_quantized.onnx')) { LOCAL.kind = 'kokoro'; return true; }
+    return false; } catch (e) { return false; }
+}
+function keepVoiceSaved() { try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {} }
 function loadLocal() {
   if (LOCAL.ready) return Promise.resolve();
   if (!LOCAL.loading) {
-    LOCAL.started = performance.now(); LOCAL.files = {}; dlUI('loading', 'Starting download…', 1);
+    LOCAL.started = performance.now(); LOCAL.files = {}; dlUI('loading', LOCAL.cached ? 'Loading her saved voice from your phone…' : 'Starting download…', 1);
     LOCAL.loading = new Promise((res, rej) => { LOCAL.loadResolve = res; LOCAL.loadReject = rej;
       if (LOCAL.kind === 'kokoro-gpu') { loadKokoroGPU().catch((e) => { console.warn('gpu voice failed', e); LOCAL.kind = 'kokoro'; LOCAL.files = {}; dlUI('loading', 'HD voice not supported here, trying the lighter one…', 1); try { localWorker().postMessage({ type: 'load' }); } catch (e2) { localFail(String(e2.message || e2)); } }); return; }
       if (LOCAL.kind === 'kitten') { loadKitten().catch((e) => { console.warn('kitten failed', e); LOCAL.kind = 'kokoro'; LOCAL.files = {}; dlUI('loading', 'Fast voice unavailable, trying the other voice…', 1); try { localWorker().postMessage({ type: 'load' }); } catch (e2) { localFail(String(e2.message || e2)); } }); return; }
@@ -1220,7 +1229,7 @@ $('#s-ping').onclick = async () => {
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
 document.getElementById('kokoroField').hidden = false; document.getElementById('kvField').hidden = true;
-$('#s-dl').onclick = () => { unlockAudio(); loadLocal().catch(() => {}); };
+$('#s-dl').onclick = async () => { unlockAudio(); LOCAL.cached = await voiceIsSaved(); loadLocal().catch(() => {}); };
 $('#s-testLocal').onclick = async () => {
   unlockAudio(); const out = $('#s-tlout'); out.style.color = 'var(--mute)';
   const log = (t) => { out.textContent = t; };
@@ -1270,7 +1279,7 @@ function openHer() { const f = shown === 'neutral' || !IMG[shown] ? 'neutral' : 
 // ---------- start ----------
 show('neutral', 1); renderLog(); renderMem(); renderTodos();
 if (S.lastVoice) $('#s-vlog').textContent = 'Last time she spoke: ' + S.lastVoice;
-if (S.localReady && S.localKind === LOCAL.kind) { dlUI('loading', 'Loading her saved voice…', 100); setTimeout(() => loadLocal().catch(() => {}), 2500); }
+voiceIsSaved().then(saved => { LOCAL.cached = saved; if (saved) setTimeout(() => loadLocal().catch(() => {}), 1500); else if (S.localReady) dlUI('error', 'Her saved voice isn\'t on this phone anymore (iOS may have cleared it). Tap download to get it back.', 0); });
 // intro
 setTimeout(() => { $('#intro').classList.add('gone'); sway.classList.add('drop'); setTimeout(() => sway.classList.remove('drop'), 1000); }, 1500);
 // falling flower petals and sparkles
