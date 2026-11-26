@@ -207,6 +207,7 @@ nav button{padding:4px 10px!important}
 #dlPill{background:var(--crimson);color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
 .btn:disabled{opacity:.7}
 [hidden]{display:none!important}
+#voiceNote{margin-top:8px;font-size:12px;color:#ffb3c4;line-height:1.35}
 </style>
 </head>
 <body>
@@ -226,7 +227,7 @@ nav button{padding:4px 10px!important}
           <canvas id="avatar" role="img" aria-label="Cerise"></canvas><img id="avatarImg" alt="Cerise" src="img/A00.webp">
           <div id="fx"></div>
         </div></div>
-        <div id="bubble"><div class="who">CERISE</div><div id="bubbleText">…</div><div id="dots"><i></i><i></i><i></i></div><div class="acts" id="bubbleActs"></div></div>
+        <div id="bubble"><div class="who">CERISE</div><div id="bubbleText">…</div><div id="dots"><i></i><i></i><i></i></div><div id="voiceNote" hidden></div><div class="acts" id="bubbleActs"></div></div>
         <div id="timers"></div>
       </div>
       <div id="chips">
@@ -251,7 +252,7 @@ nav button{padding:4px 10px!important}
     <section class="view" id="v-her">
       <div id="herStage">
         <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126191806"></div>
+        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126192156"></div>
       </div>
       <div class="card" id="herCard">
         <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div></div>
@@ -313,7 +314,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126191806 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126192156 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -332,7 +333,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126191806';
+const VER = '20261126192156';
 
 // ---------- state ----------
 // re-download needed when the voice engine changes
@@ -536,7 +537,7 @@ function audioCtx() {
   return actx;
 }
 function unlockAudio() {
-  lastActive = Date.now();
+  lastActive = Date.now(); unlockVoiceEl();
   try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
   const c = audioCtx(); if (c) { const b = c.createBuffer(1, 1, 22050); const s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); }
   // iOS only lets the phone voice talk after it has spoken once during a tap
@@ -550,6 +551,7 @@ async function ensureAudio() {
   if (c.state !== 'running') await new Promise(r => setTimeout(r, 300));
   return c;
 }
+function voiceNote(msg) { const n = document.getElementById('voiceNote'); if (!n) return; if (msg) { n.textContent = '🔇 ' + msg; n.hidden = false; } else n.hidden = true; }
 function vlog(msg) { S.lastVoice = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' · ' + msg; save(); const el = document.getElementById('s-vlog'); if (el) el.textContent = 'Last time she spoke: ' + S.lastVoice; }
 const VOICE_STYLE = {
   neutral: 'cool, unbothered and a little bored', cold: 'cold, flat and unimpressed', smug: 'smug and teasing, with a little laugh in the voice',
@@ -580,27 +582,57 @@ async function fetchTTS(text, m) {
   throw lastErr;
 }
 let speakSeq = 0;
-function stopSpeaking() { speakSeq++; try { curSrc && curSrc.stop(); } catch (e) {} curSrc = null; if ('speechSynthesis' in window) speechSynthesis.cancel(); stopLip(); }
+function stopSpeaking() { speakSeq++; try { voiceEl.pause(); } catch (e) {} curSrc = null; if ('speechSynthesis' in window) speechSynthesis.cancel(); stopLip(); }
 // play raw PCM through the analyser so her mouth follows the real audio
+// One reusable <audio> element: iOS lets it play later (after network waits) once it has played during a tap,
+// and it isn't paused by the mic or app switching like the Web Audio engine is.
+const voiceEl = new Audio(); voiceEl.setAttribute('playsinline', ''); voiceEl.preload = 'auto';
+const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
+let voiceElReady = false;
+function unlockVoiceEl() {
+  if (curSrc) return; // don't interrupt her while she talks
+  try { voiceEl.src = SILENT_WAV; const p = voiceEl.play(); if (p) p.then(() => { voiceElReady = true; }).catch(() => {}); } catch (e) {}
+}
+function wavFromFloat(f, sr) {
+  const n = f.length, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) { const x = Math.max(-1, Math.min(1, f[i])); v.setInt16(44 + i * 2, x < 0 ? x * 32768 : x * 32767, true); }
+  return new Blob([buf], { type: 'audio/wav' });
+}
+function parseWav(ab) { // 16-bit PCM WAV -> Float32
+  const v = new DataView(ab); let o = 12, sr = 24000, data = null, bits = 16, ch = 1;
+  while (o + 8 <= v.byteLength) { const id = String.fromCharCode(v.getUint8(o), v.getUint8(o + 1), v.getUint8(o + 2), v.getUint8(o + 3)); const size = v.getUint32(o + 4, true);
+    if (id === 'fmt ') { ch = v.getUint16(o + 10, true); sr = v.getUint32(o + 12, true); bits = v.getUint16(o + 22, true); }
+    if (id === 'data') { data = [o + 8, size]; break; } o += 8 + size + (size & 1); }
+  if (!data) throw new Error('bad audio from voice');
+  const n = Math.floor(data[1] / (bits / 8) / ch), f = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const p = data[0] + i * ch * (bits / 8); f[i] = bits === 16 ? v.getInt16(p, true) / 32768 : (v.getFloat32(p, true)); }
+  return { f, sr };
+}
 async function playPCM(f, sr, seq, rate = 1) {
-  const c0 = await ensureAudio();
-  if (!c0 || c0.state !== 'running') throw new Error('audio is blocked by the phone (' + (c0 ? c0.state : 'no audio') + ')');
+  if (seq !== speakSeq) return false;
+  // loudness envelope for lip-sync, every 20 ms
+  const hop = Math.max(1, Math.round(sr * 0.02)), env = new Float32Array(Math.ceil(f.length / hop));
+  for (let k = 0; k < env.length; k++) { let s2 = 0; const e = Math.min(f.length, (k + 1) * hop); for (let i = k * hop; i < e; i++) s2 += f[i] * f[i]; env[k] = Math.sqrt(s2 / Math.max(1, e - k * hop)); }
+  const url = URL.createObjectURL(wavFromFloat(f, sr));
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  voiceEl.src = url; voiceEl.playbackRate = rate; voiceEl.preservesPitch = false; voiceEl.webkitPreservesPitch = false; voiceEl.mozPreservesPitch = false;
+  const token = {}; curSrc = token;
+  try { await voiceEl.play(); }
+  catch (e) { curSrc = null; URL.revokeObjectURL(url); throw new Error(e && e.name === 'NotAllowedError' ? 'iPhone blocked the sound (tap the screen once, then try again)' : 'could not play audio: ' + (e.message || e)); }
+  if (!speaking) startLip();
+  if (onVoiceStart) { const est = playPCM.totalEst || (f.length / sr / rate); onVoiceStart(est); }
   return new Promise((resolve) => {
-    if (seq !== speakSeq) return resolve(false);
-    const c = audioCtx(); const buf = c.createBuffer(1, f.length, sr);
-    buf.copyToChannel ? buf.copyToChannel(f, 0) : buf.getChannelData(0).set(f);
-    const src = c.createBufferSource(); src.buffer = buf; src.playbackRate.value = rate; src.connect(analyser); curSrc = src;
-    const data = new Float32Array(analyser.fftSize);
-    if (!speaking) startLip();
+    const done = () => { voiceEl.removeEventListener('ended', done); voiceEl.removeEventListener('error', done); if (curSrc === token) curSrc = null; URL.revokeObjectURL(url); resolve(seq === speakSeq); };
+    voiceEl.addEventListener('ended', done); voiceEl.addEventListener('error', done);
     (function lip() {
-      if (curSrc !== src) return;
-      analyser.getFloatTimeDomainData(data); let s = 0; for (let i = 0; i < data.length; i++) s += data[i] * data[i];
-      rig.mouthT = Math.max(0, Math.min(1, (Math.sqrt(s / data.length) - 0.015) * 7));
+      if (curSrc !== token) return;
+      const k = Math.floor(voiceEl.currentTime * sr / hop); const lv = env[Math.min(env.length - 1, Math.max(0, k))] || 0;
+      rig.mouthT = Math.max(0, Math.min(1, (lv - 0.015) * 7));
       requestAnimationFrame(lip);
     })();
-    src.onended = () => { if (curSrc === src) curSrc = null; resolve(seq === speakSeq); };
-    src.start(0);
-    if (onVoiceStart) { const est = playPCM.totalEst || (buf.duration / rate); onVoiceStart(est); }
   });
 }
 // ---- unlimited on-device voice (Kokoro, runs inside the phone) ----
@@ -702,7 +734,7 @@ function localSay(text) {
 }
 function localSayRaw(text) {
   if (LOCAL.mode === 'kitten' && LOCAL.kitten) return LOCAL.kitten.textToSpeech(text.slice(0, 480), { voice: S.kittenVoice || 'Kiki', model: 'mini', speed: 1.0 })
-    .then(b => b.arrayBuffer()).then(ab => new Promise((res, rej) => audioCtx().decodeAudioData(ab, res, rej))).then(buf => ({ f: buf.getChannelData(0), sr: buf.sampleRate }));
+    .then(b => b.arrayBuffer()).then(parseWav);
   if (LOCAL.mode === 'main' && LOCAL.tts) return LOCAL.tts.generate(text, { voice: S.localVoice || 'af_bella', speed: 1.02 }).then(a => ({ f: a.audio, sr: a.sampling_rate }));
   return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: 1.02 }); });
 }
@@ -719,7 +751,7 @@ async function speakLocalInner(text, seq) {
   return played;
 }
 async function speak(text, lang = 'en', m = 'neutral') {
-  const seq = ++speakSeq; if (curSrc) { try { curSrc.stop(); } catch (e) {} curSrc = null; }
+  const seq = ++speakSeq; if (curSrc) { try { voiceEl.pause(); } catch (e) {} curSrc = null; }
   if (!S.speak || !text) { if (onVoiceStart) onVoiceStart(); return; }
   text = text.replace(/[*_#`~]/g, '');
   const engine = S.voiceEngine || 'auto'; const why = [];
@@ -728,7 +760,7 @@ async function speak(text, lang = 'en', m = 'neutral') {
     try {
       status('think', 'Voice'); const { f, rate } = await fetchTTS(text, m); status('', 'Online');
       if (seq !== speakSeq) return;
-      await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); vlog('AI voice ✓'); return;
+      await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); vlog('AI voice ✓'); voiceNote(''); return;
     } catch (e) {
       status('', 'Online'); if (seq !== speakSeq) return; stopLip();
       if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('AI voice: daily limit reached'); if (!ttsNoticeShown) { ttsNoticeShown = true; toast(engine === 'auto' ? 'AI voice limit reached, switching to her unlimited voice' : 'AI voice limit reached, using phone voice'); } }
@@ -739,12 +771,13 @@ async function speak(text, lang = 'en', m = 'neutral') {
   if ((engine === 'auto' || engine === 'local') && lang === 'en') {
     if (!LOCAL.ready && (LOCAL.loading || S.localReady)) { status('think', 'Loading voice'); loadLocal().catch(() => {}); await Promise.race([LOCAL.loading, new Promise(r => setTimeout(r, 20000))]).catch(() => {}); status('', 'Online'); if (seq !== speakSeq) return; }
     if (LOCAL.ready) {
-      try { status('think', 'Voice'); await speakLocal(text, seq); status('', 'Online'); vlog('Unlimited voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); return; }
+      try { status('think', 'Voice'); await speakLocal(text, seq); status('', 'Online'); vlog('Unlimited voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
       catch (e) { status('', 'Online'); stopLip(); why.push('Unlimited voice: ' + (e.message || e)); if (seq !== speakSeq) return; }
     } else why.push('Unlimited voice: not downloaded yet');
   } else if (engine === 'auto' || engine === 'local') why.push('Unlimited voice: English only');
   // 3) phone voice
   vlog('Phone voice' + (why.length ? ' (' + why.join('; ') + ')' : ''));
+  voiceNote('Using the phone voice because: ' + (why.join(' · ') || 'no other voice available'));
   if (!('speechSynthesis' in window) && onVoiceStart) onVoiceStart();
   phoneSpeak(text, lang, seq);
   setTimeout(() => { if (onVoiceStart && seq === speakSeq) onVoiceStart(); }, 2500);
