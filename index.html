@@ -312,7 +312,7 @@ nav button{padding:4px 10px!important}
           <svg class="mirBow" viewBox="0 0 46 30" aria-hidden="true"><path d="M23 15C17 6 6 1 3 6s2 15 10 14c4-.5 8-3 10-5zM23 15c6-9 17-14 20-9s-2 15-10 14c-4-.5-8-3-10-5z" fill="#9b0f37" stroke="#ff8fb0" stroke-width="1.2"/><path d="M21 15l-6 14 5-2 3 3zM25 15l6 14-5-2-3 3z" fill="#7a0b2b" stroke="#ff8fb0" stroke-width="1"/><ellipse cx="23" cy="15" rx="4.2" ry="4.6" fill="#d1194a" stroke="#ffc2d4" stroke-width="1.2"/></svg>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126220500">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126222022">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -351,12 +351,15 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>Voice</h3>
         <div class="field switch"><label for="s-speak">She talks out loud</label><input id="s-speak" type="checkbox"></div>
+        <div class="field"><label for="s-voicePick">Her voice right now</label>
+          <select id="s-voicePick"><option value="auto">Auto (anime voice first)</option><option value="fish">Fish Audio (unlimited)</option><option value="orpheus">Orpheus on Groq</option><option value="gemini">Gemini anime voice</option></select>
+          <small>She speaks with this one first. If it can't (daily limit, no key), she moves to the next so she never goes quiet. Auto order: Gemini anime voice, Orpheus, Fish. Orpheus is English only.</small></div>
         <div class="field"><label for="s-lang">Language you speak to her in</label>
           <select id="s-lang"><option value="en-US">English</option><option value="fr-FR">Français</option><option value="ar-LB">العربية</option></select>
           <small>Used by the mic. She understands all three when you type.</small></div>
         <div class="field"><label for="s-engine">Voice engine</label>
           <select id="s-engine"><option value="ai">AI voices only (best, recommended)</option><option value="auto">AI voices, then on-device voice</option><option value="local">On-device voice only</option><option value="phone">Phone voice</option></select>
-          <small>Order: Gemini anime voice → Orpheus → Fish Audio (unlimited). The on-device voice runs on your phone after a one-time download, English only. If you hear nothing, turn off silent mode.</small></div>
+          <small>The AI voices are Gemini, Orpheus and Fish Audio (pick which goes first above). The on-device voice runs on your phone after a one-time download, English only. If you hear nothing, turn off silent mode.</small></div>
         <div class="field"><label for="s-tts">Her voice</label>
           <select id="s-tts"><option value="Leda">Leda (youthful, anime-like)</option><option value="Zephyr">Zephyr (bright)</option><option value="Autonoe">Autonoe (bright, clear)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
         <div class="field"><label for="s-orph">Second voice (Orpheus, needs a free Groq key)</label>
@@ -398,7 +401,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126220500 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126222022 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -418,7 +421,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126220500';
+const VER = '20261126222022';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature', src: 'img/body_front.webp',
@@ -457,7 +460,7 @@ window.addEventListener('error', (e) => { if (e && e.message && !/Script error|R
 window.addEventListener('unhandledrejection', (e) => { const m = e && e.reason && (e.reason.message || String(e.reason)); if (m && !/abort|Failed to fetch dynamically/i.test(m)) setTimeout(() => { try { toast('Error: ' + m.slice(0, 120)); } catch (x) {} }, 0); });
 // ---------- state ----------
 // re-download needed when the voice engine changes
-const DEF = {key:'', groqKey:'', orphVoice:'hannah', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[], outfit:'jester', outfitAuto:true, fishKey:'', fishProxy:'', fishVoice:'08f852cd76f944cca6910f691a9547b7', fishCustom:''};
+const DEF = {key:'', groqKey:'', orphVoice:'hannah', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[], outfit:'jester', outfitAuto:true, fishKey:'', fishProxy:'', fishVoice:'08f852cd76f944cca6910f691a9547b7', fishCustom:'', voicePick:'auto'};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 if ((S.v || 0) < 3) { S.v = 3; S.voiceEngine = 'ai'; }
@@ -979,33 +982,36 @@ async function speak(text, lang = 'en', m = 'neutral') {
   if (!S.speak || !text) { if (onVoiceStart) onVoiceStart(); return; }
   text = text.replace(/[*_#`~]/g, ''); const plain = text.replace(/\[[^\]]*\]\s*/g, '');
   const engine = S.voiceEngine || 'auto'; const why = []; voiceMood = m || 'neutral';
-  // 1) expressive Gemini AI voice (free daily limit)
-  if ((engine === 'auto' || engine === 'ai') && S.key && Date.now() > ttsCooldownUntil) {
-    try {
-      status('think', 'Voice'); const { f, rate } = await fetchTTS(text, m); status('', 'Online');
-      if (seq !== speakSeq) return;
-      await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); vlog('AI voice ✓'); voiceNote(''); return;
-    } catch (e) {
-      status('', 'Online'); if (seq !== speakSeq) return; stopLip();
-      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('AI voice: daily limit reached'); if (!ttsNoticeShown) { ttsNoticeShown = true; toast(engine === 'ai' ? 'Her anime voice reached today\'s free limit, it comes back tomorrow' : 'AI voice limit reached, using her backup voice'); } }
-      else why.push('AI voice: ' + (e.message || e));
+  // 1–3) the AI voices, starting with the one you picked in Settings (then the others, so she never goes quiet)
+  const order = ['gemini', 'orpheus', 'fish']; const pick = S.voicePick || 'auto';
+  if (order.includes(pick)) { order.splice(order.indexOf(pick), 1); order.unshift(pick); }
+  if (engine === 'auto' || engine === 'ai') for (const step of order) {
+    if (step === 'gemini') { // expressive Gemini anime voice (free daily limit)
+      if (S.key && Date.now() > ttsCooldownUntil) {
+        try {
+          status('think', 'Voice'); const { f, rate } = await fetchTTS(text, m); status('', 'Online');
+          if (seq !== speakSeq) return;
+          await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); vlog('AI voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return;
+        } catch (e) {
+          status('', 'Online'); if (seq !== speakSeq) return; stopLip();
+          if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('AI voice: daily limit reached'); if (!ttsNoticeShown) { ttsNoticeShown = true; toast('Her anime voice reached today\'s free limit, switching to her next voice'); } }
+          else why.push('AI voice: ' + (e.message || e));
+        }
+      } else why.push(S.key ? 'AI voice: resting after hitting its limit' : 'AI voice: no Gemini key');
+    } else if (step === 'orpheus') { // Orpheus on Groq (English only)
+      if (lang !== 'en') { why.push('Orpheus: English only'); continue; }
+      if (S.groqKey && Date.now() > orphCooldownUntil) {
+        try { status('think', 'Voice'); await speakOrpheus(text, seq, m); status('', 'Online'); if (seq !== speakSeq) return; vlog('Orpheus voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
+        catch (e) { status('', 'Online'); stopLip(); if (seq !== speakSeq) return; if (e.status === 429) { orphCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('Orpheus: daily limit reached'); } else why.push('Orpheus: ' + (e.detail || e.message || e)); }
+      } else why.push(S.groqKey ? 'Orpheus: resting after its limit' : 'Orpheus: add a free Groq key in Settings');
+    } else if (step === 'fish') { // Fish Audio S2.1 (unlimited, every language)
+      if (S.fishKey && Date.now() > fishCooldownUntil) {
+        try { status('think', 'Voice'); await speakFish(text, seq, m); status('', 'Online'); if (seq !== speakSeq) return; vlog('Fish voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
+        catch (e) { status('', 'Online'); stopLip(); if (seq !== speakSeq) return;
+          if (e.status === 429) fishCooldownUntil = Date.now() + 60 * 1000; else if (e.status === 402) fishCooldownUntil = Date.now() + 60 * 60 * 1000;
+          why.push('Fish: ' + fishError(e)); }
+      } else why.push(S.fishKey ? 'Fish: resting for a moment' : 'Fish: add a Fish Audio key in Settings for an unlimited voice');
     }
-  } else if (engine === 'auto' || engine === 'ai') why.push(S.key ? 'AI voice: resting after hitting its limit' : 'AI voice: no Gemini key');
-  // 2) second free reactive voice (Orpheus on Groq, English)
-  if ((engine === 'ai' || engine === 'auto') && lang === 'en') {
-    if (S.groqKey && Date.now() > orphCooldownUntil) {
-      try { status('think', 'Voice'); await speakOrpheus(text, seq, m); status('', 'Online'); if (seq !== speakSeq) return; vlog('Orpheus voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
-      catch (e) { status('', 'Online'); stopLip(); if (seq !== speakSeq) return; if (e.status === 429) { orphCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('Orpheus: daily limit reached'); } else why.push('Orpheus: ' + (e.detail || e.message || e)); }
-    } else why.push(S.groqKey ? 'Orpheus: resting after its limit' : 'Orpheus: add a free Groq key in Settings for a second voice');
-  }
-  // 3) unlimited reactive voice: Fish Audio S2.1 (every language)
-  if (engine === 'ai' || engine === 'auto') {
-    if (S.fishKey && Date.now() > fishCooldownUntil) {
-      try { status('think', 'Voice'); await speakFish(text, seq, m); status('', 'Online'); if (seq !== speakSeq) return; vlog('Fish voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
-      catch (e) { status('', 'Online'); stopLip(); if (seq !== speakSeq) return;
-        if (e.status === 429) fishCooldownUntil = Date.now() + 60 * 1000; else if (e.status === 402) fishCooldownUntil = Date.now() + 60 * 60 * 1000;
-        why.push('Fish: ' + fishError(e)); }
-    } else why.push(S.fishKey ? 'Fish: resting for a moment' : 'Fish: add a Fish Audio key in Settings for an unlimited voice');
   }
   // 4) on-device voice (English)
   if ((engine === 'auto' || engine === 'local') && lang === 'en') {
@@ -1400,7 +1406,7 @@ function bind(id, key, type) {
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
 bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
-bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-orph', 'orphVoice'); bind('#s-pitch', 'animePitch', 'check'); bind('#s-fishKey', 'fishKey'); bind('#s-fishVoice', 'fishVoice'); bind('#s-fishCustom', 'fishCustom'); bind('#s-fishProxy', 'fishProxy');
+bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-orph', 'orphVoice'); bind('#s-pitch', 'animePitch', 'check'); bind('#s-voicePick', 'voicePick'); bind('#s-fishKey', 'fishKey'); bind('#s-fishVoice', 'fishVoice'); bind('#s-fishCustom', 'fishCustom'); bind('#s-fishProxy', 'fishProxy');
 function refreshFishUI() { $('#fishCustomField').hidden = S.fishVoice !== 'custom'; } refreshFishUI(); $('#s-fishVoice').addEventListener('change', refreshFishUI);
 $('#s-testFish').onclick = async () => {
   unlockAudio(); const out = $('#s-fishout'); out.style.color = 'var(--mute)';
