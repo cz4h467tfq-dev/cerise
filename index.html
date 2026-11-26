@@ -193,6 +193,12 @@ nav button.on{color:var(--crimson2)}
 .stats b{display:block;font-size:17px;color:#fff;text-transform:capitalize}
 .stats span{font-size:11px;color:var(--mute);letter-spacing:.06em}
 nav button{padding:4px 10px!important}
+
+#her3d{position:absolute;inset:0;width:100%;height:100%;z-index:2;display:block}
+#herStage.art #her3d{display:none}
+.seg{position:absolute;top:10px;right:12px;z-index:4;display:flex;background:rgba(255,255,255,.07);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;color:var(--mute);font-weight:700;font-size:13px;padding:7px 13px;border-radius:999px;min-height:34px}
+.seg button.on{background:var(--crimson);color:#fff}
 </style>
 </head>
 <body>
@@ -237,8 +243,10 @@ nav button{padding:4px 10px!important}
     <section class="view" id="v-her">
       <div id="herStage">
         <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><canvas id="bodyCv" role="img" aria-label="Cerise full body"></canvas></div>
-        <div id="viewName">Front</div>
+        <canvas id="her3d" role="img" aria-label="Cerise in 3D"></canvas>
+        <div id="bodyWrap" hidden><canvas id="bodyCv" role="img" aria-label="Cerise full body"></canvas></div>
+        <div id="viewName">Drag to spin · pinch</div>
+        <div class="seg" role="tablist"><button type="button" id="m3d" class="on">3D</button><button type="button" id="mArt">Art</button></div>
       </div>
       <div class="card" id="herCard">
         <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div>
@@ -296,7 +304,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126184240 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126184402 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -315,7 +323,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126184240';
+const VER = '20261126184402';
 
 // ---------- state ----------
 const DEF = {key:'', groqKey:'', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
@@ -1038,7 +1046,7 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
   if (b.dataset.v === 'chat') { const l = $('#log'); l.scrollTop = l.scrollHeight; }
-  BODY.on = false; if (b.dataset.v === 'her') openHer();
+  BODY.on = false; if (b.dataset.v === 'her') openHer(); else if (HER3D) HER3D.stop();
 });
 $('#form').addEventListener('submit', (e) => { e.preventDefault(); const t = $('#input').value; $('#input').value = ''; $('#input').blur(); send(t); });
 document.querySelectorAll('.chip').forEach(c => c.onclick = () => send(c.textContent));
@@ -1087,11 +1095,27 @@ function bodyRenderer() {
   }
   requestAnimationFrame(frame); return true;
 }
+let HER3D = null, herMode = '3d';
+function load3d() {
+  return new Promise((res, rej) => { if (window.Cerise3D) return res(); const sc = document.createElement('script'); sc.src = 'cerise3d.js?v=' + VER; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); });
+}
+function setHerMode(m) {
+  herMode = m; $('#m3d').classList.toggle('on', m === '3d'); $('#mArt').classList.toggle('on', m === 'art');
+  $('#herStage').classList.toggle('art', m === 'art'); $('#bodyWrap').hidden = m !== 'art';
+  $('#viewName').textContent = m === '3d' ? 'Drag to spin · pinch' : BODY.names[BODY.i];
+  if (m === '3d') { BODY.on = false; open3d(); } else { HER3D && HER3D.stop(); BODY.on = true; BODY.views.forEach(bodyImg); if (!BODY.r) BODY.r = bodyRenderer(); }
+}
+async function open3d() {
+  try { await load3d(); if (!HER3D) HER3D = Cerise3D.mount($('#her3d'), { faceSrc: IMG.neutral }); else HER3D.start(); }
+  catch (e) { toast('3D could not load, showing her art'); setHerMode('art'); }
+}
+$('#m3d').onclick = () => setHerMode('3d'); $('#mArt').onclick = () => setHerMode('art');
 function openHer() {
-  BODY.on = true; BODY.views.forEach(bodyImg); if (!BODY.r) BODY.r = bodyRenderer();
+  setHerMode(herMode);
   $('#stMood').textContent = mood; $('#stMem').textContent = S.memory.length; $('#stMsg').textContent = S.history.length;
 }
 function turnAround() {
+  if (herMode === '3d' && HER3D) { HER3D.state.vx = 0.09; HER3D.state.lastTouch = performance.now(); return; }
   const w = $('#bodyWrap'); w.classList.add('turn');
   setTimeout(() => { BODY.i = (BODY.i + 1) % 3; $('#viewName').textContent = BODY.names[BODY.i]; requestAnimationFrame(() => requestAnimationFrame(() => w.classList.remove('turn'))); }, 170);
 }
