@@ -180,7 +180,7 @@ nav button.on{color:var(--crimson2)}
 #bodyWrap.turn{transform:scaleX(0)}
 #viewName{position:absolute;top:12px;left:14px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--mute);
   background:rgba(255,255,255,.06);padding:5px 12px;border-radius:999px;z-index:3}
-.card{margin:8px 14px 12px;background:linear-gradient(180deg,rgba(42,15,25,.95),rgba(26,8,15,.95));border:1px solid rgba(255,61,110,.3);border-radius:22px;padding:14px 16px}
+.card{margin:8px 14px 10px;background:linear-gradient(180deg,rgba(42,15,25,.95),rgba(26,8,15,.95));border:1px solid rgba(255,61,110,.3);border-radius:22px;padding:14px 16px}
 .cardTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .cName{font-family:"Cinzel Decorative",Georgia,serif;font-size:22px;background:linear-gradient(180deg,#fff,#ffb3c8 60%,#ff3d6e);-webkit-background-clip:text;background-clip:text;color:transparent}
 .cSub{font-size:13px;color:var(--mute);margin-top:2px}
@@ -216,17 +216,28 @@ nav button{padding:4px 10px!important}
 .hsName{position:absolute;left:50%;top:6%;transform:translateX(-50%);z-index:-2;font-family:"Cinzel Decorative",Georgia,serif;font-weight:700;
   font-size:min(30vw,150px);line-height:1;letter-spacing:-.02em;color:transparent;-webkit-text-stroke:1.5px rgba(255,120,160,.28);white-space:nowrap;
   animation:hsIn 1.2s cubic-bezier(.2,1,.3,1) both}
-.hsBeam{position:absolute;left:50%;top:-5%;width:140%;height:105%;transform:translateX(-50%);z-index:-1;pointer-events:none;
-  background:conic-gradient(from 180deg at 50% 0%,transparent 158deg,rgba(255,220,232,.10) 170deg,rgba(255,220,232,.2) 180deg,rgba(255,220,232,.10) 190deg,transparent 202deg);
-  animation:beam 6s ease-in-out infinite}
-@keyframes beam{50%{opacity:.7}}
-.hsFloor{position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:120%;height:170px;border-radius:50%;z-index:0;
-  background:radial-gradient(ellipse at center,rgba(255,61,110,.45),rgba(209,25,74,.12) 45%,transparent 70%)}
-#bodyWrap{position:relative;height:calc(100% - 40px);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;z-index:1;
+#mirror{position:relative;z-index:1;height:calc(100% - 40px);aspect-ratio:.6;max-width:92%;margin:0 0 22px;border-radius:999px 999px 20px 20px;
+  background:radial-gradient(ellipse 80% 72% at 50% 56%,#f9edf2 66%,#f0d9e3 100%);
+  border:3px solid #9b0f37;box-shadow:0 0 0 1px rgba(255,160,190,.35),0 0 0 7px rgba(155,15,55,.22),0 18px 60px rgba(209,25,74,.38),inset 0 0 0 5px #f9edf2,inset 0 0 0 6px rgba(155,15,55,.28);
   animation:hsUp .9s cubic-bezier(.2,1.1,.3,1) both}
-#bodyImg{height:100%;width:auto;display:block;animation:bodyFloat 5s ease-in-out infinite;transform-origin:50% 100%}
-.hsReflect{position:absolute;top:100%;height:100%;width:auto;transform:scaleY(-1);opacity:.16;pointer-events:none;
-  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.9),transparent 22%);mask-image:linear-gradient(to top,rgba(0,0,0,.9),transparent 22%)}
+.mirIn{position:absolute;inset:6px;border-radius:999px 999px 15px 15px;overflow:hidden}
+.mirShadow{position:absolute;left:50%;bottom:1.5%;width:62%;height:6%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(120,20,55,.28),transparent 70%)}
+.look{position:absolute;left:2%;bottom:2.5%;width:96%;height:91%;object-fit:contain;object-position:50% 100%;opacity:0;transition:opacity .55s ease,transform .55s cubic-bezier(.2,1,.3,1);transform:translateY(10px) scale(.985);transform-origin:50% 100%}
+.look.on{opacity:1;transform:none;animation:bodyFloat 5s ease-in-out infinite}
+.mirFlash{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.95),rgba(255,214,228,.5) 40%,transparent 70%);opacity:0;pointer-events:none}
+.mirFlash.go{animation:mflash .7s ease-out}
+@keyframes mflash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+.mirBow{position:absolute;left:50%;top:-15px;width:46px;height:30px;transform:translateX(-50%);z-index:2;filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}
+#lookLabel{position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);z-index:3;white-space:nowrap;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#ffe3ea;background:linear-gradient(180deg,#a8113c,#6d0a27);padding:7px 16px;border-radius:999px;border:1px solid #ff8fb0;box-shadow:0 6px 18px rgba(0,0,0,.45);display:flex;gap:8px;align-items:center}
+#lookLabel small{font-family:"Cinzel Decorative",Georgia,serif;font-size:11px;color:#ffb3c8;letter-spacing:.08em}
+#wardrobe{position:relative;display:flex;gap:8px;overflow-x:auto;padding:2px 14px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:none}
+#wardrobe::-webkit-scrollbar{display:none}
+#wardrobe button{flex:none;width:58px;height:84px;border-radius:14px;border:2px solid transparent;background:#f9edf2;padding:3px 2px 0;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+#wardrobe button img{width:100%;height:100%;object-fit:contain;object-position:50% 100%;display:block}
+#wardrobe button.on{border-color:var(--crimson2);box-shadow:0 0 0 2px rgba(255,61,110,.35),0 6px 16px rgba(209,25,74,.45);transform:translateY(-2px)}
+#wardrobe button.auto{background:linear-gradient(180deg,#2a0f19,#1a080f);border:1px solid rgba(255,61,110,.45);color:#ffd1de;font-size:11px;font-weight:700;letter-spacing:.08em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0}
+#wardrobe button.auto b{font-size:18px;line-height:1}
+#wardrobe button.auto.off{opacity:.55}
 .hsTag{position:absolute;left:14px;top:12px;z-index:2;display:flex;flex-direction:column;gap:2px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#ffd1de}
 .hsTag .hsNo{font-family:"Cinzel Decorative",Georgia,serif;font-size:13px;color:var(--crimson2);letter-spacing:.12em}
 .hsPetals{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
@@ -238,9 +249,11 @@ nav button{padding:4px 10px!important}
 @keyframes petal{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(-60px,110vh) rotate(540deg)}}
 @keyframes hsUp{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}
 @keyframes hsIn{0%{opacity:0;letter-spacing:.2em}100%{opacity:1}}
-.cFace{width:52px;height:52px;border-radius:50%;overflow:hidden;flex:none;border:2px solid var(--crimson);background:#2a0f19}
+.cFace{width:46px;height:46px;border-radius:50%;overflow:hidden;flex:none;border:2px solid var(--crimson);background:#2a0f19}
 .cFace img{width:150%;height:auto;margin:-12% 0 0 -25%;display:block}
 .cardTop{justify-content:flex-start!important;gap:12px!important}
+.pillBtn{flex:none;border:1px solid rgba(255,61,110,.5);background:rgba(209,25,74,.18);color:#ffd1de;font-weight:700;font-size:13px;border-radius:999px;padding:9px 14px;min-height:40px}
+.stats{margin-top:10px!important}.stats div{padding:8px!important}
 #gallery{position:fixed;inset:0;z-index:30;background:rgba(12,3,7,.97);display:flex;flex-direction:column;padding:calc(var(--safe-t) + 10px) 12px calc(var(--safe-b) + 10px)}
 .galTop{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 10px}
 .galTop b{font-size:18px}.galTop button{background:rgba(255,255,255,.1);border:0;border-radius:999px;padding:9px 16px;font-weight:700;min-height:40px}
@@ -294,21 +307,26 @@ nav button{padding:4px 10px!important}
       <div id="herStage">
         <div class="hsBg"></div>
         <div class="hsName" aria-hidden="true">CERISE</div>
-        <div class="hsBeam"></div>
         <div class="hsPetals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <div class="hsFloor"></div>
-        <div id="bodyWrap">
-          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126195338">
+        <div id="mirror">
+          <svg class="mirBow" viewBox="0 0 46 30" aria-hidden="true"><path d="M23 15C17 6 6 1 3 6s2 15 10 14c4-.5 8-3 10-5zM23 15c6-9 17-14 20-9s-2 15-10 14c-4-.5-8-3-10-5z" fill="#9b0f37" stroke="#ff8fb0" stroke-width="1.2"/><path d="M21 15l-6 14 5-2 3 3zM25 15l6 14-5-2-3 3z" fill="#7a0b2b" stroke="#ff8fb0" stroke-width="1"/><ellipse cx="23" cy="15" rx="4.2" ry="4.6" fill="#d1194a" stroke="#ffc2d4" stroke-width="1.2"/></svg>
+          <div class="mirIn">
+            <div class="mirShadow"></div>
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126220500">
+            <img id="look1" class="look" alt="">
+            <div class="mirFlash" id="mirFlash"></div>
+          </div>
+          <div id="lookLabel"><small id="lookNo">01</small><span id="lookName">The Crimson Jester</span></div>
         </div>
-        <div class="hsTag"><span class="hsNo">No. 01</span><span>The Crimson Jester</span></div>
       </div>
+      <div id="wardrobe" aria-label="Her outfits"></div>
       <div class="card" id="herCard">
         <div class="cardTop">
           <div class="cFace"><img id="cFaceImg" alt=""></div>
           <div style="flex:1;min-width:0"><div class="cName">Cerise</div><div class="cSub">Cold · arrogant · secretly helpful</div></div>
+          <button class="pillBtn" id="galBtn" type="button">40 faces</button>
         </div>
-        <button class="btn" id="galBtn" type="button" style="margin:12px 0 0">See all 40 expressions</button>
-        <div class="stats"><div><b id="stMood">cold</b><span>mood</span></div><div><b id="stMem">0</b><span>memories</span></div><div><b id="stMsg">0</b><span>messages</span></div></div>
+        <div class="stats"><div><b id="stMood">cold</b><span>mood</span></div><div><b id="stLook">Jester</b><span>outfit</span></div><div><b id="stMsg">0</b><span>messages</span></div></div>
       </div>
     </section>
     <section class="view" id="v-chat"><div id="log"></div></section>
@@ -337,21 +355,32 @@ nav button{padding:4px 10px!important}
           <select id="s-lang"><option value="en-US">English</option><option value="fr-FR">Français</option><option value="ar-LB">العربية</option></select>
           <small>Used by the mic. She understands all three when you type.</small></div>
         <div class="field"><label for="s-engine">Voice engine</label>
-          <select id="s-engine"><option value="ai">Anime AI voice only (best, recommended)</option><option value="auto">Anime AI voice, then backup voice</option><option value="local">Unlimited on-device voice only</option><option value="phone">Phone voice</option></select>
-          <small>The Gemini AI voice is the most expressive but has a free daily limit. The unlimited voice runs on your phone after a one-time download, free forever, English only. If you hear nothing, turn off silent mode.</small></div>
+          <select id="s-engine"><option value="ai">AI voices only (best, recommended)</option><option value="auto">AI voices, then on-device voice</option><option value="local">On-device voice only</option><option value="phone">Phone voice</option></select>
+          <small>Order: Gemini anime voice → Orpheus → Fish Audio (unlimited). The on-device voice runs on your phone after a one-time download, English only. If you hear nothing, turn off silent mode.</small></div>
         <div class="field"><label for="s-tts">Her voice</label>
           <select id="s-tts"><option value="Leda">Leda (youthful, anime-like)</option><option value="Zephyr">Zephyr (bright)</option><option value="Autonoe">Autonoe (bright, clear)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
         <div class="field"><label for="s-orph">Second voice (Orpheus, needs a free Groq key)</label>
           <select id="s-orph"><option value="hannah">Hannah</option><option value="autumn">Autumn</option><option value="diana">Diana</option></select>
           <small>Used when the anime voice runs out for the day. Get a free key at console.groq.com/keys and paste it under Brain.</small></div>
-        <div class="field" id="kvField"><label for="s-kitten">Her unlimited voice</label>
-          <select id="s-kitten"><option value="Kiki">Kiki (cute)</option><option value="Luna">Luna (soft)</option><option value="Rosie">Rosie (bright)</option><option value="Bella">Bella (warm)</option></select></div>
-        <div class="field" id="kokoroField"><label for="s-local">Her unlimited voice</label>
+        <div class="field"><label for="s-fishKey">Unlimited voice: Fish Audio S2.1 key</label>
+          <input id="s-fishKey" type="password" placeholder="Paste your Fish Audio API key" autocomplete="off">
+          <small>Takes over when the other voices run out. Free model, no daily cap (fair use), every language. Key from <a href="https://fish.audio/app/api-keys" target="_blank" rel="noopener">fish.audio/app/api-keys</a>. Saved only on this phone.</small></div>
+        <div class="field"><label for="s-fishVoice">Fish voice</label>
+          <select id="s-fishVoice"><option value="08f852cd76f944cca6910f691a9547b7">Lively Anime Girl (English, expressive)</option><option value="f52f66be7e7a474ea121a5dcc41abf40">E-Girl (English, soft)</option><option value="69eb6788dfae49cbad7ab498f459fb80">Anime Girl (Japanese accent)</option><option value="8d12b110ec6f4783bbc8a9969739dac5">Tsundere (Japanese accent)</option><option value="custom">Custom voice ID…</option></select></div>
+        <div class="field" id="fishCustomField"><label for="s-fishCustom">Custom Fish voice ID</label>
+          <input id="s-fishCustom" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="32-letter ID from fish.audio">
+          <small>Open any voice on fish.audio, tap ⋯ then Copy Model ID.</small></div>
+        <div class="field"><label for="s-fishProxy">Fish voice server link</label>
+          <input id="s-fishProxy" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="https://cerise-….vercel.app">
+          <small>Fish Audio doesn't accept calls straight from web apps, so she reaches it through your own free server (one-time setup): vercel.com → Continue with GitHub → Add New → Project → Import "cerise" → Deploy. Paste the link it shows here.</small></div>
+        <button class="btn ghost" id="s-testFish" type="button" style="width:calc(100% - 28px);margin:0 14px 6px">Test Fish voice</button>
+        <div id="s-fishout" style="padding:0 14px 12px;font-size:13px;color:var(--mute);white-space:pre-wrap;word-break:break-word"></div>
+        <div class="field" id="kokoroField"><label for="s-local">On-device voice (offline)</label>
           <select id="s-local"><option value="af_bella">Bella (bright, youthful)</option><option value="af_jessica">Jessica (playful)</option><option value="af_kore">Kore (cool)</option><option value="af_nicole">Nicole (soft, whispery)</option><option value="af_sky">Sky (light)</option><option value="af_heart">Heart (warm)</option><option value="af_nova">Nova (clear)</option><option value="af_aoede">Aoede (smooth)</option><option value="bf_emma">Emma (British)</option><option value="bf_isabella">Isabella (British, cool)</option></select></div>
         <div class="field switch"><label for="s-pitch">Anime pitch (slightly higher voice)</label><input id="s-pitch" type="checkbox"></div>
-        <button class="btn" id="s-dl" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Download HD unlimited voice (once)</button>
+        <button class="btn" id="s-dl" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Download HD on-device voice</button>
         <div id="dlBox" hidden><div class="dlTrack"><div id="dlBar"></div></div><div id="dlText"></div><small>Keep the app open until it finishes. Wi-Fi recommended.</small></div>
-        <button class="btn ghost" id="s-testLocal" type="button" style="width:calc(100% - 28px);margin:0 14px 6px">Test unlimited voice</button>
+        <button class="btn ghost" id="s-testLocal" type="button" style="width:calc(100% - 28px);margin:0 14px 6px">Test on-device voice</button>
         <div id="s-tlout" style="padding:0 14px 12px;font-size:13px;color:var(--mute);white-space:pre-wrap;word-break:break-word"></div>
         <div id="s-vlog" style="padding:0 14px 14px;font-size:12px;color:var(--mute);word-break:break-word"></div>
         <button class="btn ghost" id="s-test" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test her voice</button>
@@ -369,7 +398,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126195338 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126220500 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -389,14 +418,46 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126195338';
+const VER = '20261126220500';
+// her wardrobe (Her tab): she changes outfit to fit what you talk about
+const OUTFITS = [
+  { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature', src: 'img/body_front.webp',
+    when: 'her default look: everyday chat, jokes, magic, circus, theater, when nothing else fits', kw: /jester|circus|cirque|clown|harlequin|arlequin|th[ée][âa]tre|theat|magic|magie|سيرك|مهرج/i },
+  { id: 'nurse', name: 'Nurse', short: 'Nurse', sub: "Doctor's orders", when: 'hospital, doctor, nurse, being sick, medicine, injuries, pain, health, clinic, appointments, first aid',
+    kw: /hospital|h[ôo]pital|doctor|docteur|m[ée]decin|nurse|infirmi|\bsick\b|malade|\bill\b|fever|fi[èe]vre|medicine|m[ée]dicament|clinic|clinique|injur|bless[ée]|\bhurts?\b|\bpain\b|douleur|health|sant[ée]|pharmac|dentist|dentiste|مستشفى|طبيب|دكتور|مريض|دواء|ممرض|صيدلية/i },
+  { id: 'pajamas', name: 'Pajamas', short: 'Pajamas', sub: 'Do not disturb', when: 'sleep, bed, being tired, good night, naps, late at night, lazy days, waking up',
+    kw: /\bsleep|dormir|sommeil|\bbed\b|\blit\b|tired|fatigu|good ?night|bonne nuit|\bnap\b|sieste|insomnia|pajama|pyjama|نوم|نعسان|تصبح على خير|سرير|تعبان/i },
+  { id: 'winter', name: 'Snow Coat', short: 'Winter', sub: 'Cold-weather fluff', when: 'winter, snow, cold or freezing weather, Christmas, skiing, mountains',
+    kw: /\bsnow|neige|winter|hiver|freezing|it'?s cold|il fait froid|christmas|no[ëe]l|\bski|برد|ثلج|شتاء|كريسماس/i },
+  { id: 'school', name: 'School Uniform', short: 'School', sub: 'Class is in session', when: 'school, homework, studying, exams, classes, teachers, university, math, science, learning a language',
+    kw: /school|[ée]cole|homework|devoirs?|\bexams?\b|examen|\bstudy|[ée]tudi|\bclass\b|classe|\bcours\b|lesson|le[çc]on|teacher|\bprof\b|universit|college|coll[èe]ge|lyc[ée]e|\bmath|physics|chemistry|biology|مدرسة|درس|امتحان|جامعة|واجب/i },
+  { id: 'gown', name: 'Red Gala Gown', short: 'Gala', sub: 'Dressed to ruin a ball', when: 'parties, galas, prom, weddings, balls, dates, birthdays, fancy dinners, celebrations, red carpet',
+    kw: /\bparty|f[êe]te|\bgala|\bprom\b|wedding|mariage|\bball\b|\bbal\b|\bdate night|birthday|anniversaire|celebrat|c[ée]l[ée]br|fancy|red carpet|حفلة|عرس|عيد ميلاد/i },
+  { id: 'kimono', name: 'Sakura Kimono', short: 'Kimono', sub: 'Sakura night', when: 'Japan, Japanese culture, anime, manga, sushi, ramen, festivals, tea ceremonies, cherry blossoms',
+    kw: /japan|japon|kimono|sushi|\banime|manga|tokyo|kyoto|matsuri|festival|sakura|ramen|اليابان|انمي/i },
+  { id: 'darkfrill', name: 'Midnight Frills', short: 'Gothic', sub: 'Gothic night', when: 'horror, Halloween, vampires, ghosts, scary stories, mysteries, anything dark or creepy',
+    kw: /horror|horreur|halloween|vampire|ghost|fant[ôo]me|scary|\bpeur\b|creepy|haunted|zombie|demon|رعب|شبح/i },
+  { id: 'elegant', name: 'Office Elegance', short: 'Office', sub: 'Business, but gothic', when: 'work, the office, meetings, jobs, interviews, business, CVs, presentations, emails, clients, productivity',
+    kw: /\b(at|to|from|after|before|for) work\b|\bmy (job|work|boss|manager)\b|\bworking on\b|travail|boulot|\boffice\b|bureau|meeting|r[ée]union|interview|entretien|\bjob\b|emploi|business|\bcv\b|r[ée]sum[ée]|presentation|pr[ée]sentation|\bboss\b|patron|client|شغل|عمل|مقابلة|اجتماع/i },
+  { id: 'maid', name: 'Maid', short: 'Maid', sub: 'At your service. Barely.', when: 'cleaning, cooking, recipes, chores, laundry, serving tea, helping around the house',
+    kw: /\bclean|nettoy|m[ée]nage|\bcook|cuisin|recipe|recette|chores|laundry|lessive|dishes|vaisselle|tea time|طبخ|تنظيف|وصفة/i },
+  { id: 'lolita', name: 'Sweet Lolita', short: 'Sweet', sub: 'Sugar and spite', when: 'cute things, sweets, cake, desserts, tea parties, flowers, compliments, romance, crushes',
+    kw: /\bcute|mignon|kawaii|\bcake|g[âa]teau|dessert|\bsweets?\b|bonbon|candy|chocolat|tea party|flowers?|fleurs?|romant|\bcrush|كيك|حلويات|ورد/i },
+  { id: 'street', name: 'Streetwear', short: 'Street', sub: 'Too cool to care', when: 'music, concerts, the gym, sports, gaming, skating, the city, coding, tech, GitHub, hacking',
+    kw: /\bgym\b|workout|\bsports?\b|football|basket|concert|music|musique|\bsong|chanson|gaming|video ?game|jeu vid|\bskate|\brap\b|\brock\b|github|\bcode\b|coding|programm|hack|رياضة|موسيقى|العاب/i },
+  { id: 'casual', name: 'Off-Duty', short: 'Casual', sub: 'Casual day out', when: 'hanging out, shopping, the mall, coffee, friends, weekends, movies, walks, the beach, chilling',
+    kw: /shopping|\bmall\b|coffee|\bcaf[ée]\b|hang ?out|friends|\bamis\b|weekend|week-end|\bmovies?\b|\bfilm\b|cin[ée]ma|\bwalk\b|promenade|\bchill|beach|plage|تسوق|قهوة|اصحاب|سينما/i },
+];
+OUTFITS.forEach((o, i) => { o.n = i + 1; if (!o.src) o.src = 'img/outfits/' + o.id + '.webp'; o.thumb = o.id === 'jester' ? 'img/outfits/t_jester.webp' : 'img/outfits/t_' + o.id + '.webp'; });
+const OUTFIT_IDS = OUTFITS.map(o => o.id);
+const outfitOf = (id) => OUTFITS.find(o => o.id === id) || OUTFITS[0];
 
 // ---------- show errors on screen ----------
 window.addEventListener('error', (e) => { if (e && e.message && !/Script error|ResizeObserver/i.test(e.message)) setTimeout(() => { try { toast('Error: ' + e.message.slice(0, 120)); } catch (x) {} }, 0); });
 window.addEventListener('unhandledrejection', (e) => { const m = e && e.reason && (e.reason.message || String(e.reason)); if (m && !/abort|Failed to fetch dynamically/i.test(m)) setTimeout(() => { try { toast('Error: ' + m.slice(0, 120)); } catch (x) {} }, 0); });
 // ---------- state ----------
 // re-download needed when the voice engine changes
-const DEF = {key:'', groqKey:'', orphVoice:'hannah', kittenVoice:'Kiki', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
+const DEF = {key:'', groqKey:'', orphVoice:'hannah', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[], outfit:'jester', outfitAuto:true, fishKey:'', fishProxy:'', fishVoice:'08f852cd76f944cca6910f691a9547b7', fishCustom:''};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 if ((S.v || 0) < 3) { S.v = 3; S.voiceEngine = 'ai'; }
@@ -677,8 +738,43 @@ async function speakOrpheus(text, seq, m) {
       const got = await (jobs[i] || fetchOrpheus(dir + chunks[i].slice(0, 190)));
       if (i + 1 < chunks.length) jobs[i + 1] = fetchOrpheus(dir + chunks[i + 1].slice(0, 190)); // fetch the next while this one plays
       if (seq !== speakSeq) return;
-      if (got.blob) await playBlob(got.blob, seq); else await playPCM(got.f, got.sr, seq, S.animePitch === false ? 1 : 1.05);
+      if (got.blob) await playBlobDirect(got.blob, seq); else await playPCM(got.f, got.sr, seq, S.animePitch === false ? 1 : 1.05);
     }
+  } finally { playPCM.totalEst = 0; }
+  if (seq === speakSeq) stopLip();
+}
+// ---- unlimited reactive voice: Fish Audio S2.1 (free model, no daily cap under fair use) ----
+const FISH_CUE = { neutral: 'cool, unbothered', cold: 'cold, unimpressed', sad: 'sad', bored: 'bored', side: 'skeptical', annoyed: 'annoyed', grumpy: 'grumpy, pouting',
+  angry: 'angry', smug: 'smug, teasing', smirk: 'sly, scheming', laugh: 'laughing', giggle: 'playful', calm: 'calm, soft', shock: 'shocked', surprised: 'surprised',
+  pout: 'embarrassed, pouting', flustered: 'flustered', cry: 'crying', teary: 'sad, teary', sleepy: 'sleepy', sleeping: 'sleepy, mumbling', blank: 'deadpan', dark: 'low, ominous' };
+let fishCooldownUntil = 0;
+function fishURL() { const p = (S.fishProxy || '').trim().replace(/\/+$/, ''); if (!p) return 'https://api.fish.audio/v1/tts';
+  const u = /^https?:\/\//i.test(p) ? p : 'https://' + p; return /\/api\/fish$|\/v1\/tts$/.test(u) ? u : u + '/api/fish'; }
+function fishVoiceId() { return S.fishVoice === 'custom' ? (S.fishCustom || '').trim() : (S.fishVoice || '08f852cd76f944cca6910f691a9547b7'); }
+function fishError(e) {
+  if (e.net) return e.message;
+  if (e.status === 401) return 'Fish Audio did not accept the key. Copy it again from fish.audio/app/api-keys.';
+  if (e.status === 402) return 'Fish Audio says no free access on this account right now (the free S2.1 offer may have ended)' + (e.detail ? ': ' + e.detail : '.');
+  if (e.status === 403) return 'Your voice server refused the request' + (e.detail ? ': ' + e.detail : '.');
+  if (e.status === 404) return 'Voice server link looks wrong (404). Paste the main link Vercel shows, like https://cerise-abc.vercel.app';
+  if (e.status === 429) return 'Fish Audio is busy, try again in a moment.';
+  return (e.status ? 'Fish ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error');
+}
+async function fetchFish(text, m) {
+  const line = /^\s*\[/.test(text) ? text : '[' + (FISH_CUE[m] || FISH_CUE.neutral) + '] ' + text;
+  const body = { text: line.slice(0, 1500), format: 'wav', sample_rate: 24000, latency: 'balanced', normalize: true, temperature: 0.7, top_p: 0.7, prosody: { speed: 1, volume: 0, normalize_loudness: true } };
+  const id = fishVoiceId(); if (id) body.reference_id = id;
+  let res;
+  try { res = await fetch(fishURL(), { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (S.fishKey || '').trim(), 'model': 's2.1-pro-free' }, body: JSON.stringify(body) }); }
+  catch (e) { const err = new Error((S.fishProxy || '').trim() ? 'Could not reach your voice server. Check the link in Settings.' : 'Fish Audio needs your voice server link (Settings → Voice, one-time setup).'); err.net = true; throw err; }
+  if (!res.ok) { const err = new Error('Fish ' + res.status); err.status = res.status; try { const j = await res.json(); err.detail = String(j.message || j.detail || j.error || '').slice(0, 160); } catch (e) {} throw err; }
+  const ab = await res.arrayBuffer(); if (ab.byteLength < 200) throw new Error('Fish sent back no audio');
+  try { const r = parseWav(ab); if (!r.f.length) throw new Error('empty'); return r; } catch (e) { return { blob: new Blob([ab], { type: res.headers.get('content-type') || 'audio/wav' }) }; }
+}
+async function speakFish(text, seq, m) {
+  playPCM.totalEst = Math.max(1, text.replace(/\[[^\]]*\]\s*/g, '').length * 0.065);
+  try { const got = await fetchFish(text, m); if (seq !== speakSeq) return;
+    if (got.blob) await playBlobDirect(got.blob, seq); else await playPCM(got.f, got.sr, seq, 1);
   } finally { playPCM.totalEst = 0; }
   if (seq === speakSeq) stopLip();
 }
@@ -756,8 +852,7 @@ async function playPCM(f, sr, seq, rate = 1) {
 // ---- unlimited on-device voice (Kokoro, runs inside the phone) ----
 const KOKORO_URL = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
 const KOKORO_MODEL = 'onnx-community/Kokoro-82M-v1.0-ONNX';
-const LOCAL = { worker: null, ready: false, loading: null, jobs: {}, id: 0, files: {}, mode: 'worker', tts: null, started: 0, kind: navigator.gpu ? 'kokoro-gpu' : 'kokoro', kitten: null };
-const KITTEN_URL = 'https://cdn.jsdelivr.net/npm/kitten-tts-webgpu@0.1.1/+esm';
+const LOCAL = { worker: null, ready: false, loading: null, jobs: {}, id: 0, files: {}, mode: 'worker', tts: null, started: 0, kind: navigator.gpu ? 'kokoro-gpu' : 'kokoro' };
 // count real download bytes while the voice loads (so the progress bar is real)
 function watchDownloads(on) {
   if (on) { if (window.__of) return; window.__of = window.fetch;
@@ -767,23 +862,12 @@ function watchDownloads(on) {
       return new Response(st, { headers: r.headers, status: r.status, statusText: r.statusText }); } catch (e) { return r; } };
   } else if (window.__of) { window.fetch = window.__of; window.__of = null; }
 }
-async function loadKitten() {
-  LOCAL.mode = 'kitten'; dlUI('loading', 'Starting (fast iPhone voice)…', 1);
-  watchDownloads(true);
-  try {
-    const mod = await import(KITTEN_URL); LOCAL.kitten = mod;
-    const t0 = performance.now(); let stage = '';
-    const tick = setInterval(() => { if (!LOCAL.ready && stage && !Object.keys(LOCAL.files).length) dlUI('loading', stage + ' ' + Math.round((performance.now() - t0) / 1000) + 's', 5); }, 500);
-    await mod.textToSpeech('Hi.', { voice: S.kittenVoice || 'Kiki', model: 'mini', onProgress: (st) => { stage = st; if (/generat/i.test(st)) dlUI('loading', 'Preparing her voice…', 100); } });
-    clearInterval(tick); localReady();
-  } finally { watchDownloads(false); }
-}
 function dlUI(state, text, pct) {
   const box = $('#dlBox'); if (!box) return; box.hidden = false;
   $('#dlText').textContent = text; const bar = $('#dlBar');
   bar.style.width = (pct == null ? 0 : Math.max(2, Math.min(100, pct))) + '%';
   box.dataset.state = state; $('#s-dl').disabled = state === 'loading';
-  $('#s-dl').textContent = state === 'ready' ? 'Unlimited voice ready ✓' : state === 'loading' ? 'Downloading…' : state === 'error' ? 'Try again' : (LOCAL.kind === 'kokoro-gpu' ? 'Download HD unlimited voice (≈330 MB, once)' : LOCAL.kind === 'kitten' ? 'Download unlimited voice (≈78 MB, once)' : 'Download unlimited voice (≈90 MB, once)');
+  $('#s-dl').textContent = state === 'ready' ? 'On-device voice ready ✓' : state === 'loading' ? 'Downloading…' : state === 'error' ? 'Try again' : (LOCAL.kind === 'kokoro-gpu' ? 'Download HD on-device voice (330 MB)' : 'Download on-device voice (90 MB)');
   const pill = $('#dlPill'); if (pill) { pill.hidden = state !== 'loading'; pill.textContent = (LOCAL.cached ? 'Loading voice ' : 'Voice ') + Math.round(pct || 0) + '%'; }
 }
 function onProgress(p) {
@@ -800,7 +884,7 @@ function onProgress(p) {
   }
   else if (p.status === 'done') { const fs = Object.values(LOCAL.files); if (fs.length && fs.every(f => f.total && f.loaded >= f.total)) dlUI('loading', 'Preparing her voice…', 100); }
 }
-function localReady() { try { localStorage.removeItem('cerise.voiceLoad'); } catch (e) {} LOCAL.ready = true; S.localReady = true; S.localKind = LOCAL.kind; save(); keepVoiceSaved(); dlUI('ready', '✓ Unlimited voice saved on your phone. No re-download, works offline.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
+function localReady() { try { localStorage.removeItem('cerise.voiceLoad'); } catch (e) {} LOCAL.ready = true; S.localReady = true; S.localKind = LOCAL.kind; save(); keepVoiceSaved(); dlUI('ready', '✓ On-device voice saved on your phone. No re-download, works offline.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
 function localFail(msg) { try { localStorage.removeItem('cerise.voiceLoad'); } catch (e) {} if (LOCAL.loadReject) LOCAL.loadReject(new Error(msg)); LOCAL.loading = null; dlUI('error', '✗ ' + msg, 0); }
 const KOKORO_WORKER = `
 import { KokoroTTS } from '${KOKORO_URL}';
@@ -848,7 +932,7 @@ async function voiceIsSaved() {
   try { if (!('caches' in window)) return false; const c = await caches.open('transformers-cache'); const keys = await c.keys();
     const has = (f) => keys.some(r => r.url.includes('Kokoro-82M') && r.url.endsWith(f));
     if (navigator.gpu && has('onnx/model.onnx') && !(S.voiceKindBan || []).includes('kokoro-gpu')) { LOCAL.kind = 'kokoro-gpu'; return true; }
-    if (has('onnx/model_quantized.onnx') && LOCAL.kind !== 'kitten') { LOCAL.kind = 'kokoro'; return true; }
+    if (has('onnx/model_quantized.onnx')) { LOCAL.kind = 'kokoro'; return true; }
     return false; } catch (e) { return false; }
 }
 function keepVoiceSaved() { try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {} }
@@ -859,7 +943,6 @@ function loadLocal() {
     LOCAL.started = performance.now(); LOCAL.files = {}; dlUI('loading', LOCAL.cached ? 'Loading her saved voice from your phone…' : 'Starting download…', 1);
     LOCAL.loading = new Promise((res, rej) => { LOCAL.loadResolve = res; LOCAL.loadReject = rej;
       if (LOCAL.kind === 'kokoro-gpu') { loadKokoroGPU().catch((e) => { console.warn('gpu voice failed', e); LOCAL.kind = 'kokoro'; LOCAL.files = {}; dlUI('loading', 'HD voice not supported here, trying the lighter one…', 1); try { localWorker().postMessage({ type: 'load' }); } catch (e2) { localFail(String(e2.message || e2)); } }); return; }
-      if (LOCAL.kind === 'kitten') { loadKitten().catch((e) => { console.warn('kitten failed', e); LOCAL.kind = 'kokoro'; LOCAL.files = {}; dlUI('loading', 'Fast voice unavailable, trying the other voice…', 1); try { localWorker().postMessage({ type: 'load' }); } catch (e2) { localFail(String(e2.message || e2)); } }); return; }
       try { localWorker().postMessage({ type: 'load' }); } catch (e) { loadMainThread().catch(e2 => localFail(String(e2.message || e2))); } });
     LOCAL.loading.catch(() => {});
   }
@@ -874,8 +957,6 @@ function localSay(text) {
   return Promise.race([localSayRaw(text), timeout]).then(r => { if (!r || !r.f || !r.f.length) throw new Error('voice came back empty'); return r; });
 }
 function localSayRaw(text) {
-  if (LOCAL.mode === 'kitten' && LOCAL.kitten) return LOCAL.kitten.textToSpeech(text.slice(0, 480), { voice: S.kittenVoice || 'Kiki', model: 'mini', speed: 1.0 })
-    .then(b => b.arrayBuffer()).then(parseWav);
   const mv = MOOD_VOICE[voiceMood] || MOOD_VOICE.neutral; const pitch = S.animePitch === false ? 1 : mv[1]; const sp = Math.max(0.7, Math.min(1.3, mv[0] / pitch));
   if (LOCAL.mode === 'main' && LOCAL.tts) return LOCAL.tts.generate(text, { voice: S.localVoice || 'af_bella', speed: sp }).then(a => ({ f: a.audio, sr: a.sampling_rate }));
   return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: sp }); });
@@ -888,7 +969,7 @@ async function speakLocalInner(text, seq) {
   const mv = MOOD_VOICE[voiceMood] || MOOD_VOICE.neutral; const pitch = S.animePitch === false ? 1 : mv[1];
   const parts = (text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]).map(s => s.trim()).filter(Boolean);
   let played = false;
-  if (LOCAL.mode === 'main' || LOCAL.mode === 'kitten') { for (const p of parts) { const { f, sr } = await localSay(p); if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, pitch); } }
+  if (LOCAL.mode === 'main') { for (const p of parts) { const { f, sr } = await localSay(p); if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, pitch); } }
   else { const jobs = parts.map(p => localSay(p)); for (const j of jobs) { const { f, sr } = await j; if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, pitch); } }
   if (seq === speakSeq) stopLip();
   return played;
@@ -917,16 +998,25 @@ async function speak(text, lang = 'en', m = 'neutral') {
       catch (e) { status('', 'Online'); stopLip(); if (seq !== speakSeq) return; if (e.status === 429) { orphCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('Orpheus: daily limit reached'); } else why.push('Orpheus: ' + (e.detail || e.message || e)); }
     } else why.push(S.groqKey ? 'Orpheus: resting after its limit' : 'Orpheus: add a free Groq key in Settings for a second voice');
   }
-  // 3) unlimited on-device voice (English)
+  // 3) unlimited reactive voice: Fish Audio S2.1 (every language)
+  if (engine === 'ai' || engine === 'auto') {
+    if (S.fishKey && Date.now() > fishCooldownUntil) {
+      try { status('think', 'Voice'); await speakFish(text, seq, m); status('', 'Online'); if (seq !== speakSeq) return; vlog('Fish voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
+      catch (e) { status('', 'Online'); stopLip(); if (seq !== speakSeq) return;
+        if (e.status === 429) fishCooldownUntil = Date.now() + 60 * 1000; else if (e.status === 402) fishCooldownUntil = Date.now() + 60 * 60 * 1000;
+        why.push('Fish: ' + fishError(e)); }
+    } else why.push(S.fishKey ? 'Fish: resting for a moment' : 'Fish: add a Fish Audio key in Settings for an unlimited voice');
+  }
+  // 4) on-device voice (English)
   if ((engine === 'auto' || engine === 'local') && lang === 'en') {
     if (!LOCAL.ready && (LOCAL.loading || S.localReady)) { status('think', 'Loading voice'); loadLocal().catch(() => {}); await Promise.race([LOCAL.loading, new Promise(r => setTimeout(r, 20000))]).catch(() => {}); status('', 'Online'); if (seq !== speakSeq) return; }
     if (LOCAL.ready) {
-      try { status('think', 'Voice'); await speakLocal(plain, seq); status('', 'Online'); vlog('Unlimited voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
-      catch (e) { status('', 'Online'); stopLip(); why.push('Unlimited voice: ' + (e.message || e)); if (seq !== speakSeq) return; }
-    } else why.push('Unlimited voice: not downloaded yet');
-  } else if (engine === 'auto' || engine === 'local') why.push('Unlimited voice: English only');
-  // 3) phone voice (only if you chose a backup)
-  if (engine === 'ai') { vlog('No voice (' + (why.join('; ') || 'AI voice unavailable') + ')'); voiceNote(why.some(w => /limit|resting/.test(w)) ? 'Her voices used up today\'s free limits. They come back tomorrow.' + (S.groqKey ? '' : ' Tip: add a free Groq key in Settings for a second voice.') : 'Her voice couldn\'t play: ' + (why.join(' · ') || 'unknown')); if (onVoiceStart) onVoiceStart(); return; }
+      try { status('think', 'Voice'); await speakLocal(plain, seq); status('', 'Online'); vlog('On-device voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
+      catch (e) { status('', 'Online'); stopLip(); why.push('On-device voice: ' + (e.message || e)); if (seq !== speakSeq) return; }
+    } else why.push('On-device voice: not downloaded yet');
+  } else if (engine === 'auto' || engine === 'local') why.push('On-device voice: English only');
+  // 5) phone voice (only if you chose a backup)
+  if (engine === 'ai') { vlog('No voice (' + (why.join('; ') || 'AI voice unavailable') + ')'); voiceNote(!S.fishKey && why.some(w => /limit|resting/.test(w)) ? 'Her voices used up today\'s free limits. Add a Fish Audio key in Settings for a voice with no daily limit.' : 'Her voice couldn\'t play: ' + (why.join(' · ') || 'unknown')); if (onVoiceStart) onVoiceStart(); return; }
   vlog('Phone voice' + (why.length ? ' (' + why.join('; ') + ')' : ''));
   voiceNote('Using the phone voice because: ' + (why.join(' · ') || 'no other voice available'));
   if (!('speechSynthesis' in window) && onVoiceStart) onVoiceStart();
@@ -1136,6 +1226,7 @@ ACTIONS you can trigger with the "actions" field (value is a string):
 - forget: value = text of a remembered fact to delete.
 - open: value = "Button label|URL". Shows a button the user taps. Use for: Spotify "spotify:search:QUERY", YouTube "https://www.youtube.com/results?search_query=QUERY", Google "https://www.google.com/search?q=QUERY", GitHub "https://github.com/...", Maps "https://maps.apple.com/?q=PLACE", directions "https://maps.apple.com/?daddr=PLACE", email "mailto:ADDRESS?subject=S&body=B", text "sms:NUMBER&body=TEXT", call "tel:NUMBER", WhatsApp "https://wa.me/?text=TEXT", Instagram "instagram://app", Calendar "calshow:", Reminders "x-apple-reminderapp://". URL-encode queries.
 Only use actions when needed. Never claim you did something you have no action for — say it's coming in a future update instead.
+OUTFIT: you have a wardrobe and you are currently wearing "${outfitOf(S.outfit).id}". Fill "outfit" with the outfit that fits what the conversation is about right now, or "keep" to stay as you are. Change only when the topic clearly fits another outfit (for example hospital or being sick = nurse), and keep it while the topic continues. Your outfits: ${OUTFITS.map(o => o.id + ' (' + o.when + ')').join('; ')}.${S.outfitAuto === false ? ' The user turned outfit changes off, so always answer "keep".' : ''} When you change, you may mention it in one short in-character remark, but don't always.
 MOOD: pick the face that fits your reply. Use the whole range and avoid using the same mood twice in a row: neutral, cold (unimpressed, your usual), sad, bored (chin on hand), side (side-eye), annoyed, grumpy (blushing frown), angry (shouting), smug (teasing grin), smirk (hand over mouth, scheming), laugh, giggle (soft happy), calm (content, eyes closed), shock, surprised, pout (blushing at compliments), flustered (embarrassed), cry (dramatic wail), teary, sleepy (yawning), sleeping, blank (dead inside), dark (ominous threat, as a joke).`;
 }
 const SCHEMA = {
@@ -1145,11 +1236,12 @@ const SCHEMA = {
     voice: { type: 'STRING' },
     mood: { type: 'STRING', enum: MOODS },
     lang: { type: 'STRING', enum: ['en', 'fr', 'ar'] },
+    outfit: { type: 'STRING', enum: OUTFIT_IDS.concat(['keep']) },
     actions: { type: 'ARRAY', items: { type: 'OBJECT', properties: {
       type: { type: 'STRING', enum: ['weather', 'search', 'lookup', 'github', 'timer', 'event', 'todo', 'shortcut', 'remember', 'forget', 'open'] },
       value: { type: 'STRING' } }, required: ['type', 'value'] } }
   },
-  required: ['reply', 'mood', 'lang']
+  required: ['reply', 'mood', 'lang', 'outfit']
 };
 const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
 async function callModel(model, contents) {
@@ -1170,7 +1262,7 @@ async function callModel(model, contents) {
 }
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 async function callGroq(contents) {
-  const msgs = [{ role: 'system', content: systemPrompt() + '\nOUTPUT: reply ONLY with a JSON object: {"reply": string, "mood": one of ' + JSON.stringify(MOODS) + ', "lang": "en"|"fr"|"ar", "actions": [{"type": string, "value": string}]}' }]
+  const msgs = [{ role: 'system', content: systemPrompt() + '\nOUTPUT: reply ONLY with a JSON object: {"reply": string, "mood": one of ' + JSON.stringify(MOODS) + ', "voice": string, "lang": "en"|"fr"|"ar", "outfit": one of ' + JSON.stringify(OUTFIT_IDS.concat(['keep'])) + ', "actions": [{"type": string, "value": string}]}' }]
     .concat(contents.map(c => ({ role: c.role === 'model' ? 'assistant' : 'user', content: c.parts.map(p => p.text).join('') })));
   let lastErr;
   for (const model of ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile']) {
@@ -1242,8 +1334,9 @@ async function send(text) {
     if (toolResults.length) {
       contents = contents.concat([{ role: 'model', parts: [{ text: out.reply || '' }] }, { role: 'user', parts: [{ text: 'TOOL RESULTS (not from the user):\n' + toolResults.join('\n') + '\nNow answer the user using this, in character, no new actions needed.' }] }]);
       const out2 = await callGemini(contents);
-      out = { ...out2, actions: [] };
+      out = { ...out2, outfit: OUTFIT_IDS.includes(out2.outfit) ? out2.outfit : out.outfit, actions: [] };
     }
+    chooseOutfit(out.outfit, text);
     herSays((out.reply || '').replace(/\[[^\]]*\]\s*/g, ''), out.mood, out.lang, buttons, out.voice);
     addLog('her', out.reply);
   } catch (e) {
@@ -1307,7 +1400,16 @@ function bind(id, key, type) {
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
 bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
-bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-orph', 'orphVoice'); bind('#s-kitten', 'kittenVoice'); bind('#s-pitch', 'animePitch', 'check');
+bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-orph', 'orphVoice'); bind('#s-pitch', 'animePitch', 'check'); bind('#s-fishKey', 'fishKey'); bind('#s-fishVoice', 'fishVoice'); bind('#s-fishCustom', 'fishCustom'); bind('#s-fishProxy', 'fishProxy');
+function refreshFishUI() { $('#fishCustomField').hidden = S.fishVoice !== 'custom'; } refreshFishUI(); $('#s-fishVoice').addEventListener('change', refreshFishUI);
+$('#s-testFish').onclick = async () => {
+  unlockAudio(); const out = $('#s-fishout'); out.style.color = 'var(--mute)';
+  if (!S.fishKey.trim()) { out.textContent = 'Paste your Fish Audio key first.'; return; }
+  if (S.fishVoice === 'custom' && !(S.fishCustom || '').trim()) { out.textContent = 'Paste a custom voice ID, or pick one of the voices.'; return; }
+  out.textContent = 'Asking Fish Audio…'; const t0 = performance.now(); const seq = ++speakSeq;
+  try { await speakFish('[smug] Hmph. So you finally gave me a voice with no limit. [giggles] Took you long enough.', seq, 'smug'); out.style.color = '#59e08b'; out.textContent = '✓ Fish voice works (' + ((performance.now() - t0) / 1000).toFixed(1) + 's). She uses it when the other voices run out.'; }
+  catch (e) { stopLip(); out.style.color = '#ff6b8a'; out.textContent = '✗ ' + fishError(e); }
+};
 $('#s-ping').onclick = async () => {
   const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
   if (!S.key && !S.groqKey) { out.textContent = 'Paste a key first.'; return; }
@@ -1315,7 +1417,7 @@ $('#s-ping').onclick = async () => {
   try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
-function refreshVoiceUI() { document.getElementById('kokoroField').hidden = LOCAL.kind === 'kitten'; document.getElementById('kvField').hidden = LOCAL.kind !== 'kitten'; if (!LOCAL.ready && !LOCAL.loading) $('#s-dl').textContent = LOCAL.kind === 'kokoro-gpu' ? 'Download HD unlimited voice (≈330 MB, once)' : LOCAL.kind === 'kitten' ? 'Download unlimited voice (≈78 MB, once)' : 'Download unlimited voice (≈90 MB, once)'; }
+function refreshVoiceUI() { if (!LOCAL.ready && !LOCAL.loading) $('#s-dl').textContent = LOCAL.kind === 'kokoro-gpu' ? 'Download HD on-device voice (330 MB)' : 'Download on-device voice (90 MB)'; }
 refreshVoiceUI();
 $('#s-dl').onclick = async () => { unlockAudio(); LOCAL.cached = await voiceIsSaved(); loadLocal().catch(() => {}); };
 $('#s-testLocal').onclick = async () => {
@@ -1374,23 +1476,64 @@ function openGallery() {
 function closeGallery() { $('#gallery').hidden = true; }
 $('#galBtn').onclick = openGallery; $('#galClose').onclick = closeGallery;
 
-// ---------- Her tab ----------
+// ---------- Her tab: her wardrobe ----------
 const BODY = { on: false };
-function openHer() { const f = shown === 'neutral' || !IMG[shown] ? 'neutral' : shown; $('#cFaceImg').src = IMG[f]; $('#stMood').textContent = mood; $('#stMem').textContent = S.memory.length; $('#stMsg').textContent = S.history.length; }
+let lookSlot = 0;
+function renderWardrobe() {
+  const w = $('#wardrobe'); if (!w) return; w.innerHTML = '';
+  const a = document.createElement('button'); a.type = 'button'; a.className = 'auto' + (S.outfitAuto === false ? ' off' : ''); a.id = 'wAuto';
+  a.innerHTML = '<b>✦</b>' + (S.outfitAuto === false ? 'Auto off' : 'Auto'); a.setAttribute('aria-label', 'She picks her outfit from the conversation: ' + (S.outfitAuto === false ? 'off' : 'on'));
+  a.onclick = () => { S.outfitAuto = S.outfitAuto === false; save(); renderWardrobe(); toast(S.outfitAuto ? 'She picks her outfit from what you talk about' : 'Outfit stays as you choose'); };
+  w.appendChild(a);
+  OUTFITS.forEach(o => { const b = document.createElement('button'); b.type = 'button'; b.dataset.o = o.id; b.className = o.id === S.outfit ? 'on' : '';
+    b.setAttribute('aria-label', o.name); const im = document.createElement('img'); im.loading = 'lazy'; im.alt = ''; im.src = o.thumb + '?v=' + VER; b.appendChild(im);
+    b.onclick = () => setOutfit(o.id, 'tap'); w.appendChild(b); });
+}
+function paintLook(o, animate) {
+  const cur = $('#look' + lookSlot), nxt = $('#look' + (1 - lookSlot)); const url = o.src + '?v=' + VER;
+  $('#lookName').textContent = o.name; $('#lookNo').textContent = String(o.n).padStart(2, '0'); $('#lookLabel').title = o.sub;
+  const st = $('#stLook'); if (st) st.textContent = o.short;
+  document.querySelectorAll('#wardrobe button[data-o]').forEach(b => { b.classList.toggle('on', b.dataset.o === o.id); if (b.dataset.o === o.id && b.offsetParent) { const w = $('#wardrobe'); w.scrollTo({ left: b.offsetLeft - (w.clientWidth - b.offsetWidth) / 2, behavior: animate ? 'smooth' : 'auto' }); } });
+  if (cur.getAttribute('src') === url) return;
+  const swap = () => { nxt.alt = 'Cerise wearing ' + o.name; cur.classList.remove('on'); nxt.classList.add('on'); lookSlot = 1 - lookSlot;
+    if (animate) { const f = $('#mirFlash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); } };
+  nxt.onload = swap; nxt.onerror = () => toast('Could not load that outfit picture');
+  nxt.src = url; if (nxt.complete && nxt.naturalWidth) { nxt.onload = null; swap(); }
+}
+function setOutfit(id, why) {
+  if (!OUTFIT_IDS.includes(id)) return false;
+  const changed = S.outfit !== id; S.outfit = id; S.outfitAt = Date.now(); save();
+  paintLook(outfitOf(id), changed);
+  if (changed && why === 'chat') toast('She changed into: ' + outfitOf(id).name);
+  return changed;
+}
+function outfitFromText(t) { for (const o of OUTFITS) if (o.kw.test(t || '')) return o.id; return null; }
+// pick an outfit for this turn: her own choice first, then keywords from what you said
+function chooseOutfit(brainPick, userText) {
+  if (S.outfitAuto === false) return;
+  const pick = OUTFIT_IDS.includes(brainPick) ? brainPick : brainPick === 'keep' ? null : outfitFromText(userText);
+  if (pick && pick !== S.outfit) setOutfit(pick, 'chat');
+}
+function openHer() { const f = shown === 'neutral' || !IMG[shown] ? 'neutral' : shown; $('#cFaceImg').src = IMG[f]; $('#stMood').textContent = mood; $('#stMsg').textContent = S.history.length; paintLook(outfitOf(S.outfit), false); }
 
 // ---------- auto-update: always run the newest version ----------
 (async () => { try { const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }); const j = await r.json();
   if (j.v && j.v !== VER && !location.search.includes('v=' + j.v)) location.replace(location.pathname + '?v=' + j.v); } catch (e) {} })();
 
 // ---------- start ----------
-show('neutral', 1); renderLog(); renderMem(); renderTodos();
+show('neutral', 1); renderLog(); renderMem(); renderTodos(); renderWardrobe(); paintLook(outfitOf(S.outfit), false);
 if (S.lastVoice) $('#s-vlog').textContent = 'Last time she spoke: ' + S.lastVoice;
 let crashedKind = null; try { const v = JSON.parse(localStorage.getItem('cerise.voiceLoad') || 'null'); if (v && Date.now() - v.t < 7 * 864e5) crashedKind = v.kind; localStorage.removeItem('cerise.voiceLoad'); } catch (e) {}
 if (crashedKind) { S.voiceKindBan = S.voiceKindBan || []; if (!S.voiceKindBan.includes(crashedKind)) S.voiceKindBan.push(crashedKind); save(); }
-if ((S.voiceKindBan || []).includes('kokoro-gpu')) { LOCAL.kind = (S.voiceKindBan || []).includes('kitten') ? 'kokoro' : 'kitten'; }
+if ((S.voiceKindBan || []).includes('kokoro-gpu')) LOCAL.kind = 'kokoro';
 refreshVoiceUI();
 if (crashedKind) setTimeout(() => toast(crashedKind === 'kokoro-gpu' ? 'The HD voice was too heavy for this phone, so she uses the lighter voice now' : 'Her voice crashed while loading, so it won\'t auto-load anymore'), 1800);
-(LOCAL.kind === 'kitten' ? Promise.resolve(S.localReady && S.localKind === 'kitten' && !crashedKind) : voiceIsSaved()).then(saved => { LOCAL.cached = saved; if (saved) setTimeout(() => loadLocal().catch(() => {}), 1500); else if (S.localReady) dlUI('error', 'Her saved voice isn\'t on this phone anymore (iOS may have cleared it). Tap download to get it back.', 0); });
+// the small 78 MB voice was removed: free the space it used on the phone
+(async function cleanupSmallVoice() { try { if (S.localKind === 'kitten') { S.localReady = false; S.localKind = ''; save(); }
+  if (!('caches' in window)) return; for (const n of await caches.keys()) { if (/kitten/i.test(n)) { await caches.delete(n); continue; }
+    const c = await caches.open(n); for (const r of await c.keys()) if (/kitten/i.test(r.url)) await c.delete(r); } } catch (e) {} })();
+const voiceBanned = (S.voiceKindBan || []).includes(LOCAL.kind);
+voiceIsSaved().then(saved => { LOCAL.cached = saved; if (saved && !voiceBanned && crashedKind !== LOCAL.kind) setTimeout(() => loadLocal().catch(() => {}), 1500); else if (S.localReady && !saved) dlUI('error', 'Her saved voice isn\'t on this phone anymore (iOS may have cleared it). Tap download to get it back.', 0); });
 // intro
 setTimeout(() => { $('#intro').classList.add('gone'); sway.classList.add('drop'); setTimeout(() => sway.classList.remove('drop'), 1000); }, 1500);
 // falling flower petals and sparkles
