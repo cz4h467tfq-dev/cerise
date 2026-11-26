@@ -232,8 +232,11 @@ nav button.on{color:var(--crimson2)}
         <div class="field"><label for="s-lang">Language you speak to her in</label>
           <select id="s-lang"><option value="en-US">English</option><option value="fr-FR">Français</option><option value="ar-LB">العربية</option></select>
           <small>Used by the mic. She understands all three when you type.</small></div>
-        <div class="field"><label for="s-voice">Her English voice</label><select id="s-voice"></select>
-          <small>Tip: in iPhone Settings › Accessibility › Spoken Content › Voices you can download nicer "Enhanced" voices.</small></div>
+        <div class="field"><label for="s-engine">Voice engine</label>
+          <select id="s-engine"><option value="ai">Cerise AI voice (Gemini, free tier)</option><option value="phone">Phone voice (offline)</option></select>
+          <small>The AI voice uses your Gemini key. If its daily limit runs out she switches to the phone voice automatically. If you hear nothing, turn off silent mode.</small></div>
+        <div class="field"><label for="s-tts">Her voice</label>
+          <select id="s-tts"><option value="Leda">Leda (youthful)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
         <button class="btn ghost" id="s-test" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test her voice</button>
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
@@ -255,67 +258,144 @@ const $ = (s) => document.querySelector(s);
 const MOODS = ['neutral','cold','bored','side','smug','smirk','laugh','giggle','annoyed','angry','shock','surprised','pout','flustered','cry','teary','sleepy','sleeping','blank','dark'];
 
 // ---------- state ----------
-const DEF = {key:'', groqKey:'', model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[]};
+const DEF = {key:'', groqKey:'', voiceEngine:'ai', ttsVoice:'Leda', model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 const save = () => { try { localStorage.setItem('cerise.v1', JSON.stringify(S)); } catch (e) {} };
 
-// ---------- avatar (WebGL: crossfades + hair sway + breathing) ----------
-const FRAMES = ['neutral','neutral2','idle3','cold','bored','side','annoyed','angry','smug','smirk','laugh','giggle','shock','surprised','pout','flustered','cry','teary','sleepy','sleeping','blank','dark'];
+// ---------- avatar: one living face (WebGL rig) + mood reactions ----------
+const FRAMES = ['neutral','cold','bored','side','annoyed','angry','smug','smirk','laugh','giggle','shock','surprised','pout','flustered','cry','teary','sleepy','sleeping','blank','dark'];
 const IMG = {}; FRAMES.forEach(n => IMG[n] = 'img/' + n + '.webp');
-const pics = {}; FRAMES.forEach(n => { const i = new Image(); i.src = IMG[n]; pics[n] = i; });
+const pics = {}; function pic(n) { if (!pics[n]) { const i = new Image(); i.decoding = 'async'; i.src = IMG[n]; pics[n] = i; } return pics[n]; }
+pic('neutral'); setTimeout(() => FRAMES.forEach(pic), 1200);
 const sway = $('#sway'), cv = $('#avatar'), fallback = $('#avatarImg');
-let mood = 'neutral', speaking = false, moodTimer = null, shown = '';
+let mood = 'neutral', speaking = false, moodTimer = null, shown = 'neutral';
+window.__rig = null;
+const rig = { blink: 0, mouth: 0, mouthT: 0, look: [0, 0], lookT: [0, 0] };
 const R = (() => {
-  const gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false });
+  const gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: true });
   if (!gl) return null;
   const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}';
-  const fs = `precision mediump float;uniform sampler2D A,B;uniform float m,t,k;varying vec2 v;
-  void main(){vec2 uv=v;float side=smoothstep(.10,.46,abs(uv.x-.5));float low=smoothstep(.12,.95,uv.y);
+  const fs = `precision highp float;
+uniform sampler2D A,B;uniform float m,t,k,bl,mo;uniform vec2 lk;varying vec2 v;
+const vec2 TS=vec2(295.,244.);
+const vec4 EL=vec4(116.5,135.,22.5,10.5);const vec4 ER=vec4(196.,134.,20.5,10.5);const vec4 MO=vec4(158.5,171.,8.,2.5);
+const vec3 SKIN=vec3(.93,.77,.82);const vec3 LASH=vec3(.22,.06,.12);
+vec2 warp(vec2 uv){
+  float side=smoothstep(.10,.46,abs(uv.x-.5));float low=smoothstep(.12,.95,uv.y);
   uv.x+=(sin(uv.y*6.-t*1.25)*.0075+sin(uv.y*15.-t*2.3)*.0018)*side*low;
   uv.y+=sin(uv.x*4.+t*.9)*.0022*side;
-  float chest=smoothstep(.6,1.,uv.y);uv.y-=(sin(t*1.55)*.0055+k*sin(t*11.)*.003)*chest;
-  vec4 c=mix(texture2D(A,uv),texture2D(B,uv),m);gl_FragColor=c;}`;
-  const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); return x; };
+  float chest=smoothstep(.62,1.,uv.y);uv.y-=(sin(t*1.55)*.0055+k*sin(t*10.)*.0025)*chest;
+  float head=1.-smoothstep(.55,.9,uv.y);
+  uv.x+=(sin(t*.53)*.0045+sin(t*1.7)*.0012)*head;uv.y+=(sin(t*.41+1.)*.003+k*sin(t*7.3)*.0018)*head;
+  return uv;}
+float el(vec2 p,vec4 e){return length((p-e.xy)/e.zw);}
+vec3 lid(vec3 c,vec2 p,vec4 e){
+  if(bl<.002)return c;
+  float r=el(p,e);float inside=1.-smoothstep(.78,1.08,r);
+  float dx=clamp((p.x-e.x)/e.z,-1.,1.);
+  float lashY=e.y-e.w*.78+e.w*.42*dx*dx;
+  float lineY=e.y+e.w*.34+e.w*.16*(1.-dx*dx);
+  float yl=mix(lashY,lineY,bl);float sh=yl-lashY;
+  vec3 skin=mix(vec3(.90,.70,.78),vec3(.95,.80,.86),smoothstep(lashY,lineY+2.,p.y));
+  vec4 mv=texture2D(A,(p-vec2(0.,sh))/TS);vec3 liner=mv.rgb/max(mv.a,1e-4);
+  float band=1.-smoothstep(1.4,2.4,abs(p.y-yl));
+  float aboveL=1.-smoothstep(yl-2.2,yl-1.,p.y);
+  float belowF=smoothstep(.75,1.,bl)*smoothstep(yl+.6,yl+1.8,p.y);
+  vec3 col=mix(c,skin,clamp(aboveL+belowF,0.,1.));
+  col=mix(col,liner,band*smoothstep(.0,.15,bl));
+  return mix(c,col,inside);}
+vec3 mouth(vec3 c,vec2 p){
+  float o=smoothstep(.02,1.,mo);if(o<.001)return c;
+  vec2 ctr=vec2(MO.x,MO.y+.4+1.2*o);
+  float rx=MO.z*(.8+.32*o);float ryTop=.35+1.2*o;float ryBot=.5+3.5*o;
+  vec2 d=p-ctr;float ry=d.y<0.?ryTop:ryBot;
+  float r=length(vec2(d.x/rx,d.y/ry));
+  float inside=1.-smoothstep(.82,1.,r);
+  float yy=clamp(d.y/ryBot,-1.,1.);
+  vec3 inner=mix(vec3(.50,.12,.22),vec3(.93,.52,.60),smoothstep(.2,.95,yy));
+  inner=mix(inner,vec3(.99,.96,.97),(1.-smoothstep(-.35,.05,d.y))*smoothstep(.45,.75,o)*.8);
+  vec3 col=mix(c,inner,inside);
+  float edge=smoothstep(.72,.94,r)*(1.-smoothstep(1.,1.2,r));
+  col=mix(col,vec3(.42,.1,.18),edge*.75);
+  return col;}
+void main(){
+  vec2 uv=warp(v);vec2 p=uv*TS;
+  float inL=1.-smoothstep(.45,.8,el(p,EL));float inR=1.-smoothstep(.45,.8,el(p,ER));
+  vec4 c=texture2D(A,uv-lk/TS*(inL+inR));
+  if(m<.999){vec3 rgb=c.rgb/max(c.a,1e-4);rgb=lid(rgb,p,EL);rgb=lid(rgb,p,ER);rgb=mouth(rgb,p);c=vec4(rgb*c.a,c.a);}
+  vec4 d=texture2D(B,uv);
+  gl_FragColor=mix(c,d,m);}`;
+  const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(x)); return x; };
   const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr);
   if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
   gl.useProgram(pr);
   const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = n => gl.getUniformLocation(pr, n); const uA = U('A'), uB = U('B'), uM = U('m'), uT = U('t'), uK = U('k');
-  gl.uniform1i(uA, 0); gl.uniform1i(uB, 1);
+  const U = n => gl.getUniformLocation(pr, n);
+  const u = { A: U('A'), B: U('B'), m: U('m'), t: U('t'), k: U('k'), bl: U('bl'), mo: U('mo'), lk: U('lk') };
+  gl.uniform1i(u.A, 0); gl.uniform1i(u.B, 1);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
   const tex = {};
   function T(name) {
-    if (tex[name]) return tex[name]; const p = pics[name]; if (!p.complete || !p.naturalWidth) return null;
+    if (tex[name]) return tex[name]; const p = pic(name); if (!p.complete || !p.naturalWidth) return null;
     const x = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, x);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, p);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     return tex[name] = x;
   }
-  let a = 'neutral', bN = 'neutral', mix = 0, from = 0, dur = 1, talk = 0;
+  // mood layer: m = 0 shows the living face, m = 1 shows a mood drawing
+  let target = 'neutral', moodName = 'neutral', mval = 0, mFrom = 0, mTo = 0, mStart = 0, mDur = 1, talk = 0, last = performance.now();
+  let nextBlink = performance.now() + 2000, blinkStart = -1, dbl = false, nextLook = performance.now() + 1500;
   function frame(now) {
-    const dpr = Math.min(2, window.devicePixelRatio || 1), w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const dpr = Math.min(3, window.devicePixelRatio || 1), w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
     if (w && (cv.width !== w || cv.height !== h)) { cv.width = w; cv.height = h; }
     gl.viewport(0, 0, cv.width, cv.height);
-    if (bN !== a) { mix = Math.min(1, (now - from) / dur); if (mix >= 1) { a = bN; mix = 0; } }
-    talk += ((speaking ? 1 : 0) - talk) * 0.1;
-    const tA = T(a), tB = T(bN) || tA;
+    // mood fade
+    const f = Math.min(1, (now - mStart) / mDur); const e = f < .5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+    mval = mFrom + (mTo - mFrom) * e;
+    // blink (natural timing, sometimes double)
+    if (now > nextBlink && blinkStart < 0) { blinkStart = now; }
+    if (blinkStart >= 0) {
+      const bt = (now - blinkStart) / 1000; const close = .07, hold = .04, open = .11;
+      rig.blink = bt < close ? bt / close : bt < close + hold ? 1 : bt < close + hold + open ? 1 - (bt - close - hold) / open : 0;
+      if (bt > close + hold + open) { blinkStart = -1; if (!dbl && Math.random() < .2) { dbl = true; nextBlink = now + 120; } else { dbl = false; nextBlink = now + 2200 + Math.random() * 4200; } }
+    }
+    // eyes glance around a little
+    if (now > nextLook) { const r = Math.random(); rig.lookT = r < .45 ? [0, 0] : [(Math.random() - .5) * 2.6, (Math.random() - .5) * 1.0]; nextLook = now + 1400 + Math.random() * 3500; }
+    rig.look[0] += (rig.lookT[0] - rig.look[0]) * Math.min(1, dt * 14); rig.look[1] += (rig.lookT[1] - rig.look[1]) * Math.min(1, dt * 14);
+    // mouth follows the voice (fast open, softer close)
+    const mt = speaking ? rig.mouthT : 0; rig.mouth += (mt - rig.mouth) * Math.min(1, dt * (mt > rig.mouth ? 28 : 16));
+    talk += ((speaking ? 1 : 0) - talk) * Math.min(1, dt * 6);
+    const tA = T('neutral'), tB = T(moodName) || tA;
     if (tA) {
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tA);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tB);
-      gl.uniform1f(uM, bN === a ? 0 : mix); gl.uniform1f(uT, now / 1000); gl.uniform1f(uK, talk);
+      gl.uniform1f(u.m, moodName === 'neutral' ? 0 : mval); gl.uniform1f(u.t, now / 1000); gl.uniform1f(u.k, talk);
+      gl.uniform1f(u.bl, rig.force != null ? rig.force : rig.blink); gl.uniform1f(u.mo, Math.max(0, Math.min(1, rig.mouth))); gl.uniform2f(u.lk, rig.look[0], rig.look[1]);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return { to(name, ms) { if (name === bN) return; if (bN !== a) a = mix > .5 ? bN : a; bN = name; from = performance.now(); dur = ms; mix = 0; } };
+  return {
+    to(name, ms) {
+      if (name === 'neutral') { mFrom = mval; mTo = 0; }
+      else if (name === moodName && mTo === 1) return;
+      else if (mval > .05 && name !== moodName) { // mood to mood: dip through the living face quickly
+        const nm = name; mFrom = mval; mTo = 0; mStart = performance.now(); mDur = ms * .5;
+        setTimeout(() => { moodName = nm; mFrom = 0; mTo = 1; mStart = performance.now(); mDur = ms * .6; }, ms * .5); return;
+      } else { moodName = name; mFrom = mval; mTo = 1; }
+      mStart = performance.now(); mDur = ms;
+    }
+  };
 })();
 if (R) fallback.remove(); else cv.remove();
-function show(name, ms = 260) {
+window.__rig = rig;
+function show(name, ms = 320) {
   if (!IMG[name] || shown === name) return; shown = name;
   if (R) R.to(name, ms); else fallback.src = IMG[name];
 }
@@ -338,58 +418,119 @@ function burst(m) {
   });
   sway.classList.remove('react'); void sway.offsetWidth; sway.classList.add('react'); setTimeout(() => sway.classList.remove('react'), 500);
 }
-function setMood(m, holdMs = 7000) {
+// 'neutral' and 'cold' are the living face; other moods are short reactions, then she relaxes back
+function setMood(m, holdMs = 2600) {
   const prev = mood; mood = MOODS.includes(m) ? m : 'neutral';
-  show(mood, 280); if (mood !== prev) burst(mood);
+  const face = (mood === 'cold') ? 'neutral' : mood;
+  moodAt = Date.now(); show(face, 380); if (mood !== prev) burst(mood);
   clearTimeout(moodTimer);
-  if (mood !== 'neutral') moodTimer = setTimeout(() => { if (!speaking) { mood = 'neutral'; show('neutral', 900); } }, holdMs);
+  if (face !== 'neutral') moodTimer = setTimeout(() => { mood = 'neutral'; show('neutral', 700); }, holdMs);
 }
-// idle life: she shifts between calm poses now and then
-const IDLE = ['neutral', 'neutral2', 'idle3', 'side', 'bored', 'neutral'];
-setInterval(() => {
-  if (speaking || busy || mood !== 'neutral') return;
-  const h = new Date().getHours();
-  const pool = (h >= 0 && h < 6) ? ['sleepy', 'neutral', 'sleeping'] : IDLE;
-  show(pool[Math.floor(Math.random() * pool.length)], 1100);
-}, 9000);
-function startLip() { speaking = true; sway.classList.add('talk'); }
-function stopLip() { speaking = false; sway.classList.remove('talk'); setMood(mood === 'cold' ? 'neutral' : mood, 3500); }
+// sleepy at night: eyes slowly close when idle
+setInterval(() => { const h = new Date().getHours(); const z = (h >= 1 && h < 6) && !speaking && !busy && mood === 'neutral' && Date.now() - lastActive > 60000; if (z && shown !== 'sleeping') show('sleeping', 1500); else if (!z && shown === 'sleeping' && mood === 'neutral') show('neutral', 600); }, 2000);
+let lastActive = Date.now();
+let moodAt = 0;
+function startLip() { speaking = true; sway.classList.add('talk'); clearTimeout(moodTimer); const wait = Math.max(0, 1000 - (Date.now() - moodAt)); setTimeout(() => { if (speaking) { show('neutral', 420); mood = 'neutral'; } }, wait); }
+function stopLip() { speaking = false; rig.mouthT = 0; sway.classList.remove('talk'); }
+
 // ---------- status / toast ----------
 function status(kind, text) { $('#dot').className = 'dot ' + (kind || ''); $('#statusText').textContent = text; }
 let toastT;
 function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2600); }
 
-// ---------- voice out ----------
-let voices = [];
-function loadVoices() {
-  voices = speechSynthesis.getVoices();
-  const sel = $('#s-voice'); const en = voices.filter(v => v.lang.startsWith('en'));
-  sel.innerHTML = '<option value="">Automatic</option>' + en.map(v => `<option value="${v.voiceURI}">${v.name} (${v.lang})</option>`).join('');
-  sel.value = S.voice;
+// ---------- voice out: Gemini AI voice with real lip-sync, phone voice as fallback ----------
+let actx = null, analyser = null, curSrc = null, ttsCooldownUntil = 0, ttsNoticeShown = false;
+function audioCtx() {
+  if (!actx) {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+    actx = new AC(); analyser = actx.createAnalyser(); analyser.fftSize = 1024; analyser.connect(actx.destination);
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
 }
+function unlockAudio() {
+  lastActive = Date.now();
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  const c = audioCtx(); if (c) { const b = c.createBuffer(1, 1, 22050); const s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); }
+}
+const VOICE_STYLE = {
+  neutral: 'cool, unbothered and a little bored', cold: 'cold, flat and unimpressed', smug: 'smug and teasing, with a little laugh in the voice',
+  smirk: 'scheming and playful', laugh: 'laughing, amused', giggle: 'softly pleased, trying to hide a smile', annoyed: 'annoyed and sharp',
+  angry: 'irritated, raising her voice a bit', shock: 'shocked', surprised: 'surprised', pout: 'flustered and pouty, embarrassed',
+  flustered: 'embarrassed, stumbling slightly', cry: 'dramatically whiny, fake crying', teary: 'sad and quiet', sleepy: 'sleepy and slow, yawning',
+  sleeping: 'half asleep, mumbling', bored: 'bored, dragging the words', side: 'skeptical', blank: 'deadpan', dark: 'low, quiet and ominous'
+};
+async function fetchTTS(text, m) {
+  const style = VOICE_STYLE[m] || VOICE_STYLE.neutral;
+  const prompt = `Read this aloud as Cerise, a young anime girl with a ${style} tone. Natural, expressive pacing:\n${text}`;
+  let lastErr;
+  for (const model of ['gemini-3.1-flash-tts-preview', 'gemini-2.5-flash-preview-tts']) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key.trim() },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: S.ttsVoice || 'Leda' } } } } })
+      });
+      if (!res.ok) { const err = new Error('tts ' + res.status); err.status = res.status; try { err.detail = (await res.json()).error.message; } catch (e) {} throw err; }
+      const data = await res.json(); const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (!part) throw new Error('no audio');
+      const rate = +(/rate=(\d+)/.exec(part.inlineData.mimeType || '') || [0, 24000])[1];
+      const bin = atob(part.inlineData.data); const n = bin.length >> 1; const f = new Float32Array(n);
+      for (let i = 0; i < n; i++) { let v = bin.charCodeAt(i * 2) | (bin.charCodeAt(i * 2 + 1) << 8); if (v >= 32768) v -= 65536; f[i] = v / 32768; }
+      return { f, rate };
+    } catch (e) { lastErr = e; if (e.status === 400 || e.status === 401 || e.status === 403) break; }
+  }
+  throw lastErr;
+}
+let speakSeq = 0;
+function stopSpeaking() { speakSeq++; try { curSrc && curSrc.stop(); } catch (e) {} curSrc = null; if ('speechSynthesis' in window) speechSynthesis.cancel(); stopLip(); }
+async function speak(text, lang = 'en', m = 'neutral') {
+  const seq = ++speakSeq; if (curSrc) { try { curSrc.stop(); } catch (e) {} curSrc = null; }
+  if (!S.speak || !text) return;
+  text = text.replace(/[*_#`~]/g, '');
+  if (S.voiceEngine !== 'phone' && S.key && Date.now() > ttsCooldownUntil && audioCtx()) {
+    try {
+      status('think', 'Voice'); const { f, rate } = await fetchTTS(text, m); status('', 'Online');
+      if (seq !== speakSeq) return;
+      const c = audioCtx(); const buf = c.createBuffer(1, f.length, rate); buf.copyToChannel ? buf.copyToChannel(f, 0) : buf.getChannelData(0).set(f);
+      const src = c.createBufferSource(); src.buffer = buf; src.connect(analyser); curSrc = src;
+      const data = new Float32Array(analyser.fftSize);
+      startLip();
+      (function lip() {
+        if (curSrc !== src) return;
+        analyser.getFloatTimeDomainData(data); let s = 0; for (let i = 0; i < data.length; i++) s += data[i] * data[i];
+        const rms = Math.sqrt(s / data.length); rig.mouthT = Math.max(0, Math.min(1, (rms - 0.015) * 7));
+        requestAnimationFrame(lip);
+      })();
+      src.onended = () => { if (curSrc === src) { curSrc = null; stopLip(); } };
+      src.start(0); return;
+    } catch (e) {
+      status('', 'Online');
+      if (seq !== speakSeq) return;
+      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; if (!ttsNoticeShown) { ttsNoticeShown = true; toast('AI voice limit reached for now, using phone voice'); } }
+      else console.warn('TTS failed', e);
+    }
+  }
+  phoneSpeak(text, lang, seq);
+}
+// fallback: built-in phone voice (mouth animated from word timing)
+let voices = [];
+function loadVoices() { voices = 'speechSynthesis' in window ? speechSynthesis.getVoices() : []; }
 if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
 function pickVoice(lang) {
-  if (lang === 'en') {
-    const chosen = voices.find(v => v.voiceURI === S.voice); if (chosen) return chosen;
-    const pref = ['Samantha','Karen','Moira','Tessa','Serena','Zira','Google US English'];
-    for (const p of pref) { const v = voices.find(v => v.name.includes(p)); if (v) return v; }
-    return voices.find(v => v.lang.startsWith('en'));
-  }
-  const code = lang === 'fr' ? 'fr' : 'ar';
-  return voices.find(v => v.lang.startsWith(code) && /female|amelie|audrey|marie|thomas|laila|maged|majed/i.test(v.name)) || voices.find(v => v.lang.startsWith(code));
+  if (lang === 'en') { const pref = ['Samantha (Enhanced)', 'Ava (Premium)', 'Ava (Enhanced)', 'Samantha', 'Karen', 'Moira', 'Google US English']; for (const p of pref) { const v = voices.find(v => v.name.includes(p)); if (v) return v; } return voices.find(v => v.lang.startsWith('en')); }
+  const code = lang === 'fr' ? 'fr' : 'ar'; return voices.find(v => v.lang.startsWith(code));
 }
-function speak(text, lang = 'en') {
-  if (!S.speak || !('speechSynthesis' in window) || !text) { startLip(); setTimeout(stopLip, Math.min(4000, 400 + text.length * 35)); return; }
+function phoneSpeak(text, lang, seq) {
+  if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text.replace(/[*_#`~]/g, ''));
+  const u = new SpeechSynthesisUtterance(text);
   const v = pickVoice(lang); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang === 'fr' ? 'fr-FR' : lang === 'ar' ? 'ar-SA' : 'en-US';
-  u.pitch = 1.15; u.rate = lang === 'en' ? 1.04 : 0.95;
-  u.onstart = startLip; u.onend = stopLip; u.onerror = stopLip;
+  u.pitch = 1.12; u.rate = lang === 'en' ? 1.02 : 0.95;
+  let flap;
+  u.onstart = () => { if (seq !== speakSeq) return; startLip(); flap = setInterval(() => { rig.mouthT = Math.random() < .25 ? .1 : .35 + Math.random() * .55; }, 95); };
+  u.onend = u.onerror = () => { clearInterval(flap); if (seq === speakSeq) stopLip(); };
   speechSynthesis.speak(u);
-  setTimeout(() => { if (!speechSynthesis.speaking && !speaking) { startLip(); setTimeout(stopLip, 1200); } }, 700);
 }
-let unlocked = false;
-function unlockAudio() { if (unlocked || !('speechSynthesis' in window)) return; unlocked = true; const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
 
 // ---------- voice in ----------
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -398,7 +539,7 @@ $('#mic').addEventListener('click', () => {
   unlockAudio();
   if (!SR) { toast('Voice input not supported here. Use the mic on your keyboard.'); $('#input').focus(); return; }
   if (listening) { rec && rec.stop(); return; }
-  speechSynthesis && speechSynthesis.cancel();
+  stopSpeaking();
   rec = new SR(); rec.lang = S.lang; rec.interimResults = true; rec.continuous = false;
   let finalText = '';
   rec.onstart = () => { $('#stage').classList.add('listen'); listening = true; $('#mic').classList.add('on'); status('listen', 'Listening'); setMood('neutral'); };
@@ -603,7 +744,7 @@ function herSays(text, m, lang, buttons) {
   const acts = $('#bubbleActs'); acts.innerHTML = '';
   (buttons || []).forEach(b => { const a = document.createElement('a'); a.className = 'act'; a.textContent = b.label; a.href = b.url; a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none'; a.style.color = '#fff'; acts.appendChild(a); });
   setMood(m || 'neutral');
-  speak(text, lang || 'en');
+  speak(text, lang || 'en', m || 'neutral');
 }
 
 // ---------- chat log ----------
@@ -633,7 +774,7 @@ function bind(id, key, type) {
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
 bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
-bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-voice', 'voice');
+bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice');
 $('#s-ping').onclick = async () => {
   const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
   if (!S.key && !S.groqKey) { out.textContent = 'Paste a key first.'; return; }
@@ -641,7 +782,7 @@ $('#s-ping').onclick = async () => {
   try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
-$('#s-test').onclick = () => { unlocked = true; herSays(`Testing? Fine. I'm Cerise${S.name ? ', and you are ' + S.name : ''}. Try not to bore me.`, 'smug', 'en', []); };
+$('#s-test').onclick = () => { unlockAudio(); herSays(`Testing? Fine. I'm Cerise${S.name ? ', and you are ' + S.name : ''}. Try not to bore me.`, 'smug', 'en', []); };
 $('#s-clear').onclick = () => { if (confirm('Clear the whole chat history?')) { S.history = []; save(); renderLog(); toast('Chat cleared'); } };
 function renderMem() {
   const box = $('#memList'); box.innerHTML = '';
