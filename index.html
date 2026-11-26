@@ -134,7 +134,7 @@ nav button.on{color:var(--crimson2)}
 .valance::after{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:#3c0614}
 #rig{position:absolute;left:0;right:0;bottom:0;top:0;display:flex;align-items:flex-end;justify-content:center;z-index:2;
   animation:breath 4.2s ease-in-out infinite;transform-origin:50% 100%}
-#sway{position:relative;flex:none;width:min(122vw,560px,calc((100dvh - 320px)*1.2));animation:sway 7s ease-in-out infinite;transform-origin:50% 100%}
+#sway{position:relative;flex:none;width:min(100vw,410px,calc((100dvh - 320px)*1.2));animation:sway 7s ease-in-out infinite;transform-origin:50% 100%}
 #sway.drop{animation:dropin .9s cubic-bezier(.2,1.4,.4,1) both, sway 7s ease-in-out .9s infinite}
 #sway.talk{animation:talkbob .32s ease-in-out infinite}
 #sway.react{animation:react .45s ease-out}
@@ -251,7 +251,7 @@ nav button{padding:4px 10px!important}
     <section class="view" id="v-her">
       <div id="herStage">
         <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126191139"></div>
+        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126191806"></div>
       </div>
       <div class="card" id="herCard">
         <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div></div>
@@ -313,7 +313,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126191139 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126191806 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -332,7 +332,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126191139';
+const VER = '20261126191806';
 
 // ---------- state ----------
 // re-download needed when the voice engine changes
@@ -600,6 +600,7 @@ async function playPCM(f, sr, seq, rate = 1) {
     })();
     src.onended = () => { if (curSrc === src) curSrc = null; resolve(seq === speakSeq); };
     src.start(0);
+    if (onVoiceStart) { const est = playPCM.totalEst || (buf.duration / rate); onVoiceStart(est); }
   });
 }
 // ---- unlimited on-device voice (Kokoro, runs inside the phone) ----
@@ -706,6 +707,10 @@ function localSayRaw(text) {
   return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: 1.02 }); });
 }
 async function speakLocal(text, seq) {
+  playPCM.totalEst = Math.max(1, text.length * 0.068);
+  try { return await speakLocalInner(text, seq); } finally { playPCM.totalEst = 0; }
+}
+async function speakLocalInner(text, seq) {
   const parts = (text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]).map(s => s.trim()).filter(Boolean);
   let played = false;
   if (LOCAL.mode === 'main' || LOCAL.mode === 'kitten') { for (const p of parts) { const { f, sr } = await localSay(p); if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); } }
@@ -715,7 +720,7 @@ async function speakLocal(text, seq) {
 }
 async function speak(text, lang = 'en', m = 'neutral') {
   const seq = ++speakSeq; if (curSrc) { try { curSrc.stop(); } catch (e) {} curSrc = null; }
-  if (!S.speak || !text) return;
+  if (!S.speak || !text) { if (onVoiceStart) onVoiceStart(); return; }
   text = text.replace(/[*_#`~]/g, '');
   const engine = S.voiceEngine || 'auto'; const why = [];
   // 1) expressive Gemini AI voice (free daily limit)
@@ -740,7 +745,9 @@ async function speak(text, lang = 'en', m = 'neutral') {
   } else if (engine === 'auto' || engine === 'local') why.push('Unlimited voice: English only');
   // 3) phone voice
   vlog('Phone voice' + (why.length ? ' (' + why.join('; ') + ')' : ''));
+  if (!('speechSynthesis' in window) && onVoiceStart) onVoiceStart();
   phoneSpeak(text, lang, seq);
+  setTimeout(() => { if (onVoiceStart && seq === speakSeq) onVoiceStart(); }, 2500);
 }
 // fallback: built-in phone voice (mouth animated from word timing)
 let voices = [];
@@ -757,7 +764,7 @@ function phoneSpeak(text, lang, seq) {
   const v = pickVoice(lang); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang === 'fr' ? 'fr-FR' : lang === 'ar' ? 'ar-SA' : 'en-US';
   u.pitch = 1.12; u.rate = lang === 'en' ? 1.02 : 0.95;
   let flap;
-  u.onstart = () => { if (seq !== speakSeq) return; startLip(); flap = setInterval(() => { rig.mouthT = Math.random() < .25 ? .1 : .35 + Math.random() * .55; }, 95); };
+  u.onstart = () => { if (seq !== speakSeq) return; if (onVoiceStart) onVoiceStart(text.length * 0.07); startLip(); flap = setInterval(() => { rig.mouthT = Math.random() < .25 ? .1 : .35 + Math.random() * .55; }, 95); };
   u.onend = u.onerror = () => { clearInterval(flap); if (seq === speakSeq) stopLip(); };
   speechSynthesis.speak(u);
 }
@@ -1067,13 +1074,20 @@ async function send(text) {
   } finally { busy = false; status('', 'Online'); $('#bubble').classList.remove('thinking'); }
 }
 let typeT;
-function typeText(text) {
+function typeText(text, dur) {
   const el = $('#bubbleText'); clearInterval(typeT); el.textContent = ''; let i = 0;
   const b = $('#bubble'); b.classList.remove('thinking', 'pop'); void b.offsetWidth; b.classList.add('pop');
-  typeT = setInterval(() => { i += 2; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(typeT); }, 28);
+  const steps = Math.max(1, Math.ceil(text.length / 2));
+  const every = dur ? Math.max(12, Math.min(90, dur * 1000 * 0.9 / steps)) : 28;
+  typeT = setInterval(() => { i += 2; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(typeT); }, every);
 }
+let onVoiceStart = null;
 function herSays(text, m, lang, buttons) {
-  typeText(text);
+  // her words appear together with her voice
+  if (S.speak) {
+    let typed = false; const go = (dur) => { if (typed) return; typed = true; onVoiceStart = null; typeText(text, dur); };
+    $('#bubble').classList.add('thinking'); onVoiceStart = go; setTimeout(() => go(), 9000);
+  } else typeText(text);
   const acts = $('#bubbleActs'); acts.innerHTML = '';
   (buttons || []).forEach(b => { const a = document.createElement('a'); a.className = 'act'; a.textContent = b.label; a.href = b.url; if (/^https:/i.test(b.url)) a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none'; a.style.color = '#fff'; acts.appendChild(a); });
   setMood(m || 'neutral');
