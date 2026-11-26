@@ -198,12 +198,15 @@ nav button{padding:4px 10px!important}
 .dlTrack{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:6px 0 8px}
 #dlBar{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--crimson),var(--crimson2));transition:width .25s}
 #dlBox[data-state=ready] #dlBar{background:#3ccf7a}
+#dlBox[data-state=loading] .dlTrack{background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.14),rgba(255,255,255,.06));background-size:200% 100%;animation:shim 1.2s linear infinite}
+@keyframes shim{to{background-position:-200% 0}}
 #dlBox[data-state=error] #dlBar{background:#777}
 #dlText{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
 #dlBox small{display:block;color:var(--mute);font-size:12px;margin-top:4px}
 #dlBox[data-state=ready] small,#dlBox[data-state=error] small{display:none}
 #dlPill{background:var(--crimson);color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
 .btn:disabled{opacity:.7}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -248,7 +251,7 @@ nav button{padding:4px 10px!important}
     <section class="view" id="v-her">
       <div id="herStage">
         <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126185924"></div>
+        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126190409"></div>
       </div>
       <div class="card" id="herCard">
         <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div></div>
@@ -285,7 +288,9 @@ nav button{padding:4px 10px!important}
           <small>The Gemini AI voice is the most expressive but has a free daily limit. The unlimited voice runs on your phone after a one-time download, free forever, English only. If you hear nothing, turn off silent mode.</small></div>
         <div class="field"><label for="s-tts">Her voice</label>
           <select id="s-tts"><option value="Leda">Leda (youthful)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
-        <div class="field"><label for="s-local">Her unlimited voice</label>
+        <div class="field" id="kvField"><label for="s-kitten">Her unlimited voice</label>
+          <select id="s-kitten"><option value="Kiki">Kiki (cute)</option><option value="Luna">Luna (soft)</option><option value="Rosie">Rosie (bright)</option><option value="Bella">Bella (warm)</option></select></div>
+        <div class="field" id="kokoroField"><label for="s-local">Backup unlimited voice</label>
           <select id="s-local"><option value="af_bella">Bella (bright, youthful)</option><option value="af_nicole">Nicole (soft, whispery)</option><option value="af_sky">Sky (light)</option><option value="af_heart">Heart (warm)</option><option value="af_nova">Nova (clear)</option><option value="af_aoede">Aoede (smooth)</option><option value="bf_emma">Emma (British)</option><option value="bf_isabella">Isabella (British, cool)</option></select></div>
         <div class="field switch"><label for="s-pitch">Anime pitch (slightly higher voice)</label><input id="s-pitch" type="checkbox"></div>
         <button class="btn" id="s-dl" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Download unlimited voice (≈90 MB, once)</button>
@@ -307,7 +312,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126185924 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126190409 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -326,10 +331,11 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126185924';
+const VER = '20261126190409';
 
 // ---------- state ----------
-const DEF = {key:'', groqKey:'', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
+// re-download needed when the voice engine changes
+const DEF = {key:'', groqKey:'', kittenVoice:'Kiki', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 if (S.v !== 2) { S.v = 2; if (S.voiceEngine === 'ai') S.voiceEngine = 'auto'; }
@@ -585,7 +591,28 @@ function playPCM(f, sr, seq, rate = 1) {
 // ---- unlimited on-device voice (Kokoro, runs inside the phone) ----
 const KOKORO_URL = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
 const KOKORO_MODEL = 'onnx-community/Kokoro-82M-v1.0-ONNX';
-const LOCAL = { worker: null, ready: false, loading: null, jobs: {}, id: 0, files: {}, mode: 'worker', tts: null, started: 0 };
+const LOCAL = { worker: null, ready: false, loading: null, jobs: {}, id: 0, files: {}, mode: 'worker', tts: null, started: 0, kind: navigator.gpu ? 'kitten' : 'kokoro', kitten: null };
+const KITTEN_URL = 'https://cdn.jsdelivr.net/npm/kitten-tts-webgpu@0.1.1/+esm';
+// count real download bytes while the voice loads (so the progress bar is real)
+function watchDownloads(on) {
+  if (on) { if (window.__of) return; window.__of = window.fetch;
+    window.fetch = async (...a) => { const r = await window.__of(...a); try { const url = String((a[0] && a[0].url) || a[0]); const len = +r.headers.get('content-length');
+      if (!r.body || !len || len < 300000) return r; const rd = r.body.getReader(); let got = 0;
+      const st = new ReadableStream({ async pull(c) { const { done, value } = await rd.read(); if (done) { c.close(); return; } got += value.length; onProgress({ status: 'progress', file: url, loaded: got, total: len }); c.enqueue(value); } });
+      return new Response(st, { headers: r.headers, status: r.status, statusText: r.statusText }); } catch (e) { return r; } };
+  } else if (window.__of) { window.fetch = window.__of; window.__of = null; }
+}
+async function loadKitten() {
+  LOCAL.mode = 'kitten'; dlUI('loading', 'Starting (fast iPhone voice)…', 1);
+  watchDownloads(true);
+  try {
+    const mod = await import(KITTEN_URL); LOCAL.kitten = mod;
+    const t0 = performance.now(); let stage = '';
+    const tick = setInterval(() => { if (!LOCAL.ready && stage && !Object.keys(LOCAL.files).length) dlUI('loading', stage + ' ' + Math.round((performance.now() - t0) / 1000) + 's', 5); }, 500);
+    await mod.textToSpeech('Hi.', { voice: S.kittenVoice || 'Kiki', model: 'mini', onProgress: (st) => { stage = st; if (/generat/i.test(st)) dlUI('loading', 'Preparing her voice…', 100); } });
+    clearInterval(tick); localReady();
+  } finally { watchDownloads(false); }
+}
 function dlUI(state, text, pct) {
   const box = $('#dlBox'); if (!box) return; box.hidden = false;
   $('#dlText').textContent = text; const bar = $('#dlBar');
@@ -607,7 +634,7 @@ function onProgress(p) {
   }
   else if (p.status === 'done') { const fs = Object.values(LOCAL.files); if (fs.length && fs.every(f => f.total && f.loaded >= f.total)) dlUI('loading', 'Preparing her voice…', 100); }
 }
-function localReady() { LOCAL.ready = true; S.localReady = true; save(); dlUI('ready', '✓ Unlimited voice ready. Works offline, no limits.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
+function localReady() { LOCAL.ready = true; S.localReady = true; S.localKind = LOCAL.mode === 'kitten' ? 'kitten' : 'kokoro'; save(); dlUI('ready', '✓ Unlimited voice ready. Works offline, no limits.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
 function localFail(msg) { if (LOCAL.loadReject) LOCAL.loadReject(new Error(msg)); LOCAL.loading = null; dlUI('error', '✗ ' + msg, 0); }
 const KOKORO_WORKER = `
 import { KokoroTTS } from '${KOKORO_URL}';
@@ -648,23 +675,26 @@ function loadLocal() {
   if (!LOCAL.loading) {
     LOCAL.started = performance.now(); LOCAL.files = {}; dlUI('loading', 'Starting download…', 1);
     LOCAL.loading = new Promise((res, rej) => { LOCAL.loadResolve = res; LOCAL.loadReject = rej;
+      if (LOCAL.kind === 'kitten') { loadKitten().catch((e) => { console.warn('kitten failed', e); LOCAL.kind = 'kokoro'; LOCAL.files = {}; dlUI('loading', 'Fast voice unavailable, trying the other voice…', 1); try { localWorker().postMessage({ type: 'load' }); } catch (e2) { localFail(String(e2.message || e2)); } }); return; }
       try { localWorker().postMessage({ type: 'load' }); } catch (e) { loadMainThread().catch(e2 => localFail(String(e2.message || e2))); } });
     LOCAL.loading.catch(() => {});
   }
   return LOCAL.loading;
 }
 function localSay(text) {
-  const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('voice generation took longer than 45s')), 45000));
+  const timeout = new Promise((_, rej) => setTimeout(() => { if (LOCAL.mode === 'worker' && LOCAL.worker) { LOCAL.worker.terminate(); LOCAL.worker = null; LOCAL.ready = false; LOCAL.loading = null; } rej(new Error('voice generation took longer than 45s (your phone may have run out of memory)')); }, 45000));
   return Promise.race([localSayRaw(text), timeout]).then(r => { if (!r || !r.f || !r.f.length) throw new Error('voice came back empty'); return r; });
 }
 function localSayRaw(text) {
+  if (LOCAL.mode === 'kitten' && LOCAL.kitten) return LOCAL.kitten.textToSpeech(text.slice(0, 480), { voice: S.kittenVoice || 'Kiki', model: 'mini', speed: 1.0 })
+    .then(b => b.arrayBuffer()).then(ab => new Promise((res, rej) => audioCtx().decodeAudioData(ab, res, rej))).then(buf => ({ f: buf.getChannelData(0), sr: buf.sampleRate }));
   if (LOCAL.mode === 'main' && LOCAL.tts) return LOCAL.tts.generate(text, { voice: S.localVoice || 'af_bella', speed: 1.02 }).then(a => ({ f: a.audio, sr: a.sampling_rate }));
   return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: 1.02 }); });
 }
 async function speakLocal(text, seq) {
   const parts = (text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]).map(s => s.trim()).filter(Boolean);
   let played = false;
-  if (LOCAL.mode === 'main') { for (const p of parts) { const { f, sr } = await localSay(p); if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); } }
+  if (LOCAL.mode === 'main' || LOCAL.mode === 'kitten') { for (const p of parts) { const { f, sr } = await localSay(p); if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); } }
   else { const jobs = parts.map(p => localSay(p)); for (const j of jobs) { const { f, sr } = await j; if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); } }
   if (seq === speakSeq) stopLip();
   return played;
@@ -1060,7 +1090,7 @@ function bind(id, key, type) {
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
 bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
-bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-pitch', 'animePitch', 'check');
+bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-kitten', 'kittenVoice'); bind('#s-pitch', 'animePitch', 'check');
 $('#s-ping').onclick = async () => {
   const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
   if (!S.key && !S.groqKey) { out.textContent = 'Paste a key first.'; return; }
@@ -1068,14 +1098,15 @@ $('#s-ping').onclick = async () => {
   try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
+document.getElementById('kokoroField').hidden = LOCAL.kind === 'kitten'; document.getElementById('kvField').hidden = LOCAL.kind !== 'kitten';
 $('#s-dl').onclick = () => { unlockAudio(); loadLocal().catch(() => {}); };
 $('#s-testLocal').onclick = async () => {
   unlockAudio(); const out = $('#s-tlout'); out.style.color = 'var(--mute)';
   const log = (t) => { out.textContent = t; };
   try {
     if (!LOCAL.ready) { log('Loading the voice first…'); await loadLocal(); }
-    log('Generating speech on your phone… (mode: ' + LOCAL.mode + ')'); const t0 = performance.now();
-    const { f, sr } = await localSay("Hmph. So this is my unlimited voice. Happy now?");
+    const t0 = performance.now(); const tk = setInterval(() => log('Generating speech on your phone… ' + ((performance.now() - t0) / 1000).toFixed(0) + 's (mode: ' + LOCAL.mode + ')'), 250);
+    let f, sr; try { ({ f, sr } = await localSay("Hmph. So this is my unlimited voice. Happy now?")); } finally { clearInterval(tk); }
     let peak = 0; for (let i = 0; i < f.length; i += 50) peak = Math.max(peak, Math.abs(f[i]));
     const c = audioCtx();
     log(`Generated ${(f.length / sr).toFixed(1)}s of audio in ${((performance.now() - t0) / 1000).toFixed(1)}s (loudness ${peak.toFixed(2)}). Playing… audio: ${c ? c.state : 'none'}`);
@@ -1117,7 +1148,7 @@ function openHer() { $('#stMood').textContent = mood; $('#stMem').textContent = 
 
 // ---------- start ----------
 show('neutral', 1); renderLog(); renderMem(); renderTodos();
-if (S.localReady) { dlUI('loading', 'Loading her saved voice…', 100); setTimeout(() => loadLocal().catch(() => {}), 2500); }
+if (S.localReady && S.localKind === LOCAL.kind) { dlUI('loading', 'Loading her saved voice…', 100); setTimeout(() => loadLocal().catch(() => {}), 2500); }
 // intro
 setTimeout(() => { $('#intro').classList.add('gone'); sway.classList.add('drop'); setTimeout(() => sway.classList.remove('drop'), 1000); }, 1500);
 // falling flower petals and sparkles
