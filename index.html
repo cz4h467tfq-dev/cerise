@@ -152,7 +152,9 @@ nav button.on{color:var(--crimson2)}
           <small>Free from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a>. It's saved only on this phone and sent only to Google.</small></div>
         <div class="field"><label for="s-model">Model</label>
           <input id="s-model" autocomplete="off">
-          <small>Leave as <b>gemini-flash-latest</b> unless it stops working.</small></div>
+          <small>Leave empty to pick a working model automatically.</small></div>
+        <button class="btn" id="s-ping" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test connection</button>
+        <div id="s-pingout" style="padding:0 14px 14px;font-size:13px;color:var(--mute);white-space:pre-wrap;word-break:break-word"></div>
       </div>
       <div class="group"><h3>About you</h3>
         <div class="field"><label for="s-name">Your name</label><input id="s-name" autocomplete="off"></div>
@@ -186,7 +188,7 @@ const $ = (s) => document.querySelector(s);
 const MOODS = ['neutral','cold','smug','annoyed','laugh','giggle','shock','surprised','pout','cry'];
 
 // ---------- state ----------
-const DEF = {key:'', model:'gemini-flash-latest', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[]};
+const DEF = {key:'', model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 const save = () => { try { localStorage.setItem('cerise.v1', JSON.stringify(S)); } catch (e) {} };
@@ -357,20 +359,36 @@ const SCHEMA = {
   },
   required: ['reply', 'mood', 'lang']
 };
-async function callGemini(contents) {
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(S.model || DEF.model)}:generateContent`, {
+const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+async function callModel(model, contents) {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key.trim() },
     body: JSON.stringify({
       system_instruction: { parts: [{ text: systemPrompt() }] },
       contents,
-      generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA, temperature: 0.9, maxOutputTokens: 800 }
+      generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA, temperature: 0.9, maxOutputTokens: 4096 }
     })
   });
-  if (!res.ok) { const err = new Error('http'); err.status = res.status; try { err.detail = (await res.json()).error.message; } catch (e) {} throw err; }
+  if (!res.ok) { const err = new Error('HTTP ' + res.status); err.status = res.status; try { err.detail = (await res.json()).error.message; } catch (e) {} throw err; }
   const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
-  try { return JSON.parse(text); } catch (e) { return { reply: text || '…', mood: 'cold', lang: 'en', actions: [] }; }
+  const text = data.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('') || '';
+  if (!text) { const err = new Error('empty'); err.status = 0; err.detail = 'Empty reply (' + (data.candidates?.[0]?.finishReason || data.promptFeedback?.blockReason || 'unknown') + ')'; throw err; }
+  try { return JSON.parse(text); } catch (e) { const m = text.match(/\{[\s\S]*\}/); if (m) try { return JSON.parse(m[0]); } catch (e2) {} return { reply: text, mood: 'cold', lang: 'en', actions: [] }; }
+}
+async function callGemini(contents) {
+  const first = (S.model || '').trim() || S.okModel || DEF.model;
+  const order = [first, S.okModel, ...FALLBACK_MODELS].filter((m, i, a) => m && a.indexOf(m) === i);
+  let lastErr;
+  for (const m of order) {
+    try { const out = await callModel(m, contents); if (S.okModel !== m) { S.okModel = m; save(); } return out; }
+    catch (e) {
+      lastErr = e;
+      const keyProblem = e.status === 400 && /api key|API_KEY/i.test(e.detail || '') || e.status === 401 || (e.status === 403 && /key|permission|denied/i.test(e.detail || ''));
+      if (keyProblem || e.status === undefined) throw e; // bad key or network: no point trying other models
+    }
+  }
+  throw lastErr;
 }
 function historyContents() {
   const h = S.history.slice(-16); while (h.length && h[0].who !== 'me') h.shift();
@@ -405,12 +423,15 @@ async function send(text) {
     herSays(out.reply, out.mood, out.lang, buttons);
     addLog('her', out.reply);
   } catch (e) {
+    const d = (e.detail || e.message || '').toLowerCase();
     let line = "Ugh. Something broke and it was definitely not my fault.";
-    if (e.status === 429) line = "I'm out of free brainpower for a minute. Rate limits. Try again soon.";
-    else if (e.status === 400 || e.status === 403) line = "Your API key or model name is wrong. Fix it in Settings, genius.";
-    else if (e.status === 404) line = "That model doesn't exist anymore. Change the model name in Settings.";
-    else if (!navigator.onLine) line = "You're offline. I can't think without internet, you know.";
-    herSays(line, 'annoyed', 'en', []); addLog('sys', (e.detail || e.message || 'error').slice(0, 160));
+    if (!navigator.onLine) line = "You're offline. I can't think without internet, you know.";
+    else if (/api key|api_key/.test(d) || e.status === 401) line = "That API key doesn't work. Copy it again from AI Studio and paste it in Settings.";
+    else if (e.status === 429 || /quota|exhausted/.test(d)) line = "Google says I'm out of free quota right now. Wait a minute and try again.";
+    else if (e.status === 403) line = "Google blocked the request. Your key might be restricted, check it in AI Studio.";
+    else if (e.status === undefined) line = "I couldn't reach Google at all. Check your internet.";
+    herSays(line, 'annoyed', 'en', []); addLog('sys', 'Error: ' + (e.detail || e.message || 'unknown').slice(0, 220));
+    toast((e.detail || e.message || 'error').slice(0, 120));
   } finally { busy = false; status('', 'Online'); }
 }
 function herSays(text, m, lang, buttons) {
@@ -449,6 +470,13 @@ function bind(id, key, type) {
 }
 bind('#s-key', 'key'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
 bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-voice', 'voice');
+$('#s-ping').onclick = async () => {
+  const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); save();
+  if (!S.key) { out.textContent = 'Paste your key first.'; return; }
+  out.textContent = 'Testing…';
+  try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
+  catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
+};
 $('#s-test').onclick = () => { unlocked = true; herSays(`Testing? Fine. I'm Cerise${S.name ? ', and you are ' + S.name : ''}. Try not to bore me.`, 'smug', 'en', []); };
 $('#s-clear').onclick = () => { if (confirm('Clear the whole chat history?')) { S.history = []; save(); renderLog(); toast('Chat cleared'); } };
 function renderMem() {
