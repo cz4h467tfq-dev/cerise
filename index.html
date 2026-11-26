@@ -169,6 +169,25 @@ nav button.on{color:var(--crimson2)}
 #intro .diamonds{width:120px;height:14px;background:linear-gradient(45deg,transparent 35%,var(--crimson) 35%,var(--crimson) 65%,transparent 65%) 0 0/14px 14px;
   animation:introT 1s both}
 @keyframes introT{0%{opacity:0;transform:translateY(14px);letter-spacing:.4em}100%{opacity:1;transform:none}}
+
+#v-her{background:radial-gradient(ellipse at 50% 30%,rgba(209,25,74,.18),transparent 60%)}
+#herStage{flex:1;position:relative;min-height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+#bodyWrap{position:relative;height:calc(100% - 12px);display:flex;align-items:flex-end;justify-content:center;transition:transform .16s ease-in;z-index:2}
+#bodyWrap.turn{transform:scaleX(0)}
+#bodyCv{height:100%;width:auto;display:block;filter:drop-shadow(0 10px 30px rgba(0,0,0,.6)) drop-shadow(0 0 20px rgba(255,61,110,.25))}
+#viewName{position:absolute;top:12px;left:14px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--mute);
+  background:rgba(255,255,255,.06);padding:5px 12px;border-radius:999px;z-index:3}
+.card{margin:8px 14px 12px;background:linear-gradient(180deg,rgba(42,15,25,.95),rgba(26,8,15,.95));border:1px solid rgba(255,61,110,.3);border-radius:22px;padding:14px 16px}
+.cardTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cName{font-family:"Cinzel Decorative",Georgia,serif;font-size:22px;background:linear-gradient(180deg,#fff,#ffb3c8 60%,#ff3d6e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cSub{font-size:13px;color:var(--mute);margin-top:2px}
+.turnBtn{display:flex;align-items:center;gap:6px;background:var(--crimson);border:0;border-radius:999px;padding:10px 16px;font-weight:700;font-size:14px;min-height:44px}
+.turnBtn svg{width:18px;height:18px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.stats div{background:rgba(255,255,255,.05);border-radius:14px;padding:10px;text-align:center}
+.stats b{display:block;font-size:17px;color:#fff;text-transform:capitalize}
+.stats span{font-size:11px;color:var(--mute);letter-spacing:.06em}
+nav button{padding:4px 10px!important}
 </style>
 </head>
 <body>
@@ -185,7 +204,7 @@ nav button.on{color:var(--crimson2)}
         <div class="curtain l"></div><div class="curtain r"></div><div class="valance"></div>
         <div class="floor"></div>
         <div id="rig"><div id="sway">
-          <canvas id="avatar" role="img" aria-label="Cerise"></canvas><img id="avatarImg" alt="Cerise" src="img/neutral.webp">
+          <canvas id="avatar" role="img" aria-label="Cerise"></canvas><img id="avatarImg" alt="Cerise" src="img/A00.webp">
           <div id="fx"></div>
         </div></div>
         <div id="bubble"><div class="who">CERISE</div><div id="bubbleText">…</div><div id="dots"><i></i><i></i><i></i></div><div class="acts" id="bubbleActs"></div></div>
@@ -207,6 +226,18 @@ nav button.on{color:var(--crimson2)}
       </form>
     </section>
 
+    <section class="view" id="v-her">
+      <div id="herStage">
+        <div class="beam"></div><div class="floor"></div>
+        <div id="bodyWrap"><canvas id="bodyCv" role="img" aria-label="Cerise full body"></canvas></div>
+        <div id="viewName">Front</div>
+      </div>
+      <div class="card" id="herCard">
+        <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div>
+          <button class="turnBtn" id="turnBtn" type="button" aria-label="Turn around"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>Turn</button></div>
+        <div class="stats"><div><b id="stMood">cold</b><span>mood</span></div><div><b id="stMem">0</b><span>memories</span></div><div><b id="stMsg">0</b><span>messages</span></div></div>
+      </div>
+    </section>
     <section class="view" id="v-chat"><div id="log"></div></section>
 
     <section class="view" id="v-settings"><div id="settings">
@@ -246,11 +277,12 @@ nav button.on{color:var(--crimson2)}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise v1 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126182714 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
     <button class="on" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>Cerise</button>
+    <button data-v="her"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><path d="M12 8v6M8 22l4-8 4 8M7 11h10"/></svg>Her</button>
     <button data-v="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>Chat</button>
     <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
   </nav>
@@ -260,7 +292,11 @@ nav button.on{color:var(--crimson2)}
 
 <script>
 const $ = (s) => document.querySelector(s);
-const MOODS = ['neutral','cold','bored','side','smug','smirk','laugh','giggle','annoyed','angry','shock','surprised','pout','flustered','cry','teary','sleepy','sleeping','blank','dark'];
+const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bored:['A03','A34','B33'], side:['B04'], annoyed:['A04','B03','B01'], grumpy:['B11'], angry:['B12'],
+  smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
+  cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
+const MOODS = Object.keys(VAR);
+const VER = '20261126182714';
 
 // ---------- state ----------
 const DEF = {key:'', groqKey:'', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[]};
@@ -270,10 +306,12 @@ if (S.v !== 2) { S.v = 2; if (S.voiceEngine === 'ai') S.voiceEngine = 'auto'; }
 const save = () => { try { localStorage.setItem('cerise.v1', JSON.stringify(S)); } catch (e) {} };
 
 // ---------- avatar: one living face (WebGL rig) + mood reactions ----------
-const FRAMES = ['neutral','cold','bored','side','annoyed','angry','smug','smirk','laugh','giggle','shock','surprised','pout','flustered','cry','teary','sleepy','sleeping','blank','dark'];
-const IMG = {}; FRAMES.forEach(n => IMG[n] = 'img/' + n + '.webp');
+const FRAMES = [...new Set(Object.values(VAR).flat())];
+const IMG = { neutral: 'img/A00.webp?v=' + VER }; FRAMES.forEach(n => { if (n !== 'A00') IMG[n] = 'img/' + n + '.webp?v=' + VER; });
 const pics = {}; function pic(n) { if (!pics[n]) { const i = new Image(); i.decoding = 'async'; i.src = IMG[n]; pics[n] = i; } return pics[n]; }
-pic('neutral'); setTimeout(() => FRAMES.forEach(pic), 1200);
+pic('neutral');
+// preload the rest quietly, one at a time
+setTimeout(function pre(i = 0) { const n = FRAMES[i]; if (!n) return; if (n === 'A00') return pre(i + 1); const p = pic(n); const go = () => setTimeout(() => pre(i + 1), 150); p.complete ? go() : (p.onload = p.onerror = go); }, 4000);
 const sway = $('#sway'), cv = $('#avatar'), fallback = $('#avatarImg');
 let mood = 'neutral', speaking = false, moodTimer = null, shown = 'neutral';
 window.__rig = null;
@@ -401,10 +439,15 @@ void main(){
 })();
 if (R) fallback.remove(); else cv.remove();
 window.__rig = rig;
+let wantFace = 'neutral';
 function show(name, ms = 320) {
-  if (!IMG[name] || shown === name) return; shown = name;
-  if (R) R.to(name, ms); else fallback.src = IMG[name];
+  if (!IMG[name] || shown === name) return; wantFace = name;
+  const p = pic(name);
+  const go = () => { if (wantFace !== name) return; shown = name; if (R) R.to(name, ms); else fallback.src = IMG[name]; };
+  if (p.complete && p.naturalWidth) go(); else p.addEventListener('load', go, { once: true });
 }
+let lastVariant = {};
+function variant(m) { const v = VAR[m] || VAR.neutral; if (m === 'neutral') return 'neutral'; let pick = v[Math.floor(Math.random() * v.length)]; if (v.length > 1 && pick === lastVariant[m]) pick = v[(v.indexOf(pick) + 1) % v.length]; lastVariant[m] = pick; return pick; }
 const FX = {
   heart: '<svg viewBox="0 0 24 24"><path fill="#ff5c8a" stroke="#fff" stroke-width="1.2" d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.3 5 6.6 5c2 0 3.4 1.1 4.4 2.6C12 6.1 13.4 5 15.4 5 18.7 5 21 8.3 19.5 11.8 17.5 16.4 12 21 12 21z"/></svg>',
   anger: '<svg viewBox="0 0 24 24" fill="none" stroke="#ff2f5b" stroke-width="2.6" stroke-linecap="round"><path d="M9 3c0 4-2 6-6 6M15 3c0 4 2 6 6 6M9 21c0-4-2-6-6-6M15 21c0-4 2-6 6-6"/></svg>',
@@ -413,7 +456,7 @@ const FX = {
   drop: '<svg viewBox="0 0 24 24"><path fill="#8fd3ff" stroke="#fff" stroke-width="1.2" d="M12 2s6 7.2 6 11.5A6 6 0 0 1 6 13.5C6 9.2 12 2 12 2z"/></svg>',
   zzz: '<svg viewBox="0 0 24 24" fill="none" stroke="#ffd9e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h6l-6 7h6M14 12h5l-5 6h5"/></svg>'
 };
-const MOOD_FX = { pout: ['heart', 'heart'], flustered: ['heart', 'drop'], annoyed: ['anger'], angry: ['anger', 'anger'], smug: ['sparkle', 'sparkle'], smirk: ['sparkle'], laugh: ['sparkle'], giggle: ['heart'], shock: ['shock', 'drop'], surprised: ['shock'], cry: ['drop', 'drop'], teary: ['drop'], sleeping: ['zzz'], sleepy: ['zzz'], blank: ['drop'] };
+const MOOD_FX = { grumpy: ['anger'], sad: ['drop'], calm: ['sparkle'], pout: ['heart', 'heart'], flustered: ['heart', 'drop'], annoyed: ['anger'], angry: ['anger', 'anger'], smug: ['sparkle', 'sparkle'], smirk: ['sparkle'], laugh: ['sparkle'], giggle: ['heart'], shock: ['shock', 'drop'], surprised: ['shock'], cry: ['drop', 'drop'], teary: ['drop'], sleeping: ['zzz'], sleepy: ['zzz'], blank: ['drop'] };
 function burst(m) {
   const list = MOOD_FX[m]; if (!list) return;
   const box = $('#fx');
@@ -427,13 +470,14 @@ function burst(m) {
 // 'neutral' and 'cold' are the living face; other moods are short reactions, then she relaxes back
 function setMood(m, holdMs = 2600) {
   const prev = mood; mood = MOODS.includes(m) ? m : 'neutral';
-  const face = (mood === 'cold') ? 'neutral' : mood;
+  const face = variant(mood);
   moodAt = Date.now(); show(face, 380); if (mood !== prev) burst(mood);
   clearTimeout(moodTimer);
   if (face !== 'neutral') moodTimer = setTimeout(() => { mood = 'neutral'; show('neutral', 700); }, holdMs);
 }
 // sleepy at night: eyes slowly close when idle
-setInterval(() => { const h = new Date().getHours(); const z = (h >= 1 && h < 6) && !speaking && !busy && mood === 'neutral' && Date.now() - lastActive > 60000; if (z && shown !== 'sleeping') show('sleeping', 1500); else if (!z && shown === 'sleeping' && mood === 'neutral') show('neutral', 600); }, 2000);
+let dozing = false;
+setInterval(() => { const h = new Date().getHours(); const z = (h >= 1 && h < 6) && !speaking && !busy && mood === 'neutral' && Date.now() - lastActive > 60000; if (z && !dozing) { dozing = true; show(variant('sleeping'), 1500); } else if (!z && dozing) { dozing = false; if (mood === 'neutral') show('neutral', 600); } }, 2000);
 let lastActive = Date.now();
 let moodAt = 0;
 function startLip() { speaking = true; sway.classList.add('talk'); clearTimeout(moodTimer); const wait = Math.max(0, 1000 - (Date.now() - moodAt)); setTimeout(() => { if (speaking) { show('neutral', 420); mood = 'neutral'; } }, wait); }
@@ -690,7 +734,7 @@ ACTIONS you can trigger with the "actions" field (value is a string):
 - forget: value = text of a remembered fact to delete.
 - open: value = "Button label|URL". Shows a button the user taps. Use for: Spotify "spotify:search:QUERY", YouTube "https://www.youtube.com/results?search_query=QUERY", Google "https://www.google.com/search?q=QUERY", GitHub "https://github.com/...", Maps "https://maps.apple.com/?q=PLACE", email "mailto:...", WhatsApp "https://wa.me/?text=TEXT". URL-encode queries.
 Only use actions when needed. Never claim you did something you have no action for — say it's coming in a future update instead.
-MOOD: pick the face that fits your reply: neutral (default), cold (unimpressed), bored (chin on hand), side (side-eye), smug (teasing grin), smirk (hand over mouth, scheming), laugh, giggle (soft happy), annoyed, angry (shouting), shock, surprised, pout (blushing at compliments), flustered (embarrassed), cry (dramatic wail), teary, sleepy (yawning), sleeping, blank (dead inside, unimpressed shock), dark (ominous threat, used as a joke).`;
+MOOD: pick the face that fits your reply and vary it a lot: neutral, cold (unimpressed, your usual), sad, bored (chin on hand), side (side-eye), annoyed, grumpy (blushing frown), angry (shouting), smug (teasing grin), smirk (hand over mouth, scheming), laugh, giggle (soft happy), calm (content, eyes closed), shock, surprised, pout (blushing at compliments), flustered (embarrassed), cry (dramatic wail), teary, sleepy (yawning), sleeping, blank (dead inside), dark (ominous threat, as a joke).`;
 }
 const SCHEMA = {
   type: 'OBJECT',
@@ -829,7 +873,7 @@ function renderLogItem(who, text) {
   const log = $('#log'); const e = log.querySelector('.empty'); if (e) e.remove();
   if (who === 'her') {
     const row = document.createElement('div'); row.className = 'row';
-    row.innerHTML = `<img src="img/neutral.webp" alt="">`;
+    row.innerHTML = `<img src="${IMG.neutral}" alt="">`;
     const m = document.createElement('div'); m.className = 'msg her'; m.textContent = text; row.appendChild(m); log.appendChild(row);
   } else { const m = document.createElement('div'); m.className = 'msg ' + who; m.textContent = text; log.appendChild(m); }
   log.scrollTop = log.scrollHeight;
@@ -873,10 +917,68 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
   if (b.dataset.v === 'chat') { const l = $('#log'); l.scrollTop = l.scrollHeight; }
+  BODY.on = false; if (b.dataset.v === 'her') openHer();
 });
 $('#form').addEventListener('submit', (e) => { e.preventDefault(); const t = $('#input').value; $('#input').value = ''; $('#input').blur(); send(t); });
 document.querySelectorAll('.chip').forEach(c => c.onclick = () => send(c.textContent));
 $('#rig').addEventListener('click', () => { if (busy || speaking) return; const pokes = [["Don't poke me.", 'annoyed'], ["What. Do you need something or are you just staring?", 'cold'], ["Hehe… I mean. Stop that.", 'pout'], ["Touch me again and I'm deleting your homework.", 'smug']]; const p = pokes[Math.floor(Math.random() * pokes.length)]; unlockAudio(); herSays(p[0], p[1], 'en', []); });
+
+
+// ---------- full body ("Her" tab): breathing, hair + skirt sway, turnaround ----------
+const BODY = { views: ['front', 'side', 'back'], names: ['Front', 'Side', 'Back'], i: 0, imgs: {}, r: null, on: false };
+function bodyImg(v) { if (!BODY.imgs[v]) { const im = new Image(); im.src = 'img/body_' + v + '.webp?v=' + VER; BODY.imgs[v] = im; } return BODY.imgs[v]; }
+function bodyRenderer() {
+  const cv = $('#bodyCv'); const gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true });
+  if (!gl) return null;
+  const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}';
+  const fs = `precision highp float;uniform sampler2D A;uniform float t;varying vec2 v;
+  void main(){vec2 uv=v;float cx=abs(uv.x-.5);
+    float hair=smoothstep(.18,.45,cx)*smoothstep(.05,.45,uv.y)*(1.-smoothstep(.55,.75,uv.y));
+    uv.x+=(sin(uv.y*5.-t*1.2)*.007+sin(uv.y*12.-t*2.)*.0015)*hair;
+    float skirt=smoothstep(.3,.5,uv.y)*(1.-smoothstep(.72,.8,uv.y));
+    uv.x+=sin(uv.y*8.-t*1.5)*.0045*skirt*(.4+cx);
+    float chest=smoothstep(.12,.2,uv.y)*(1.-smoothstep(.3,.4,uv.y));uv.y-=sin(t*1.5)*.003*chest;
+    float head=1.-smoothstep(.08,.22,uv.y);uv.x+=sin(t*.55)*.004*head;uv.y+=sin(t*.43)*.002*head;
+    gl_FragColor=texture2D(A,uv);}`;
+  const sh = (ty, src) => { const x = gl.createShader(ty); gl.shaderSource(x, src); gl.compileShader(x); return x; };
+  const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null; gl.useProgram(pr);
+  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const uT = gl.getUniformLocation(pr, 't'); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  const tex = {}; let cur = null;
+  function T(v) { if (tex[v]) return tex[v]; const im = bodyImg(v); if (!im.complete || !im.naturalWidth) return null;
+    const x = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, x); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+    [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
+    [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); return tex[v] = x; }
+  function frame(now) {
+    if (BODY.on) {
+      const v = BODY.views[BODY.i]; const im = bodyImg(v); const tx = T(v);
+      if (tx) {
+        if (cur !== v) { cur = v; cv.style.aspectRatio = im.naturalWidth + '/' + im.naturalHeight; }
+        const dpr = Math.min(3, devicePixelRatio || 1), w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
+        if (w && (cv.width !== w || cv.height !== h)) { cv.width = w; cv.height = h; }
+        gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.bindTexture(gl.TEXTURE_2D, tx); gl.uniform1f(uT, now / 1000); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame); return true;
+}
+function openHer() {
+  BODY.on = true; BODY.views.forEach(bodyImg); if (!BODY.r) BODY.r = bodyRenderer();
+  $('#stMood').textContent = mood; $('#stMem').textContent = S.memory.length; $('#stMsg').textContent = S.history.length;
+}
+function turnAround() {
+  const w = $('#bodyWrap'); w.classList.add('turn');
+  setTimeout(() => { BODY.i = (BODY.i + 1) % 3; $('#viewName').textContent = BODY.names[BODY.i]; requestAnimationFrame(() => requestAnimationFrame(() => w.classList.remove('turn'))); }, 170);
+}
+$('#turnBtn').onclick = turnAround; $('#bodyWrap').onclick = turnAround;
+
+// ---------- auto-update: always run the newest version ----------
+(async () => { try { const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }); const j = await r.json();
+  if (j.v && j.v !== VER && !location.search.includes('v=' + j.v)) location.replace(location.pathname + '?v=' + j.v); } catch (e) {} })();
 
 // ---------- start ----------
 show('neutral', 1); renderLog(); renderMem();
