@@ -77,7 +77,7 @@ main{flex:1;position:relative;overflow:hidden}
 .msg{max-width:82%;padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
 .msg.me{align-self:flex-end;background:var(--crimson);border-bottom-right-radius:6px}
 .row{display:flex;gap:8px;align-items:flex-end}
-.row img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:50% 45%;background:var(--card);flex:none}
+.row img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:55% 60%;background:var(--card);flex:none}
 .msg.her{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
 .msg.sys{align-self:center;background:none;color:var(--mute);font-size:12px;padding:2px}
 .empty{margin:auto;text-align:center;color:var(--mute);font-size:14px}
@@ -246,7 +246,7 @@ nav button{padding:4px 10px!important}
 @keyframes hsUp{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}
 @keyframes hsIn{0%{opacity:0;letter-spacing:.2em}100%{opacity:1}}
 .cFace{width:46px;height:46px;border-radius:50%;overflow:hidden;flex:none;border:2px solid var(--crimson);background:#2a0f19}
-.cFace img{width:150%;height:auto;margin:-12% 0 0 -25%;display:block}
+.cFace img{width:170%;height:auto;margin:-57% 0 0 -45%;display:block}
 .cardTop{justify-content:flex-start!important;gap:12px!important}
 .pillBtn{flex:none;border:1px solid rgba(255,61,110,.5);background:rgba(209,25,74,.18);color:#ffd1de;font-weight:700;font-size:13px;border-radius:999px;padding:9px 14px;min-height:40px}
 .stats{margin-top:10px!important}.stats div{padding:8px!important}
@@ -255,7 +255,7 @@ nav button{padding:4px 10px!important}
 .galTop b{font-size:18px}.galTop button{background:rgba(255,255,255,.1);border:0;border-radius:999px;padding:9px 16px;font-weight:700;min-height:40px}
 .galGrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-content:start}
 .galGrid button{border:0;padding:0;background:#2a0f19;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;align-items:stretch}
-.galGrid img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 40%;display:block}
+.galGrid img{width:100%;aspect-ratio:1;object-fit:cover;object-position:55% 56%;display:block}
 .galGrid span{font-size:10px;color:var(--mute);padding:4px 2px 6px;text-transform:capitalize}
 .galHint{color:var(--mute);font-size:12px;text-align:center;margin:8px 0 0}
 
@@ -396,7 +396,7 @@ nav button svg{display:none}
 #sway{width:var(--cw,320px);height:var(--ch,280px);flex:none;position:relative;opacity:0;transition:opacity .6s ease}
 #sway.ready{opacity:1}
 #win{position:absolute;inset:0;overflow:hidden;clip-path:polygon(0 0,calc(100% - 30px) 0,100% 30px,100% 100%,30px 100%,0 calc(100% - 30px));
-  background:radial-gradient(ellipse 80% 70% at 50% 35%,#4a1022,#16060d 75%)}
+  background:repeating-linear-gradient(115deg,rgba(209,25,74,.035) 0 1px,transparent 1px 12px),radial-gradient(ellipse 85% 75% at 50% 40%,#fdf8fa 45%,#f6e6ed 80%,#efd6e0)}
 #win #avatar,#win #avatarImg{position:absolute;max-width:none;aspect-ratio:auto;z-index:1}
 .winFrame{position:absolute;inset:-3px;pointer-events:none;z-index:2;background:linear-gradient(160deg,#ff4d7d,#8d0b31 60%,#ff4d7d);
   clip-path:polygon(0 0,calc(100% - 32px) 0,100% 32px,100% 100%,32px 100%,0 calc(100% - 32px),0 0,3px 3px,3px calc(100% - 33px),33px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 33px,calc(100% - 33px) 3px,3px 3px);transition:opacity .2s}
@@ -413,6 +413,10 @@ nav button svg{display:none}
 #grain{z-index:0}
 #app{z-index:1}
 #bubble{max-height:min(26vh,190px)}
+
+/* light paper behind her everywhere her face appears, so no trace of the original white paper can show */
+.galGrid button,.galGrid img{background:#fbf3f6}
+.cFace,.row img{background:#fbf3f6}
 </style>
 </head>
 <body>
@@ -428,7 +432,7 @@ nav button svg{display:none}
         <div class="vName" aria-hidden="true">CERISE</div>
         <canvas id="petals"></canvas>
         <div id="rig"><div id="sway">
-          <div id="win"><canvas id="avatar" role="img" aria-label="Cerise"></canvas><img id="avatarImg" alt="Cerise" src="img/A00.webp"></div>
+          <div id="win"><canvas id="avatar" role="img" aria-label="Cerise"></canvas><img id="avatarImg" alt="Cerise" src="img/F01.webp"></div>
           <div class="winFrame" aria-hidden="true"></div>
           <div class="winTag" aria-hidden="true"><i></i>LIVE</div>
           <div class="winNo" aria-hidden="true">No.01</div>
@@ -454,7 +458,7 @@ nav button svg{display:none}
           <div class="mirTag">WARDROBE</div>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126230502">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261126234436">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -543,7 +547,7 @@ nav button svg{display:none}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126230502 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126234436 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -560,37 +564,38 @@ nav button svg{display:none}
 
 <script>
 const $ = (s) => document.querySelector(s);
-const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bored:['A03','A34','B33'], side:['B04'], annoyed:['A04','B03','B01'], grumpy:['B11'], angry:['B12'],
-  smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
-  cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
+const VAR = { neutral:['F01'], cold:['F19','F40','F34'], sad:['F18','F37'], bored:['F10','F34'], side:['F29','F21'], annoyed:['F38'], grumpy:['F26'], angry:['F04'],
+  smug:['F13','F39','F36'], smirk:['F03','F14'], laugh:['F02','F25'], giggle:['F16','F30'], calm:['F15','F22'], shock:['F07','F12'], surprised:['F31'], confused:['F08'],
+  pout:['F27'], flustered:['F06','F11'], shy:['F32','F21'], love:['F28','F11'], excited:['F24'], cry:['F17'], teary:['F05'], sleepy:['F35','F22'], sleeping:['F09'],
+  blank:['F20'], dark:['F23'], sick:['F33'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126230502';
+const VER = '20261126234436';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
-  { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature', src: 'img/body_front.webp',
+  { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature',
     when: 'her default look: everyday chat, jokes, magic, circus, theater, when nothing else fits', kw: /jester|circus|cirque|clown|harlequin|arlequin|th[ée][âa]tre|theat|magic|magie|سيرك|مهرج/i },
-  { id: 'pajamas', name: 'Pajamas', short: 'Pajamas', sub: 'Do not disturb', when: 'sleep, bed, being tired, good night, naps, late at night, lazy days, waking up',
+  { id: 'doctor', name: 'Doctor', short: 'Doctor', sub: "Doctor's orders", when: 'hospital, doctor, being sick, medicine, injuries, pain, health, clinic, appointments, first aid, biology',
+    kw: /hospital|h[ôo]pital|doctor|docteur|m[ée]decin|nurse|infirmi|\bsick\b|malade|\bill\b|fever|fi[èe]vre|medicine|m[ée]dicament|clinic|clinique|injur|bless[ée]|\bhurts?\b|\bpain\b|douleur|health|sant[ée]|pharmac|dentist|dentiste|مستشفى|طبيب|دكتور|مريض|دواء|صيدلية/i },
+  { id: 'pajamas', name: 'Bunny Pajamas', short: 'Pajamas', sub: 'Do not disturb', when: 'sleep, bed, being tired, good night, naps, late at night, lazy days, waking up',
     kw: /\bsleep|dormir|sommeil|\bbed\b|\blit\b|tired|fatigu|good ?night|bonne nuit|\bnap\b|sieste|insomnia|pajama|pyjama|نوم|نعسان|تصبح على خير|سرير|تعبان/i },
-  { id: 'winter', name: 'Snow Coat', short: 'Winter', sub: 'Cold-weather fluff', when: 'winter, snow, cold or freezing weather, Christmas, skiing, mountains',
+  { id: 'school', name: 'School Uniform', short: 'School', sub: 'Class is in session', when: 'school, homework, studying, exams, classes, teachers, university, math, physics, learning',
+    kw: /school|[ée]cole|homework|devoirs?|\bexams?\b|examen|\bstudy|[ée]tudi|\bclass\b|classe|\bcours\b|lesson|le[çc]on|teacher|\bprof\b|universit|college|coll[èe]ge|lyc[ée]e|\bmath|physics|chemistry|مدرسة|درس|امتحان|جامعة|واجب/i },
+  { id: 'winter', name: 'Winter Fluff', short: 'Winter', sub: 'Cold-weather fluff', when: 'winter, snow, cold or freezing weather, Christmas, skiing, mountains',
     kw: /\bsnow|neige|winter|hiver|freezing|it'?s cold|il fait froid|christmas|no[ëe]l|\bski|برد|ثلج|شتاء|كريسماس/i },
-  { id: 'gown', name: 'Red Gala Gown', short: 'Gala', sub: 'Dressed to ruin a ball', when: 'parties, galas, prom, weddings, balls, dates, birthdays, fancy dinners, celebrations, red carpet',
-    kw: /\bparty|f[êe]te|\bgala|\bprom\b|wedding|mariage|\bball\b|\bbal\b|\bdate night|birthday|anniversaire|celebrat|c[ée]l[ée]br|fancy|red carpet|حفلة|عرس|عيد ميلاد/i },
-  { id: 'kimono', name: 'Sakura Kimono', short: 'Kimono', sub: 'Sakura night', when: 'Japan, Japanese culture, anime, manga, sushi, ramen, festivals, tea ceremonies, cherry blossoms',
+  { id: 'dress', name: 'Ruffled Dress', short: 'Dress', sub: 'Dressed to ruin a party', when: 'parties, birthdays, weddings, dates, galas, fancy dinners, celebrations, cute things and sweets',
+    kw: /\bparty|f[êe]te|\bgala|\bprom\b|wedding|mariage|\bball\b|\bbal\b|\bdate\b|birthday|anniversaire|celebrat|c[ée]l[ée]br|fancy|\bcute|kawaii|\bcake|dessert|حفلة|عرس|عيد ميلاد/i },
+  { id: 'kimono', name: 'Floral Kimono', short: 'Kimono', sub: 'Sakura night', when: 'Japan, Japanese culture, anime, manga, sushi, ramen, festivals, cherry blossoms',
     kw: /japan|japon|kimono|sushi|\banime|manga|tokyo|kyoto|matsuri|festival|sakura|ramen|اليابان|انمي/i },
-  { id: 'darkfrill', name: 'Midnight Frills', short: 'Gothic', sub: 'Gothic night', when: 'horror, Halloween, vampires, ghosts, scary stories, mysteries, anything dark or creepy',
-    kw: /horror|horreur|halloween|vampire|ghost|fant[ôo]me|scary|\bpeur\b|creepy|haunted|zombie|demon|رعب|شبح/i },
-  { id: 'elegant', name: 'Office Elegance', short: 'Office', sub: 'Business, but gothic', when: 'work, the office, meetings, jobs, interviews, business, CVs, presentations, emails, clients, productivity',
-    kw: /\b(at|to|from|after|before|for) work\b|\bmy (job|work|boss|manager)\b|\bworking on\b|travail|boulot|\boffice\b|bureau|meeting|r[ée]union|interview|entretien|\bjob\b|emploi|business|\bcv\b|r[ée]sum[ée]|presentation|pr[ée]sentation|\bboss\b|patron|client|شغل|عمل|مقابلة|اجتماع/i },
+  { id: 'gothic', name: 'Gothic Lolita', short: 'Gothic', sub: 'Gothic night', when: 'horror, Halloween, vampires, ghosts, scary stories, mysteries, anything dark or creepy',
+    kw: /horror|horreur|halloween|vampire|ghost|fant[ôo]me|scary|\bpeur\b|creepy|haunted|zombie|demon|gothic|gothique|رعب|شبح/i },
   { id: 'maid', name: 'Maid', short: 'Maid', sub: 'At your service. Barely.', when: 'cleaning, cooking, recipes, chores, laundry, serving tea, helping around the house',
     kw: /\bclean|nettoy|m[ée]nage|\bcook|cuisin|recipe|recette|chores|laundry|lessive|dishes|vaisselle|tea time|طبخ|تنظيف|وصفة/i },
-  { id: 'lolita', name: 'Sweet Lolita', short: 'Sweet', sub: 'Sugar and spite', when: 'cute things, sweets, cake, desserts, tea parties, flowers, compliments, romance, crushes',
-    kw: /\bcute|mignon|kawaii|\bcake|g[âa]teau|dessert|\bsweets?\b|bonbon|candy|chocolat|tea party|flowers?|fleurs?|romant|\bcrush|كيك|حلويات|ورد/i },
   { id: 'street', name: 'Streetwear', short: 'Street', sub: 'Too cool to care', when: 'music, concerts, the gym, sports, gaming, skating, the city, coding, tech, GitHub, hacking',
     kw: /\bgym\b|workout|\bsports?\b|football|basket|concert|music|musique|\bsong|chanson|gaming|video ?game|jeu vid|\bskate|\brap\b|\brock\b|github|\bcode\b|coding|programm|hack|رياضة|موسيقى|العاب/i },
-  { id: 'casual', name: 'Off-Duty', short: 'Casual', sub: 'Casual day out', when: 'hanging out, shopping, the mall, coffee, friends, weekends, movies, walks, the beach, chilling',
+  { id: 'casual', name: 'Cozy Sweater', short: 'Casual', sub: 'Casual day out', when: 'hanging out, shopping, the mall, coffee, friends, weekends, movies, walks, work and errands, chilling',
     kw: /shopping|\bmall\b|coffee|\bcaf[ée]\b|hang ?out|friends|\bamis\b|weekend|week-end|\bmovies?\b|\bfilm\b|cin[ée]ma|\bwalk\b|promenade|\bchill|beach|plage|تسوق|قهوة|اصحاب|سينما/i },
 ];
-OUTFITS.forEach((o, i) => { o.n = i + 1; if (!o.src) o.src = 'img/outfits/' + o.id + '.webp'; o.thumb = o.id === 'jester' ? 'img/outfits/t_jester.webp' : 'img/outfits/t_' + o.id + '.webp'; });
+OUTFITS.forEach((o, i) => { o.n = i + 1; o.src = 'img/outfits/' + o.id + '.webp'; o.thumb = 'img/outfits/t_' + o.id + '.webp'; });
 const OUTFIT_IDS = OUTFITS.map(o => o.id);
 const outfitOf = (id) => OUTFITS.find(o => o.id === id) || OUTFITS[0];
 
@@ -607,11 +612,11 @@ const save = () => { try { localStorage.setItem('cerise.v1', JSON.stringify(S));
 
 // ---------- avatar: one living face (WebGL rig) + mood reactions ----------
 const FRAMES = [...new Set(Object.values(VAR).flat())];
-const IMG = { neutral: 'img/A00.webp?v=' + VER }; FRAMES.forEach(n => { if (n !== 'A00') IMG[n] = 'img/' + n + '.webp?v=' + VER; });
+const IMG = { neutral: 'img/F01.webp?v=' + VER, closed: 'img/F01_closed.webp?v=' + VER }; FRAMES.forEach(n => { if (n !== 'F01') IMG[n] = 'img/' + n + '.webp?v=' + VER; });
 const pics = {}; function pic(n) { if (!pics[n]) { const i = new Image(); i.decoding = 'async'; i.src = IMG[n]; pics[n] = i; } return pics[n]; }
 pic('neutral');
 // preload the rest quietly, one at a time
-setTimeout(function pre(i = 0) { const n = FRAMES[i]; if (!n) return; if (n === 'A00') return pre(i + 1); const p = pic(n); const go = () => setTimeout(() => pre(i + 1), 150); p.complete ? go() : (p.onload = p.onerror = go); }, 4000);
+setTimeout(function pre(i = 0) { const n = FRAMES[i]; if (!n) return; if (n === 'F01') return pre(i + 1); const p = pic(n); const go = () => setTimeout(() => pre(i + 1), 150); p.complete ? go() : (p.onload = p.onerror = go); }, 4000);
 const sway = $('#sway'), cv = $('#avatar'), fallback = $('#avatarImg');
 let mood = 'neutral', speaking = false, moodTimer = null, shown = 'neutral';
 window.__rig = null;
@@ -621,51 +626,34 @@ const R = (() => {
   if (!gl) return null;
   const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}';
   const fs = `precision highp float;
-uniform sampler2D A,B;uniform float m,t,k,bl,mo;uniform vec2 lk;varying vec2 v;
-const vec2 TS=vec2(307.,256.);
-const vec4 EL=vec4(122.5,141.,22.5,10.5);const vec4 ER=vec4(202.,140.,20.5,10.5);const vec4 MO=vec4(164.5,177.,8.,2.5);
-const vec3 SKIN=vec3(.93,.77,.82);const vec3 LASH=vec3(.22,.06,.12);
+uniform sampler2D A,B,C;uniform float m,t,k,bl,mo;varying vec2 v;
+const vec2 TS=vec2(1024.,1093.);
+const vec4 MO=vec4(571.,801.,19.,0.);
 vec2 warp(vec2 uv){
-  float side=smoothstep(.27,.5,abs(uv.x-.5));float low=smoothstep(.12,.95,uv.y);
-  uv.x+=(sin(uv.y*6.-t*1.25)*.0075+sin(uv.y*15.-t*2.3)*.0018)*side*low;
-  uv.y+=sin(uv.x*4.+t*.9)*.0022*side;
-  float chest=smoothstep(.9,1.,uv.y);uv.y-=(sin(t*1.55)*.0055+k*sin(t*10.)*.0025)*chest;
+  float side=smoothstep(.30,.5,abs(uv.x-.5));float low=smoothstep(.25,.95,uv.y);
+  uv.x+=(sin(uv.y*6.-t*1.25)*.0055+sin(uv.y*15.-t*2.3)*.0013)*side*low;
+  uv.y+=sin(uv.x*4.+t*.9)*.0016*side;
+  float chest=smoothstep(.9,1.,uv.y);uv.y-=(sin(t*1.55)*.004+k*sin(t*10.)*.002)*chest;
   return uv;}
-float el(vec2 p,vec4 e){return length((p-e.xy)/e.zw);}
-vec3 lid(vec3 c,vec2 p,vec4 e){
-  if(bl<.002)return c;
-  float r=el(p,e);float inside=1.-smoothstep(.78,1.08,r);
-  float dx=clamp((p.x-e.x)/e.z,-1.,1.);
-  float lashY=e.y-e.w*.78+e.w*.42*dx*dx;
-  float lineY=e.y+e.w*.34+e.w*.16*(1.-dx*dx);
-  float yl=mix(lashY,lineY,bl);float sh=yl-lashY;
-  vec3 skin=mix(vec3(.90,.70,.78),vec3(.95,.80,.86),smoothstep(lashY,lineY+2.,p.y));
-  vec4 mv=texture2D(A,(p-vec2(0.,sh))/TS);vec3 liner=mv.rgb/max(mv.a,1e-4);
-  float band=1.-smoothstep(1.4,2.4,abs(p.y-yl));
-  float aboveL=1.-smoothstep(yl-2.2,yl-1.,p.y);
-  float belowF=smoothstep(.75,1.,bl)*smoothstep(yl+.6,yl+1.8,p.y);
-  vec3 col=mix(c,skin,clamp(aboveL+belowF,0.,1.));
-  col=mix(col,liner,band*smoothstep(.0,.15,bl));
-  return mix(c,col,inside);}
 vec3 mouth(vec3 c,vec2 p){
   float o=smoothstep(.02,1.,mo);if(o<.001)return c;
-  vec2 ctr=vec2(MO.x,MO.y+.4+1.2*o);
-  float rx=MO.z*(.8+.32*o);float ryTop=.35+1.2*o;float ryBot=.5+3.5*o;
+  vec2 ctr=vec2(MO.x,MO.y+1.+5.*o);
+  float rx=MO.z*(.78+.34*o);float ryTop=1.4+4.5*o;float ryBot=2.+15.*o;
   vec2 d=p-ctr;float ry=d.y<0.?ryTop:ryBot;
   float r=length(vec2(d.x/rx,d.y/ry));
-  float inside=1.-smoothstep(.82,1.,r);
+  float inside=1.-smoothstep(.84,1.,r);
   float yy=clamp(d.y/ryBot,-1.,1.);
-  vec3 inner=mix(vec3(.50,.12,.22),vec3(.93,.52,.60),smoothstep(.2,.95,yy));
-  inner=mix(inner,vec3(.99,.96,.97),(1.-smoothstep(-.35,.05,d.y))*smoothstep(.45,.75,o)*.8);
+  vec3 inner=mix(vec3(.30,.07,.12),vec3(.80,.38,.45),smoothstep(.25,.95,yy));
+  inner=mix(inner,vec3(.98,.95,.95),(1.-smoothstep(-.4,.0,d.y))*smoothstep(.45,.8,o)*.85);
   vec3 col=mix(c,inner,inside);
-  float edge=smoothstep(.72,.94,r)*(1.-smoothstep(1.,1.2,r));
-  col=mix(col,vec3(.42,.1,.18),edge*.75);
+  float edge=smoothstep(.74,.95,r)*(1.-smoothstep(1.,1.18,r));
+  col=mix(col,vec3(.22,.07,.11),edge*.85);
   return col;}
 void main(){
   vec2 uv=warp(v);vec2 p=uv*TS;
-  float inL=1.-smoothstep(.45,.8,el(p,EL));float inR=1.-smoothstep(.45,.8,el(p,ER));
-  vec4 c=texture2D(A,uv-lk/TS*(inL+inR));
-  if(m<.999){vec3 rgb=c.rgb/max(c.a,1e-4);rgb=lid(rgb,p,EL);rgb=lid(rgb,p,ER);rgb=mouth(rgb,p);c=vec4(rgb*c.a,c.a);}
+  vec4 c=texture2D(A,uv);
+  if(bl>.002){vec4 e=texture2D(C,uv);c=mix(c,e,bl);}
+  if(m<.999&&mo>.002){vec3 rgb=c.rgb/max(c.a,1e-4);rgb=mouth(rgb,p);c=vec4(rgb*c.a,c.a);}
   vec4 d=texture2D(B,uv);
   gl_FragColor=mix(c,d,m);}`;
   const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(x)); return x; };
@@ -675,8 +663,8 @@ void main(){
   const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = n => gl.getUniformLocation(pr, n);
-  const u = { A: U('A'), B: U('B'), m: U('m'), t: U('t'), k: U('k'), bl: U('bl'), mo: U('mo'), lk: U('lk') };
-  gl.uniform1i(u.A, 0); gl.uniform1i(u.B, 1);
+  const u = { A: U('A'), B: U('B'), C: U('C'), m: U('m'), t: U('t'), k: U('k'), bl: U('bl'), mo: U('mo') };
+  gl.uniform1i(u.A, 0); gl.uniform1i(u.B, 1); gl.uniform1i(u.C, 2);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
   const tex = {};
   function T(name) {
@@ -711,13 +699,14 @@ void main(){
     // mouth follows the voice (fast open, softer close)
     const mt = speaking ? rig.mouthT : 0; rig.mouth += (mt - rig.mouth) * Math.min(1, dt * (mt > rig.mouth ? 28 : 16));
     talk += ((speaking ? 1 : 0) - talk) * Math.min(1, dt * 6);
-    const tA = T('neutral'), tB = T(moodName) || tA;
+    const tA = T('neutral'), tB = T(moodName) || tA, tC = T('closed') || tA;
     if (tA) {
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tA);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tB);
+      gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, tC);
       gl.uniform1f(u.m, moodName === 'neutral' ? 0 : mval); gl.uniform1f(u.t, now / 1000); gl.uniform1f(u.k, talk);
-      gl.uniform1f(u.bl, rig.force != null ? rig.force : rig.blink); gl.uniform1f(u.mo, Math.max(0, Math.min(1, rig.mouth))); gl.uniform2f(u.lk, Math.round(rig.look[0] * 4) / 4, Math.round(rig.look[1] * 4) / 4);
+      gl.uniform1f(u.bl, rig.force != null ? rig.force : rig.blink); gl.uniform1f(u.mo, Math.max(0, Math.min(1, rig.mouth))); 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
     requestAnimationFrame(frame);
@@ -737,7 +726,7 @@ void main(){
 })();
 if (R) fallback.remove(); else cv.remove();
 // size the card so her picture shows at its real resolution (never enlarged), snapped to whole screen pixels
-const IW = 1228, IH = 1024, CROP = { l: .10, t: .06, w: .80, h: .84 };
+const IW = 1024, IH = 1093, CROP = { l: .1025, t: .0659, w: .7793, h: .7896 };
 function layoutCard() {
   const st = $('#stage'); if (!st || !st.clientWidth) return;
   const dpr = window.devicePixelRatio || 1, el = R ? cv : fallback;
@@ -779,7 +768,7 @@ const FX = {
   drop: '<svg viewBox="0 0 24 24"><path fill="#8fd3ff" stroke="#fff" stroke-width="1.2" d="M12 2s6 7.2 6 11.5A6 6 0 0 1 6 13.5C6 9.2 12 2 12 2z"/></svg>',
   zzz: '<svg viewBox="0 0 24 24" fill="none" stroke="#ffd9e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h6l-6 7h6M14 12h5l-5 6h5"/></svg>'
 };
-const MOOD_FX = { grumpy: ['anger'], sad: ['drop'], calm: ['sparkle'], pout: ['heart', 'heart'], flustered: ['heart', 'drop'], annoyed: ['anger'], angry: ['anger', 'anger'], smug: ['sparkle', 'sparkle'], smirk: ['sparkle'], laugh: ['sparkle'], giggle: ['heart'], shock: ['shock', 'drop'], surprised: ['shock'], cry: ['drop', 'drop'], teary: ['drop'], sleeping: ['zzz'], sleepy: ['zzz'], blank: ['drop'] };
+const MOOD_FX = {}; // her new faces draw their own hearts, marks and sweat drops
 function burst(m) {
   const list = MOOD_FX[m]; if (!list) return;
   const box = $('#fx');
@@ -851,7 +840,8 @@ const VOICE_STYLE = {
   smirk: 'scheming and playful', laugh: 'laughing, amused', giggle: 'softly pleased, trying to hide a smile', annoyed: 'annoyed and sharp',
   angry: 'irritated, raising her voice a bit', shock: 'shocked', surprised: 'surprised', pout: 'flustered and pouty, embarrassed',
   flustered: 'embarrassed, stumbling slightly', cry: 'dramatically whiny, fake crying', teary: 'sad and quiet', sleepy: 'sleepy and slow, yawning',
-  sleeping: 'half asleep, mumbling', bored: 'bored, dragging the words', side: 'skeptical', blank: 'deadpan', dark: 'low, quiet and ominous'
+  sleeping: 'half asleep, mumbling', bored: 'bored, dragging the words', side: 'skeptical', blank: 'deadpan', dark: 'low, quiet and ominous',
+  confused: 'confused, questioning', shy: 'shy and quiet, a little embarrassed', love: 'dreamy and delighted', excited: 'excited and bubbly', sick: 'weak and croaky, feeling sick'
 };
 async function fetchTTS(text, m) {
   const style = VOICE_STYLE[m] || VOICE_STYLE.neutral;
@@ -877,7 +867,7 @@ async function fetchTTS(text, m) {
   throw lastErr;
 }
 // ---- second free reactive voice: Orpheus on Groq (uses your free Groq key) ----
-const ORPH_DIR = { neutral: 'casual', cold: 'cold', bored: 'bored', side: 'skeptical', annoyed: 'annoyed', grumpy: 'grumpy', angry: 'angry', smug: 'teasing', smirk: 'sly',
+const ORPH_DIR = { confused: 'confused', shy: 'shy', love: 'dreamy', excited: 'excited', sick: 'tired', neutral: 'casual', cold: 'cold', bored: 'bored', side: 'skeptical', annoyed: 'annoyed', grumpy: 'grumpy', angry: 'angry', smug: 'teasing', smirk: 'sly',
   laugh: 'laughing', giggle: 'playful', calm: 'soft', shock: 'shocked', surprised: 'surprised', pout: 'flustered', flustered: 'flustered', cry: 'whiny', teary: 'sad',
   sleepy: 'sleepy', sleeping: 'sleepy', blank: 'deadpan', dark: 'whisper', sad: 'sad' };
 let orphCooldownUntil = 0;
@@ -909,7 +899,7 @@ async function speakOrpheus(text, seq, m) {
   if (seq === speakSeq) stopLip();
 }
 // ---- unlimited reactive voice: Fish Audio S2.1 (free model, no daily cap under fair use) ----
-const FISH_CUE = { neutral: 'cool, unbothered', cold: 'cold, unimpressed', sad: 'sad', bored: 'bored', side: 'skeptical', annoyed: 'annoyed', grumpy: 'grumpy, pouting',
+const FISH_CUE = { confused: 'confused', shy: 'shy, embarrassed', love: 'delighted, dreamy', excited: 'excited', sick: 'weak, sick', neutral: 'cool, unbothered', cold: 'cold, unimpressed', sad: 'sad', bored: 'bored', side: 'skeptical', annoyed: 'annoyed', grumpy: 'grumpy, pouting',
   angry: 'angry', smug: 'smug, teasing', smirk: 'sly, scheming', laugh: 'laughing', giggle: 'playful', calm: 'calm, soft', shock: 'shocked', surprised: 'surprised',
   pout: 'embarrassed, pouting', flustered: 'flustered', cry: 'crying', teary: 'sad, teary', sleepy: 'sleepy', sleeping: 'sleepy, mumbling', blank: 'deadpan', dark: 'low, ominous' };
 let fishCooldownUntil = 0;
@@ -1113,7 +1103,7 @@ function loadLocal() {
   }
   return LOCAL.loading;
 }
-const MOOD_VOICE = { neutral: [1, 1.04], cold: [0.96, 1.0], bored: [0.88, 0.98], side: [0.95, 1.0], annoyed: [1.08, 1.02], grumpy: [1.0, 1.03], angry: [1.14, 1.04],
+const MOOD_VOICE = { confused: [1.02, 1.06], shy: [0.95, 1.07], love: [0.98, 1.08], excited: [1.12, 1.09], sick: [0.85, 0.97], neutral: [1, 1.04], cold: [0.96, 1.0], bored: [0.88, 0.98], side: [0.95, 1.0], annoyed: [1.08, 1.02], grumpy: [1.0, 1.03], angry: [1.14, 1.04],
   smug: [0.94, 1.05], smirk: [0.95, 1.05], laugh: [1.08, 1.09], giggle: [1.04, 1.08], calm: [0.9, 1.03], shock: [1.12, 1.08], surprised: [1.1, 1.08],
   pout: [1.06, 1.1], flustered: [1.12, 1.1], cry: [0.95, 1.08], teary: [0.88, 1.05], sleepy: [0.8, 0.98], sleeping: [0.78, 0.97], blank: [0.9, 1.0], dark: [0.85, 0.93], sad: [0.88, 1.02] };
 let voiceMood = 'neutral';
@@ -1395,7 +1385,7 @@ ACTIONS you can trigger with the "actions" field (value is a string):
 - open: value = "Button label|URL". Shows a button the user taps. Use for: Spotify "spotify:search:QUERY", YouTube "https://www.youtube.com/results?search_query=QUERY", Google "https://www.google.com/search?q=QUERY", GitHub "https://github.com/...", Maps "https://maps.apple.com/?q=PLACE", directions "https://maps.apple.com/?daddr=PLACE", email "mailto:ADDRESS?subject=S&body=B", text "sms:NUMBER&body=TEXT", call "tel:NUMBER", WhatsApp "https://wa.me/?text=TEXT", Instagram "instagram://app", Calendar "calshow:", Reminders "x-apple-reminderapp://". URL-encode queries.
 Only use actions when needed. Never claim you did something you have no action for — say it's coming in a future update instead.
 OUTFIT: you have a wardrobe and you are currently wearing "${outfitOf(S.outfit).id}". Fill "outfit" with the outfit that fits what the conversation is about right now, or "keep" to stay as you are. Change only when the topic clearly fits another outfit (for example being tired = pajamas, a party = gown), and keep it while the topic continues. Your outfits: ${OUTFITS.map(o => o.id + ' (' + o.when + ')').join('; ')}.${S.outfitAuto === false ? ' The user turned outfit changes off, so always answer "keep".' : ''} When you change, you may mention it in one short in-character remark, but don't always.
-MOOD: pick the face that fits your reply. Use the whole range and avoid using the same mood twice in a row: neutral, cold (unimpressed, your usual), sad, bored (chin on hand), side (side-eye), annoyed, grumpy (blushing frown), angry (shouting), smug (teasing grin), smirk (hand over mouth, scheming), laugh, giggle (soft happy), calm (content, eyes closed), shock, surprised, pout (blushing at compliments), flustered (embarrassed), cry (dramatic wail), teary, sleepy (yawning), sleeping, blank (dead inside), dark (ominous threat, as a joke).`;
+MOOD: pick the face that fits your reply. Use the whole range and avoid using the same mood twice in a row: neutral, cold (unimpressed, your usual), sad, bored (chin on hand), side (thinking, side-eye), annoyed (exasperated sigh), grumpy (irritated, rubbing her eye), angry (shouting), smug (teasing grin or wink), smirk (hand at her mouth, scheming), laugh, giggle (soft happy), calm (content), shock, surprised, confused (huh?), pout (puffed cheeks), flustered (blushing, embarrassed), shy (hands over mouth), love (heart eyes, only as a joke or when truly delighted), excited (sparkly), cry (dramatic wail), teary, sleepy, sleeping, blank (dead inside), dark (ominous threat, as a joke), sick (ice pack, when the user is ill or she feels unwell).`;
 }
 const SCHEMA = {
   type: 'OBJECT',
@@ -1632,10 +1622,10 @@ const FACE_MOOD = {}; Object.entries(VAR).forEach(([m, ids]) => ids.forEach(id =
 function openGallery() {
   const g = $('#galGrid'); if (!g.children.length) {
     FRAMES.forEach(id => { const b = document.createElement('button'); b.type = 'button';
-      const im = document.createElement('img'); im.loading = 'lazy'; im.alt = FACE_MOOD[id]; im.src = id === 'A00' ? IMG.neutral : IMG[id];
+      const im = document.createElement('img'); im.loading = 'lazy'; im.alt = FACE_MOOD[id]; im.src = id === 'F01' ? IMG.neutral : IMG[id];
       const t = document.createElement('span'); t.textContent = FACE_MOOD[id];
       b.append(im, t); b.onclick = () => { closeGallery(); document.querySelector('nav button[data-v=home]').click(); unlockAudio();
-        const m = FACE_MOOD[id]; mood = m; moodAt = Date.now(); show(id === 'A00' ? 'neutral' : id, 380); burst(m); clearTimeout(moodTimer);
+        const m = FACE_MOOD[id]; mood = m; moodAt = Date.now(); show(id === 'F01' ? 'neutral' : id, 380); burst(m); clearTimeout(moodTimer);
         moodTimer = setTimeout(() => { if (!speaking) { mood = 'neutral'; show('neutral', 700); } }, 6000); };
       g.appendChild(b); });
   }
