@@ -140,7 +140,8 @@ nav button.on{color:var(--crimson2)}
 #sway.react{animation:react .45s ease-out}
 #avatar,#avatarImg{display:block;width:100%;aspect-ratio:1228/1024;height:auto;user-select:none;-webkit-user-drag:none;
 }
-#sway::before{content:"";position:absolute;left:8%;right:8%;top:12%;bottom:0;border-radius:50% 50% 30% 30%;background:radial-gradient(ellipse at 50% 55%,rgba(255,61,110,.32),rgba(255,61,110,0) 70%);transition:opacity .3s;pointer-events:none}
+#avatar,#avatarImg{position:relative;z-index:1}
+#sway::before{content:"";position:absolute;z-index:0;left:8%;right:8%;top:12%;bottom:0;border-radius:50% 50% 30% 30%;background:radial-gradient(ellipse at 50% 55%,rgba(255,61,110,.32),rgba(255,61,110,0) 70%);transition:opacity .3s;pointer-events:none}
 #sway.talk::before{opacity:1.6;background:radial-gradient(ellipse at 50% 55%,rgba(255,61,110,.45),rgba(255,61,110,0) 72%)}
 @keyframes breath{50%{transform:scale(1.006,1.014)}}
 @keyframes sway{0%,100%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg) translateY(-3px)}}
@@ -240,6 +241,14 @@ nav button{padding:4px 10px!important}
 .cFace{width:52px;height:52px;border-radius:50%;overflow:hidden;flex:none;border:2px solid var(--crimson);background:#2a0f19}
 .cFace img{width:150%;height:auto;margin:-12% 0 0 -25%;display:block}
 .cardTop{justify-content:flex-start!important;gap:12px!important}
+#gallery{position:fixed;inset:0;z-index:30;background:rgba(12,3,7,.97);display:flex;flex-direction:column;padding:calc(var(--safe-t) + 10px) 12px calc(var(--safe-b) + 10px)}
+.galTop{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 10px}
+.galTop b{font-size:18px}.galTop button{background:rgba(255,255,255,.1);border:0;border-radius:999px;padding:9px 16px;font-weight:700;min-height:40px}
+.galGrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-content:start}
+.galGrid button{border:0;padding:0;background:#2a0f19;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;align-items:stretch}
+.galGrid img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 40%;display:block}
+.galGrid span{font-size:10px;color:var(--mute);padding:4px 2px 6px;text-transform:capitalize}
+.galHint{color:var(--mute);font-size:12px;text-align:center;margin:8px 0 0}
 </style>
 </head>
 <body>
@@ -289,7 +298,7 @@ nav button{padding:4px 10px!important}
         <div class="hsPetals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="hsFloor"></div>
         <div id="bodyWrap">
-          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126193948">
+          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126194617">
         </div>
         <div class="hsTag"><span class="hsNo">No. 01</span><span>The Crimson Jester</span></div>
       </div>
@@ -298,6 +307,7 @@ nav button{padding:4px 10px!important}
           <div class="cFace"><img id="cFaceImg" alt=""></div>
           <div style="flex:1;min-width:0"><div class="cName">Cerise</div><div class="cSub">Cold · arrogant · secretly helpful</div></div>
         </div>
+        <button class="btn" id="galBtn" type="button" style="margin:12px 0 0">See all 40 expressions</button>
         <div class="stats"><div><b id="stMood">cold</b><span>mood</span></div><div><b id="stMem">0</b><span>memories</span></div><div><b id="stMsg">0</b><span>messages</span></div></div>
       </div>
     </section>
@@ -331,6 +341,9 @@ nav button{padding:4px 10px!important}
           <small>The Gemini AI voice is the most expressive but has a free daily limit. The unlimited voice runs on your phone after a one-time download, free forever, English only. If you hear nothing, turn off silent mode.</small></div>
         <div class="field"><label for="s-tts">Her voice</label>
           <select id="s-tts"><option value="Leda">Leda (youthful, anime-like)</option><option value="Zephyr">Zephyr (bright)</option><option value="Autonoe">Autonoe (bright, clear)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
+        <div class="field"><label for="s-orph">Second voice (Orpheus, needs a free Groq key)</label>
+          <select id="s-orph"><option value="hannah">Hannah</option><option value="autumn">Autumn</option><option value="diana">Diana</option></select>
+          <small>Used when the anime voice runs out for the day. Get a free key at console.groq.com/keys and paste it under Brain.</small></div>
         <div class="field" id="kvField"><label for="s-kitten">Her unlimited voice</label>
           <select id="s-kitten"><option value="Kiki">Kiki (cute)</option><option value="Luna">Luna (soft)</option><option value="Rosie">Rosie (bright)</option><option value="Bella">Bella (warm)</option></select></div>
         <div class="field" id="kokoroField"><label for="s-local">Her unlimited voice</label>
@@ -356,7 +369,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126193948 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126194617 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -367,6 +380,7 @@ nav button{padding:4px 10px!important}
   </nav>
 </div>
 <div id="toast"></div>
+<div id="gallery" hidden><div class="galTop"><b>Her 40 expressions</b><button type="button" id="galClose" aria-label="Close">Close</button></div><div class="galGrid" id="galGrid"></div><p class="galHint">Tap a face and she'll make it.</p></div>
 <div id="intro"><div class="diamonds"></div><div class="title">CERISE</div><div class="sub">your pocket jester</div></div>
 
 <script>
@@ -375,14 +389,14 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126193948';
+const VER = '20261126194617';
 
 // ---------- show errors on screen ----------
 window.addEventListener('error', (e) => { if (e && e.message && !/Script error|ResizeObserver/i.test(e.message)) setTimeout(() => { try { toast('Error: ' + e.message.slice(0, 120)); } catch (x) {} }, 0); });
 window.addEventListener('unhandledrejection', (e) => { const m = e && e.reason && (e.reason.message || String(e.reason)); if (m && !/abort|Failed to fetch dynamically/i.test(m)) setTimeout(() => { try { toast('Error: ' + m.slice(0, 120)); } catch (x) {} }, 0); });
 // ---------- state ----------
 // re-download needed when the voice engine changes
-const DEF = {key:'', groqKey:'', kittenVoice:'Kiki', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
+const DEF = {key:'', groqKey:'', orphVoice:'hannah', kittenVoice:'Kiki', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 if ((S.v || 0) < 3) { S.v = 3; S.voiceEngine = 'ai'; }
@@ -551,7 +565,7 @@ function burst(m) {
   sway.classList.remove('react'); void sway.offsetWidth; sway.classList.add('react'); setTimeout(() => sway.classList.remove('react'), 500);
 }
 // 'neutral' and 'cold' are the living face; other moods are short reactions, then she relaxes back
-function setMood(m, holdMs = 2600) {
+function setMood(m, holdMs = 9000) {
   const prev = mood; mood = MOODS.includes(m) ? m : 'neutral';
   const face = variant(mood);
   moodAt = Date.now(); show(face, 380); if (mood !== prev) burst(mood);
@@ -562,9 +576,17 @@ function setMood(m, holdMs = 2600) {
 let dozing = false;
 setInterval(() => { const h = new Date().getHours(); const z = (h >= 1 && h < 6) && !speaking && !busy && mood === 'neutral' && Date.now() - lastActive > 60000; if (z && !dozing) { dozing = true; show(variant('sleeping'), 1500); } else if (!z && dozing) { dozing = false; if (mood === 'neutral') show('neutral', 600); } }, 2000);
 let lastActive = Date.now();
+const IDLE_MOODS = ['bored', 'side', 'calm', 'smirk', 'cold', 'bored', 'side'];
+(function idleFace() { setTimeout(() => {
+  if (!speaking && !busy && !dozing && mood === 'neutral' && shown === 'neutral' && document.visibilityState === 'visible' && $('#v-home').classList.contains('on')) {
+    const m = IDLE_MOODS[Math.floor(Math.random() * IDLE_MOODS.length)]; show(variant(m), 700);
+    setTimeout(() => { if (!speaking && mood === 'neutral') show('neutral', 900); }, 4500);
+  }
+  idleFace(); }, 22000 + Math.random() * 16000); })();
 let moodAt = 0;
-function startLip() { speaking = true; sway.classList.add('talk'); clearTimeout(moodTimer); const wait = Math.max(0, 1000 - (Date.now() - moodAt)); setTimeout(() => { if (speaking) { show('neutral', 420); mood = 'neutral'; } }, wait); }
-function stopLip() { speaking = false; rig.mouthT = 0; sway.classList.remove('talk'); }
+const LIPSYNC_MOODS = ['neutral', 'cold'];
+function startLip() { speaking = true; sway.classList.add('talk'); clearTimeout(moodTimer); if (LIPSYNC_MOODS.includes(mood)) { const wait = Math.max(0, 900 - (Date.now() - moodAt)); setTimeout(() => { if (speaking && LIPSYNC_MOODS.includes(mood)) show('neutral', 420); }, wait); } }
+function stopLip() { speaking = false; rig.mouthT = 0; sway.classList.remove('talk'); clearTimeout(moodTimer); if (shown !== 'neutral') moodTimer = setTimeout(() => { if (!speaking) { mood = 'neutral'; show('neutral', 700); } }, 3500); }
 
 // ---------- status / toast ----------
 function status(kind, text) { $('#dot').className = 'dot ' + (kind || ''); $('#statusText').textContent = text; }
@@ -627,6 +649,37 @@ async function fetchTTS(text, m) {
     } catch (e) { lastErr = e; if (e.status === 400 || e.status === 401 || e.status === 403) break; }
   }
   throw lastErr;
+}
+// ---- second free reactive voice: Orpheus on Groq (uses your free Groq key) ----
+const ORPH_DIR = { neutral: 'casual', cold: 'cold', bored: 'bored', side: 'skeptical', annoyed: 'annoyed', grumpy: 'grumpy', angry: 'angry', smug: 'teasing', smirk: 'sly',
+  laugh: 'laughing', giggle: 'playful', calm: 'soft', shock: 'shocked', surprised: 'surprised', pout: 'flustered', flustered: 'flustered', cry: 'whiny', teary: 'sad',
+  sleepy: 'sleepy', sleeping: 'sleepy', blank: 'deadpan', dark: 'whisper', sad: 'sad' };
+let orphCooldownUntil = 0;
+async function fetchOrpheus(chunk) {
+  const res = await fetch('https://api.groq.com/openai/v1/audio/speech', { method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.groqKey.trim() },
+    body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: S.orphVoice || 'hannah', input: chunk, response_format: 'wav' }) });
+  if (!res.ok) { const err = new Error('Orpheus ' + res.status); err.status = res.status; try { err.detail = (await res.json()).error.message; } catch (e) {} throw err; }
+  return parseWav(await res.arrayBuffer());
+}
+async function speakOrpheus(text, seq, m) {
+  const dir = '[' + (ORPH_DIR[m] || 'casual') + '] ';
+  const plainText = text.replace(/\[[^\]]*\]\s*/g, '');
+  // the API takes up to 200 characters per request, so split at sentence ends
+  const sentences = plainText.match(/[^.!?…]+[.!?…]*\s*/g) || [plainText]; const chunks = []; let cur = '';
+  for (const t of sentences) { if ((cur + t).length + dir.length > 195 && cur) { chunks.push(cur.trim()); cur = ''; } cur += t; }
+  if (cur.trim()) chunks.push(cur.trim());
+  playPCM.totalEst = Math.max(1, plainText.length * 0.065);
+  try {
+    const jobs = chunks.map((c, i) => i === 0 ? fetchOrpheus(dir + c.slice(0, 190)) : null);
+    for (let i = 0; i < chunks.length; i++) {
+      const { f, sr } = await (jobs[i] || fetchOrpheus(dir + chunks[i].slice(0, 190)));
+      if (i + 1 < chunks.length) jobs[i + 1] = fetchOrpheus(dir + chunks[i + 1].slice(0, 190)); // fetch the next while this one plays
+      if (seq !== speakSeq) return;
+      await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.05);
+    }
+  } finally { playPCM.totalEst = 0; }
+  if (seq === speakSeq) stopLip();
 }
 let speakSeq = 0;
 function stopSpeaking() { speakSeq++; try { voiceEl.pause(); } catch (e) {} curSrc = null; if ('speechSynthesis' in window) speechSynthesis.cancel(); stopLip(); }
@@ -839,7 +892,14 @@ async function speak(text, lang = 'en', m = 'neutral') {
       else why.push('AI voice: ' + (e.message || e));
     }
   } else if (engine === 'auto' || engine === 'ai') why.push(S.key ? 'AI voice: resting after hitting its limit' : 'AI voice: no Gemini key');
-  // 2) unlimited on-device voice (English)
+  // 2) second free reactive voice (Orpheus on Groq, English)
+  if ((engine === 'ai' || engine === 'auto') && lang === 'en') {
+    if (S.groqKey && Date.now() > orphCooldownUntil) {
+      try { status('think', 'Voice'); await speakOrpheus(text, seq, m); status('', 'Online'); if (seq !== speakSeq) return; vlog('Orpheus voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
+      catch (e) { status('', 'Online'); stopLip(); if (seq !== speakSeq) return; if (e.status === 429) { orphCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('Orpheus: daily limit reached'); } else why.push('Orpheus: ' + (e.detail || e.message || e)); }
+    } else why.push(S.groqKey ? 'Orpheus: resting after its limit' : 'Orpheus: add a free Groq key in Settings for a second voice');
+  }
+  // 3) unlimited on-device voice (English)
   if ((engine === 'auto' || engine === 'local') && lang === 'en') {
     if (!LOCAL.ready && (LOCAL.loading || S.localReady)) { status('think', 'Loading voice'); loadLocal().catch(() => {}); await Promise.race([LOCAL.loading, new Promise(r => setTimeout(r, 20000))]).catch(() => {}); status('', 'Online'); if (seq !== speakSeq) return; }
     if (LOCAL.ready) {
@@ -848,7 +908,7 @@ async function speak(text, lang = 'en', m = 'neutral') {
     } else why.push('Unlimited voice: not downloaded yet');
   } else if (engine === 'auto' || engine === 'local') why.push('Unlimited voice: English only');
   // 3) phone voice (only if you chose a backup)
-  if (engine === 'ai') { vlog('No voice (' + (why.join('; ') || 'AI voice unavailable') + ')'); voiceNote(why.some(w => /limit|resting/.test(w)) ? 'Her anime voice used up today\'s free limit. It comes back tomorrow.' : 'Her anime voice couldn\'t play: ' + (why.join(' · ') || 'unknown')); if (onVoiceStart) onVoiceStart(); return; }
+  if (engine === 'ai') { vlog('No voice (' + (why.join('; ') || 'AI voice unavailable') + ')'); voiceNote(why.some(w => /limit|resting/.test(w)) ? 'Her voices used up today\'s free limits. They come back tomorrow.' + (S.groqKey ? '' : ' Tip: add a free Groq key in Settings for a second voice.') : 'Her voice couldn\'t play: ' + (why.join(' · ') || 'unknown')); if (onVoiceStart) onVoiceStart(); return; }
   vlog('Phone voice' + (why.length ? ' (' + why.join('; ') + ')' : ''));
   voiceNote('Using the phone voice because: ' + (why.join(' · ') || 'no other voice available'));
   if (!('speechSynthesis' in window) && onVoiceStart) onVoiceStart();
@@ -1058,7 +1118,7 @@ ACTIONS you can trigger with the "actions" field (value is a string):
 - forget: value = text of a remembered fact to delete.
 - open: value = "Button label|URL". Shows a button the user taps. Use for: Spotify "spotify:search:QUERY", YouTube "https://www.youtube.com/results?search_query=QUERY", Google "https://www.google.com/search?q=QUERY", GitHub "https://github.com/...", Maps "https://maps.apple.com/?q=PLACE", directions "https://maps.apple.com/?daddr=PLACE", email "mailto:ADDRESS?subject=S&body=B", text "sms:NUMBER&body=TEXT", call "tel:NUMBER", WhatsApp "https://wa.me/?text=TEXT", Instagram "instagram://app", Calendar "calshow:", Reminders "x-apple-reminderapp://". URL-encode queries.
 Only use actions when needed. Never claim you did something you have no action for — say it's coming in a future update instead.
-MOOD: pick the face that fits your reply and vary it a lot: neutral, cold (unimpressed, your usual), sad, bored (chin on hand), side (side-eye), annoyed, grumpy (blushing frown), angry (shouting), smug (teasing grin), smirk (hand over mouth, scheming), laugh, giggle (soft happy), calm (content, eyes closed), shock, surprised, pout (blushing at compliments), flustered (embarrassed), cry (dramatic wail), teary, sleepy (yawning), sleeping, blank (dead inside), dark (ominous threat, as a joke).`;
+MOOD: pick the face that fits your reply. Use the whole range and avoid using the same mood twice in a row: neutral, cold (unimpressed, your usual), sad, bored (chin on hand), side (side-eye), annoyed, grumpy (blushing frown), angry (shouting), smug (teasing grin), smirk (hand over mouth, scheming), laugh, giggle (soft happy), calm (content, eyes closed), shock, surprised, pout (blushing at compliments), flustered (embarrassed), cry (dramatic wail), teary, sleepy (yawning), sleeping, blank (dead inside), dark (ominous threat, as a joke).`;
 }
 const SCHEMA = {
   type: 'OBJECT',
@@ -1229,7 +1289,7 @@ function bind(id, key, type) {
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
 bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
-bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-kitten', 'kittenVoice'); bind('#s-pitch', 'animePitch', 'check');
+bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-orph', 'orphVoice'); bind('#s-kitten', 'kittenVoice'); bind('#s-pitch', 'animePitch', 'check');
 $('#s-ping').onclick = async () => {
   const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
   if (!S.key && !S.groqKey) { out.textContent = 'Paste a key first.'; return; }
@@ -1275,8 +1335,26 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
 });
 $('#form').addEventListener('submit', (e) => { e.preventDefault(); const t = $('#input').value; $('#input').value = ''; $('#input').blur(); send(t); });
 document.querySelectorAll('.chip').forEach(c => c.onclick = () => send(c.textContent));
-$('#rig').addEventListener('click', () => { if (busy || speaking) return; const pokes = [["Don't poke me.", 'annoyed'], ["What. Do you need something or are you just staring?", 'cold'], ["Hehe… I mean. Stop that.", 'pout'], ["Touch me again and I'm deleting your homework.", 'smug']]; const p = pokes[Math.floor(Math.random() * pokes.length)]; unlockAudio(); herSays(p[0], p[1], 'en', []); });
+$('#rig').addEventListener('click', () => { if (busy || speaking) return; const pokes = [["Don't poke me.", 'annoyed'], ["What. Do you need something or are you just staring?", 'cold'], ["Hehe… I mean. Stop that.", 'pout'], ["Touch me again and I'm deleting your homework.", 'smug'],
+  ["H-hey! Warn me first!", 'flustered'], ["Are you serious right now?", 'angry'], ["...Wow. Riveting.", 'blank'], ["Pfft. You're so weird.", 'giggle'], ["Excuse me?!", 'shock'], ["Ugh. Fine. I'm listening.", 'grumpy'], ["Keep poking and see what happens.", 'dark'], ["Don't look at me like that...", 'side']]; const p = pokes[Math.floor(Math.random() * pokes.length)]; unlockAudio(); herSays(p[0], p[1], 'en', []); });
 
+
+// ---------- gallery: every one of her 40 faces ----------
+const FACE_MOOD = {}; Object.entries(VAR).forEach(([m, ids]) => ids.forEach(id => { FACE_MOOD[id] = m; }));
+function openGallery() {
+  const g = $('#galGrid'); if (!g.children.length) {
+    FRAMES.forEach(id => { const b = document.createElement('button'); b.type = 'button';
+      const im = document.createElement('img'); im.loading = 'lazy'; im.alt = FACE_MOOD[id]; im.src = id === 'A00' ? IMG.neutral : IMG[id];
+      const t = document.createElement('span'); t.textContent = FACE_MOOD[id];
+      b.append(im, t); b.onclick = () => { closeGallery(); document.querySelector('nav button[data-v=home]').click(); unlockAudio();
+        const m = FACE_MOOD[id]; mood = m; moodAt = Date.now(); show(id === 'A00' ? 'neutral' : id, 380); burst(m); clearTimeout(moodTimer);
+        moodTimer = setTimeout(() => { if (!speaking) { mood = 'neutral'; show('neutral', 700); } }, 6000); };
+      g.appendChild(b); });
+  }
+  $('#gallery').hidden = false;
+}
+function closeGallery() { $('#gallery').hidden = true; }
+$('#galBtn').onclick = openGallery; $('#galClose').onclick = closeGallery;
 
 // ---------- Her tab ----------
 const BODY = { on: false };
