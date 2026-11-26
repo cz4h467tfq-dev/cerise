@@ -139,8 +139,9 @@ nav button.on{color:var(--crimson2)}
 #sway.talk{animation:talkbob .32s ease-in-out infinite}
 #sway.react{animation:react .45s ease-out}
 #avatar,#avatarImg{display:block;width:100%;aspect-ratio:1228/1024;height:auto;user-select:none;-webkit-user-drag:none;
-  filter:drop-shadow(0 0 22px rgba(255,61,110,.35))}
-#sway.talk #avatar,#sway.talk #avatarImg{filter:drop-shadow(0 0 30px rgba(255,61,110,.6))}
+}
+#sway::before{content:"";position:absolute;left:8%;right:8%;top:12%;bottom:0;border-radius:50% 50% 30% 30%;background:radial-gradient(ellipse at 50% 55%,rgba(255,61,110,.32),rgba(255,61,110,0) 70%);transition:opacity .3s;pointer-events:none}
+#sway.talk::before{opacity:1.6;background:radial-gradient(ellipse at 50% 55%,rgba(255,61,110,.45),rgba(255,61,110,0) 72%)}
 @keyframes breath{50%{transform:scale(1.006,1.014)}}
 @keyframes sway{0%,100%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg) translateY(-3px)}}
 @keyframes talkbob{50%{transform:translateY(-3px) scale(1.01)}}
@@ -175,11 +176,7 @@ nav button.on{color:var(--crimson2)}
   animation:introT 1s both}
 @keyframes introT{0%{opacity:0;transform:translateY(14px);letter-spacing:.4em}100%{opacity:1;transform:none}}
 
-#v-her{background:radial-gradient(ellipse at 50% 30%,rgba(209,25,74,.18),transparent 60%)}
-#herStage{flex:1;position:relative;min-height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
-#bodyWrap{position:relative;height:calc(100% - 12px);display:flex;align-items:flex-end;justify-content:center;transition:transform .16s ease-in;z-index:2}
 #bodyWrap.turn{transform:scaleX(0)}
-#bodyImg{height:100%;width:auto;display:block;animation:bodyFloat 5s ease-in-out infinite;transform-origin:50% 100%;filter:drop-shadow(0 10px 30px rgba(0,0,0,.6)) drop-shadow(0 0 20px rgba(255,61,110,.25))}
 #viewName{position:absolute;top:12px;left:14px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--mute);
   background:rgba(255,255,255,.06);padding:5px 12px;border-radius:999px;z-index:3}
 .card{margin:8px 14px 12px;background:linear-gradient(180deg,rgba(42,15,25,.95),rgba(26,8,15,.95));border:1px solid rgba(255,61,110,.3);border-radius:22px;padding:14px 16px}
@@ -208,6 +205,41 @@ nav button{padding:4px 10px!important}
 .btn:disabled{opacity:.7}
 [hidden]{display:none!important}
 #voiceNote{margin-top:8px;font-size:12px;color:#ffb3c4;line-height:1.35}
+
+#v-her{background:#120409}
+#herStage{flex:1;position:relative;min-height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;isolation:isolate}
+.hsBg{position:absolute;inset:0;z-index:-3;background:
+  radial-gradient(ellipse 70% 55% at 50% 38%,rgba(209,25,74,.38),transparent 70%),
+  repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 2px,transparent 2px 22px),
+  linear-gradient(180deg,#1d0610,#0c0206)}
+.hsName{position:absolute;left:50%;top:6%;transform:translateX(-50%);z-index:-2;font-family:"Cinzel Decorative",Georgia,serif;font-weight:700;
+  font-size:min(30vw,150px);line-height:1;letter-spacing:-.02em;color:transparent;-webkit-text-stroke:1.5px rgba(255,120,160,.28);white-space:nowrap;
+  animation:hsIn 1.2s cubic-bezier(.2,1,.3,1) both}
+.hsBeam{position:absolute;left:50%;top:-5%;width:140%;height:105%;transform:translateX(-50%);z-index:-1;pointer-events:none;
+  background:conic-gradient(from 180deg at 50% 0%,transparent 158deg,rgba(255,220,232,.10) 170deg,rgba(255,220,232,.2) 180deg,rgba(255,220,232,.10) 190deg,transparent 202deg);
+  animation:beam 6s ease-in-out infinite}
+@keyframes beam{50%{opacity:.7}}
+.hsFloor{position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:120%;height:170px;border-radius:50%;z-index:0;
+  background:radial-gradient(ellipse at center,rgba(255,61,110,.45),rgba(209,25,74,.12) 45%,transparent 70%)}
+#bodyWrap{position:relative;height:calc(100% - 40px);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;z-index:1;
+  animation:hsUp .9s cubic-bezier(.2,1.1,.3,1) both}
+#bodyImg{height:100%;width:auto;display:block;animation:bodyFloat 5s ease-in-out infinite;transform-origin:50% 100%}
+.hsReflect{position:absolute;top:100%;height:100%;width:auto;transform:scaleY(-1);opacity:.16;pointer-events:none;
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.9),transparent 22%);mask-image:linear-gradient(to top,rgba(0,0,0,.9),transparent 22%)}
+.hsTag{position:absolute;left:14px;top:12px;z-index:2;display:flex;flex-direction:column;gap:2px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#ffd1de}
+.hsTag .hsNo{font-family:"Cinzel Decorative",Georgia,serif;font-size:13px;color:var(--crimson2);letter-spacing:.12em}
+.hsPetals{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.hsPetals i{position:absolute;top:-20px;width:12px;height:12px;border-radius:12px 0 12px 0;background:linear-gradient(135deg,#ffe3ea,#ff9bb6);opacity:.85;animation:petal 9s linear infinite}
+.hsPetals i:nth-child(1){left:8%;animation-delay:0s}.hsPetals i:nth-child(2){left:22%;animation-delay:2.2s;animation-duration:11s}
+.hsPetals i:nth-child(3){left:38%;animation-delay:4.1s}.hsPetals i:nth-child(4){left:55%;animation-delay:1.3s;animation-duration:10s}
+.hsPetals i:nth-child(5){left:70%;animation-delay:5.2s}.hsPetals i:nth-child(6){left:84%;animation-delay:3s;animation-duration:12s}
+.hsPetals i:nth-child(7){left:93%;animation-delay:6.5s}.hsPetals i:nth-child(8){left:46%;animation-delay:7.6s;animation-duration:10.5s}
+@keyframes petal{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(-60px,110vh) rotate(540deg)}}
+@keyframes hsUp{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}
+@keyframes hsIn{0%{opacity:0;letter-spacing:.2em}100%{opacity:1}}
+.cFace{width:52px;height:52px;border-radius:50%;overflow:hidden;flex:none;border:2px solid var(--crimson);background:#2a0f19}
+.cFace img{width:150%;height:auto;margin:-12% 0 0 -25%;display:block}
+.cardTop{justify-content:flex-start!important;gap:12px!important}
 </style>
 </head>
 <body>
@@ -251,11 +283,21 @@ nav button{padding:4px 10px!important}
 
     <section class="view" id="v-her">
       <div id="herStage">
-        <div class="beam"></div><div class="floor"></div>
-        <div id="bodyWrap"><img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126192156"></div>
+        <div class="hsBg"></div>
+        <div class="hsName" aria-hidden="true">CERISE</div>
+        <div class="hsBeam"></div>
+        <div class="hsPetals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="hsFloor"></div>
+        <div id="bodyWrap">
+          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126192820">
+        </div>
+        <div class="hsTag"><span class="hsNo">No. 01</span><span>The Crimson Jester</span></div>
       </div>
       <div class="card" id="herCard">
-        <div class="cardTop"><div><div class="cName">Cerise</div><div class="cSub">Pocket jester · your assistant</div></div></div>
+        <div class="cardTop">
+          <div class="cFace"><img id="cFaceImg" alt=""></div>
+          <div style="flex:1;min-width:0"><div class="cName">Cerise</div><div class="cSub">Cold · arrogant · secretly helpful</div></div>
+        </div>
         <div class="stats"><div><b id="stMood">cold</b><span>mood</span></div><div><b id="stMem">0</b><span>memories</span></div><div><b id="stMsg">0</b><span>messages</span></div></div>
       </div>
     </section>
@@ -291,10 +333,10 @@ nav button{padding:4px 10px!important}
           <select id="s-tts"><option value="Leda">Leda (youthful)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
         <div class="field" id="kvField"><label for="s-kitten">Her unlimited voice</label>
           <select id="s-kitten"><option value="Kiki">Kiki (cute)</option><option value="Luna">Luna (soft)</option><option value="Rosie">Rosie (bright)</option><option value="Bella">Bella (warm)</option></select></div>
-        <div class="field" id="kokoroField"><label for="s-local">Backup unlimited voice</label>
-          <select id="s-local"><option value="af_bella">Bella (bright, youthful)</option><option value="af_nicole">Nicole (soft, whispery)</option><option value="af_sky">Sky (light)</option><option value="af_heart">Heart (warm)</option><option value="af_nova">Nova (clear)</option><option value="af_aoede">Aoede (smooth)</option><option value="bf_emma">Emma (British)</option><option value="bf_isabella">Isabella (British, cool)</option></select></div>
+        <div class="field" id="kokoroField"><label for="s-local">Her unlimited voice</label>
+          <select id="s-local"><option value="af_bella">Bella (bright, youthful)</option><option value="af_jessica">Jessica (playful)</option><option value="af_kore">Kore (cool)</option><option value="af_nicole">Nicole (soft, whispery)</option><option value="af_sky">Sky (light)</option><option value="af_heart">Heart (warm)</option><option value="af_nova">Nova (clear)</option><option value="af_aoede">Aoede (smooth)</option><option value="bf_emma">Emma (British)</option><option value="bf_isabella">Isabella (British, cool)</option></select></div>
         <div class="field switch"><label for="s-pitch">Anime pitch (slightly higher voice)</label><input id="s-pitch" type="checkbox"></div>
-        <button class="btn" id="s-dl" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Download unlimited voice (≈90 MB, once)</button>
+        <button class="btn" id="s-dl" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Download HD unlimited voice (once)</button>
         <div id="dlBox" hidden><div class="dlTrack"><div id="dlBar"></div></div><div id="dlText"></div><small>Keep the app open until it finishes. Wi-Fi recommended.</small></div>
         <button class="btn ghost" id="s-testLocal" type="button" style="width:calc(100% - 28px);margin:0 14px 6px">Test unlimited voice</button>
         <div id="s-tlout" style="padding:0 14px 12px;font-size:13px;color:var(--mute);white-space:pre-wrap;word-break:break-word"></div>
@@ -314,7 +356,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126192156 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126192820 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -333,7 +375,7 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126192156';
+const VER = '20261126192820';
 
 // ---------- state ----------
 // re-download needed when the voice engine changes
@@ -369,7 +411,7 @@ vec2 warp(vec2 uv){
   uv.y+=sin(uv.x*4.+t*.9)*.0022*side;
   float chest=smoothstep(.62,1.,uv.y);uv.y-=(sin(t*1.55)*.0055+k*sin(t*10.)*.0025)*chest;
   float head=1.-smoothstep(.55,.9,uv.y);
-  uv.x+=(sin(t*.53)*.0045+sin(t*1.7)*.0012)*head;uv.y+=(sin(t*.41+1.)*.003+k*sin(t*7.3)*.0018)*head;
+  uv.x+=(sin(t*.53)*.0022+sin(t*1.7)*.0005)*head;uv.y+=(sin(t*.41+1.)*.0015+k*sin(t*7.3)*.0012)*head;
   return uv;}
 float el(vec2 p,vec4 e){return length((p-e.xy)/e.zw);}
 vec3 lid(vec3 c,vec2 p,vec4 e){
@@ -638,7 +680,7 @@ async function playPCM(f, sr, seq, rate = 1) {
 // ---- unlimited on-device voice (Kokoro, runs inside the phone) ----
 const KOKORO_URL = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
 const KOKORO_MODEL = 'onnx-community/Kokoro-82M-v1.0-ONNX';
-const LOCAL = { worker: null, ready: false, loading: null, jobs: {}, id: 0, files: {}, mode: 'worker', tts: null, started: 0, kind: navigator.gpu ? 'kitten' : 'kokoro', kitten: null };
+const LOCAL = { worker: null, ready: false, loading: null, jobs: {}, id: 0, files: {}, mode: 'worker', tts: null, started: 0, kind: navigator.gpu ? 'kokoro-gpu' : 'kokoro', kitten: null };
 const KITTEN_URL = 'https://cdn.jsdelivr.net/npm/kitten-tts-webgpu@0.1.1/+esm';
 // count real download bytes while the voice loads (so the progress bar is real)
 function watchDownloads(on) {
@@ -665,7 +707,7 @@ function dlUI(state, text, pct) {
   $('#dlText').textContent = text; const bar = $('#dlBar');
   bar.style.width = (pct == null ? 0 : Math.max(2, Math.min(100, pct))) + '%';
   box.dataset.state = state; $('#s-dl').disabled = state === 'loading';
-  $('#s-dl').textContent = state === 'ready' ? 'Unlimited voice ready ✓' : state === 'loading' ? 'Downloading…' : state === 'error' ? 'Try again' : 'Download unlimited voice (≈90 MB, once)';
+  $('#s-dl').textContent = state === 'ready' ? 'Unlimited voice ready ✓' : state === 'loading' ? 'Downloading…' : state === 'error' ? 'Try again' : (LOCAL.kind === 'kokoro-gpu' ? 'Download HD unlimited voice (≈330 MB, once)' : 'Download unlimited voice (≈90 MB, once)');
   const pill = $('#dlPill'); if (pill) { pill.hidden = state !== 'loading'; pill.textContent = 'Voice ' + Math.round(pct || 0) + '%'; }
 }
 function onProgress(p) {
@@ -681,7 +723,7 @@ function onProgress(p) {
   }
   else if (p.status === 'done') { const fs = Object.values(LOCAL.files); if (fs.length && fs.every(f => f.total && f.loaded >= f.total)) dlUI('loading', 'Preparing her voice…', 100); }
 }
-function localReady() { LOCAL.ready = true; S.localReady = true; S.localKind = LOCAL.mode === 'kitten' ? 'kitten' : 'kokoro'; save(); dlUI('ready', '✓ Unlimited voice ready. Works offline, no limits.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
+function localReady() { LOCAL.ready = true; S.localReady = true; S.localKind = LOCAL.kind; save(); dlUI('ready', '✓ Unlimited voice ready. Works offline, no limits.', 100); if (LOCAL.loadResolve) LOCAL.loadResolve(); }
 function localFail(msg) { if (LOCAL.loadReject) LOCAL.loadReject(new Error(msg)); LOCAL.loading = null; dlUI('error', '✗ ' + msg, 0); }
 const KOKORO_WORKER = `
 import { KokoroTTS } from '${KOKORO_URL}';
@@ -698,6 +740,14 @@ self.onmessage = async (e) => {
     if (d.type === 'say') { const t = await load(); const a = await t.generate(d.text, { voice: d.voice, speed: d.speed || 1 }); const f = a.audio; self.postMessage({ type: 'audio', id: d.id, audio: f, sr: a.sampling_rate }, [f.buffer]); }
   } catch (err) { self.postMessage({ type: 'error', id: d.id, error: String((err && err.message) || err) }); if (d.type === 'load') loading = null; }
 };`;
+// best quality: the full Kokoro model on the phone's graphics chip (≈330 MB, once)
+async function loadKokoroGPU() {
+  LOCAL.mode = 'main'; dlUI('loading', 'Starting download (HD voice)…', 1);
+  const mod = await import(KOKORO_URL);
+  LOCAL.tts = await mod.KokoroTTS.from_pretrained(KOKORO_MODEL, { dtype: 'fp32', device: 'webgpu', progress_callback: onProgress });
+  await LOCAL.tts.generate('Hi.', { voice: S.localVoice || 'af_bella' }); // warm up the GPU
+  localReady();
+}
 async function loadMainThread() { // backup: run the voice on the page itself
   LOCAL.mode = 'main'; dlUI('loading', 'Trying the backup loader…', 1);
   const mod = await import(KOKORO_URL);
@@ -722,12 +772,17 @@ function loadLocal() {
   if (!LOCAL.loading) {
     LOCAL.started = performance.now(); LOCAL.files = {}; dlUI('loading', 'Starting download…', 1);
     LOCAL.loading = new Promise((res, rej) => { LOCAL.loadResolve = res; LOCAL.loadReject = rej;
+      if (LOCAL.kind === 'kokoro-gpu') { loadKokoroGPU().catch((e) => { console.warn('gpu voice failed', e); LOCAL.kind = 'kokoro'; LOCAL.files = {}; dlUI('loading', 'HD voice not supported here, trying the lighter one…', 1); try { localWorker().postMessage({ type: 'load' }); } catch (e2) { localFail(String(e2.message || e2)); } }); return; }
       if (LOCAL.kind === 'kitten') { loadKitten().catch((e) => { console.warn('kitten failed', e); LOCAL.kind = 'kokoro'; LOCAL.files = {}; dlUI('loading', 'Fast voice unavailable, trying the other voice…', 1); try { localWorker().postMessage({ type: 'load' }); } catch (e2) { localFail(String(e2.message || e2)); } }); return; }
       try { localWorker().postMessage({ type: 'load' }); } catch (e) { loadMainThread().catch(e2 => localFail(String(e2.message || e2))); } });
     LOCAL.loading.catch(() => {});
   }
   return LOCAL.loading;
 }
+const MOOD_VOICE = { neutral: [1, 1.04], cold: [0.96, 1.0], bored: [0.88, 0.98], side: [0.95, 1.0], annoyed: [1.08, 1.02], grumpy: [1.0, 1.03], angry: [1.14, 1.04],
+  smug: [0.94, 1.05], smirk: [0.95, 1.05], laugh: [1.08, 1.09], giggle: [1.04, 1.08], calm: [0.9, 1.03], shock: [1.12, 1.08], surprised: [1.1, 1.08],
+  pout: [1.06, 1.1], flustered: [1.12, 1.1], cry: [0.95, 1.08], teary: [0.88, 1.05], sleepy: [0.8, 0.98], sleeping: [0.78, 0.97], blank: [0.9, 1.0], dark: [0.85, 0.93], sad: [0.88, 1.02] };
+let voiceMood = 'neutral';
 function localSay(text) {
   const timeout = new Promise((_, rej) => setTimeout(() => { if (LOCAL.mode === 'worker' && LOCAL.worker) { LOCAL.worker.terminate(); LOCAL.worker = null; LOCAL.ready = false; LOCAL.loading = null; } rej(new Error('voice generation took longer than 45s (your phone may have run out of memory)')); }, 45000));
   return Promise.race([localSayRaw(text), timeout]).then(r => { if (!r || !r.f || !r.f.length) throw new Error('voice came back empty'); return r; });
@@ -735,18 +790,20 @@ function localSay(text) {
 function localSayRaw(text) {
   if (LOCAL.mode === 'kitten' && LOCAL.kitten) return LOCAL.kitten.textToSpeech(text.slice(0, 480), { voice: S.kittenVoice || 'Kiki', model: 'mini', speed: 1.0 })
     .then(b => b.arrayBuffer()).then(parseWav);
-  if (LOCAL.mode === 'main' && LOCAL.tts) return LOCAL.tts.generate(text, { voice: S.localVoice || 'af_bella', speed: 1.02 }).then(a => ({ f: a.audio, sr: a.sampling_rate }));
-  return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: 1.02 }); });
+  const mv = MOOD_VOICE[voiceMood] || MOOD_VOICE.neutral; const pitch = S.animePitch === false ? 1 : mv[1]; const sp = Math.max(0.7, Math.min(1.3, mv[0] / pitch));
+  if (LOCAL.mode === 'main' && LOCAL.tts) return LOCAL.tts.generate(text, { voice: S.localVoice || 'af_bella', speed: sp }).then(a => ({ f: a.audio, sr: a.sampling_rate }));
+  return new Promise((resolve, reject) => { const id = ++LOCAL.id; LOCAL.jobs[id] = { resolve, reject }; localWorker().postMessage({ type: 'say', id, text, voice: S.localVoice || 'af_bella', speed: sp }); });
 }
 async function speakLocal(text, seq) {
   playPCM.totalEst = Math.max(1, text.length * 0.068);
   try { return await speakLocalInner(text, seq); } finally { playPCM.totalEst = 0; }
 }
 async function speakLocalInner(text, seq) {
+  const mv = MOOD_VOICE[voiceMood] || MOOD_VOICE.neutral; const pitch = S.animePitch === false ? 1 : mv[1];
   const parts = (text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]).map(s => s.trim()).filter(Boolean);
   let played = false;
-  if (LOCAL.mode === 'main' || LOCAL.mode === 'kitten') { for (const p of parts) { const { f, sr } = await localSay(p); if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); } }
-  else { const jobs = parts.map(p => localSay(p)); for (const j of jobs) { const { f, sr } = await j; if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, S.animePitch === false ? 1 : 1.07); } }
+  if (LOCAL.mode === 'main' || LOCAL.mode === 'kitten') { for (const p of parts) { const { f, sr } = await localSay(p); if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, pitch); } }
+  else { const jobs = parts.map(p => localSay(p)); for (const j of jobs) { const { f, sr } = await j; if (seq !== speakSeq) return true; played = true; await playPCM(f, sr, seq, pitch); } }
   if (seq === speakSeq) stopLip();
   return played;
 }
@@ -754,7 +811,7 @@ async function speak(text, lang = 'en', m = 'neutral') {
   const seq = ++speakSeq; if (curSrc) { try { voiceEl.pause(); } catch (e) {} curSrc = null; }
   if (!S.speak || !text) { if (onVoiceStart) onVoiceStart(); return; }
   text = text.replace(/[*_#`~]/g, '');
-  const engine = S.voiceEngine || 'auto'; const why = [];
+  const engine = S.voiceEngine || 'auto'; const why = []; voiceMood = m || 'neutral';
   // 1) expressive Gemini AI voice (free daily limit)
   if ((engine === 'auto' || engine === 'ai') && S.key && Date.now() > ttsCooldownUntil) {
     try {
@@ -1162,7 +1219,7 @@ $('#s-ping').onclick = async () => {
   try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
-document.getElementById('kokoroField').hidden = LOCAL.kind === 'kitten'; document.getElementById('kvField').hidden = LOCAL.kind !== 'kitten';
+document.getElementById('kokoroField').hidden = false; document.getElementById('kvField').hidden = true;
 $('#s-dl').onclick = () => { unlockAudio(); loadLocal().catch(() => {}); };
 $('#s-testLocal').onclick = async () => {
   unlockAudio(); const out = $('#s-tlout'); out.style.color = 'var(--mute)';
@@ -1204,7 +1261,7 @@ $('#rig').addEventListener('click', () => { if (busy || speaking) return; const 
 
 // ---------- Her tab ----------
 const BODY = { on: false };
-function openHer() { $('#stMood').textContent = mood; $('#stMem').textContent = S.memory.length; $('#stMsg').textContent = S.history.length; }
+function openHer() { const f = shown === 'neutral' || !IMG[shown] ? 'neutral' : shown; $('#cFaceImg').src = IMG[f]; $('#stMood').textContent = mood; $('#stMem').textContent = S.memory.length; $('#stMsg').textContent = S.history.length; }
 
 // ---------- auto-update: always run the newest version ----------
 (async () => { try { const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }); const j = await r.json();
