@@ -94,6 +94,11 @@ main{flex:1;position:relative;overflow:hidden}
 .switch input{width:auto;height:auto;transform:scale(1.4);accent-color:var(--crimson)}
 .btn{display:block;width:100%;height:46px;border-radius:12px;border:0;background:var(--crimson);font-weight:700;margin:6px 0}
 .btn.ghost{background:rgba(255,255,255,.08)}
+.field textarea{min-height:96px;border-radius:10px;border:1px solid var(--line);background:var(--ink);padding:10px 12px;font-size:16px;width:100%;font-family:inherit;color:inherit;resize:vertical}
+.todoAdd{display:flex;gap:8px;padding:10px 14px}
+.todoAdd input{flex:1;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--ink);padding:0 12px;font-size:16px}
+.todoAdd button{min-width:56px;border-radius:10px;border:0;background:var(--crimson);font-weight:700}
+.mem.done span{text-decoration:line-through;color:var(--mute)}
 .mem{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 14px;border-top:1px solid rgba(255,255,255,.05);font-size:14px}
 .mem button{background:none;border:0;color:var(--crimson2);font-size:13px}
 a{color:var(--crimson2)}
@@ -214,7 +219,10 @@ nav button{padding:4px 10px!important}
         <button class="chip">What's the weather?</button>
         <button class="chip">Set a 25 minute focus timer</button>
         <button class="chip">Play something on Spotify</button>
-        <button class="chip">Tell me about Mars</button>
+        <button class="chip">What's in the news today?</button>
+        <button class="chip">Remind me tomorrow at 9 to study</button>
+        <button class="chip">What did I push to GitHub lately?</button>
+        <button class="chip">What's on my to-do list?</button>
         <button class="chip">Roast me</button>
         <button class="chip">Bonjour Cerise, ça va ?</button>
         <button class="chip">مرحبا سيريز</button>
@@ -275,9 +283,20 @@ nav button{padding:4px 10px!important}
         <div id="s-dlout" style="padding:0 14px 12px;font-size:13px;color:var(--mute)"></div>
         <button class="btn ghost" id="s-test" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test her voice</button>
       </div>
+      <div class="group"><h3>Connections</h3>
+        <div class="field"><label for="s-gh">GitHub username</label><input id="s-gh" autocomplete="off" autocapitalize="off" placeholder="your-username">
+          <small>Lets her check your repos, commits and issues.</small></div>
+        <div class="field"><label for="s-ghtok">GitHub token (optional)</label><input id="s-ghtok" type="password" autocomplete="off" placeholder="github_pat_…">
+          <small>Only needed for private repos or for her to open issues for you. Make a fine-grained token at github.com/settings/tokens with Issues: read and write. Saved only on this phone and sent only to GitHub.</small></div>
+        <div class="field"><label for="s-sc">Your iPhone Shortcuts</label><textarea id="s-sc" autocapitalize="off" placeholder="Alarm - sets an alarm, input is a time like 7:30&#10;Focus - turns on Do Not Disturb&#10;Text Mom - sends a message, input is the text"></textarea>
+          <small>One per line: exact Shortcut name, then what it does. She can run these for you, which is how she controls alarms, Focus, smart home, messages and anything else Shortcuts can do. Tip: make a shortcut use "Shortcut Input" to receive what she sends.</small></div>
+      </div>
+      <div class="group"><h3>To-do</h3><div id="todoList"></div>
+        <form class="todoAdd" id="todoForm"><input id="todoIn" placeholder="Add a task…" autocomplete="off" enterkeyhint="done"><button type="submit" aria-label="Add task">Add</button></form>
+      </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126182714 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126184240 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -296,10 +315,10 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126182714';
+const VER = '20261126184240';
 
 // ---------- state ----------
-const DEF = {key:'', groqKey:'', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[]};
+const DEF = {key:'', groqKey:'', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 if (S.v !== 2) { S.v = 2; if (S.voiceEngine === 'ai') S.voiceEngine = 'auto'; }
@@ -716,7 +735,95 @@ setInterval(() => {
   }
   if (timers.length) renderTimers();
 }, 1000);
-const SAFE_URL = /^(https:|spotify:|mailto:|sms:|tel:)/i;
+const SAFE_URL = /^(https:|spotify:|mailto:|sms:|tel:|facetime:|facetime-audio:|shortcuts:|whatsapp:|instagram:|youtube:|music:|maps:|calshow:|x-apple-reminderapp:|data:text\/calendar)/i;
+
+// web search: Gemini with Google Search grounding, then Groq web search, then Wikipedia
+async function webSearch(q) {
+  const ask = `Search the web and answer concisely (max 120 words) with the key facts, numbers and dates. Today is ${new Date().toDateString()}. Question: ${q}`;
+  if (S.key) for (const m of ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest']) {
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, { method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key.trim() },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: ask }] }], tools: [{ google_search: {} }], generationConfig: { temperature: 0.2, maxOutputTokens: 2048 } }) });
+      if (!r.ok) continue;
+      const d = await r.json(); const t = d.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('').trim();
+      if (t) return t.slice(0, 1500);
+    } catch (e) {}
+  }
+  if (S.groqKey) for (const m of ['groq/compound-mini', 'groq/compound']) {
+    try {
+      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.groqKey.trim() },
+        body: JSON.stringify({ model: m, messages: [{ role: 'user', content: ask }], max_tokens: 800 }) });
+      if (!r.ok) continue;
+      const t = ((await r.json()).choices?.[0]?.message?.content || '').trim(); if (t) return t.slice(0, 1500);
+    } catch (e) {}
+  }
+  return 'Web search unavailable, Wikipedia instead: ' + await lookup(q);
+}
+
+// GitHub
+async function gh(path, opt = {}) {
+  const h = { 'Accept': 'application/vnd.github+json' }; if (S.ghToken.trim()) h.Authorization = 'Bearer ' + S.ghToken.trim();
+  if (opt.body) h['Content-Type'] = 'application/json';
+  const r = await fetch('https://api.github.com' + path, { ...opt, headers: h });
+  if (!r.ok) throw new Error('GitHub ' + r.status);
+  return r.json();
+}
+async function github(v) {
+  const u = S.github.trim(); if (!u) return 'No GitHub username set. Tell the user to add it in Settings > Connections.';
+  const [cmd, repo, ...rest] = v.split('|').map(x => x.trim());
+  const full = repo && repo.includes('/') ? repo : u + '/' + repo;
+  if (cmd === 'repos' || !cmd) {
+    const list = await gh(S.ghToken.trim() ? '/user/repos?sort=pushed&per_page=12&affiliation=owner' : `/users/${encodeURIComponent(u)}/repos?sort=pushed&per_page=12`);
+    return 'Repos (latest push first): ' + list.map(r => `${r.name}${r.private ? ' (private)' : ''}, pushed ${r.pushed_at.slice(0, 10)}, ${r.open_issues_count} open issues, ${r.stargazers_count}★${r.description ? ', "' + r.description.slice(0, 80) + '"' : ''}`).join('; ');
+  }
+  if (!repo) return 'Which repo? Ask the user.';
+  if (cmd === 'commits') { const c = await gh(`/repos/${full}/commits?per_page=6`); return `Latest commits in ${full}: ` + c.map(x => `${x.commit.author.date.slice(0, 10)} "${x.commit.message.split('\n')[0].slice(0, 90)}"`).join('; '); }
+  if (cmd === 'issues') { const i = await gh(`/repos/${full}/issues?state=open&per_page=10`); return i.length ? `Open issues in ${full}: ` + i.map(x => `#${x.number} ${x.title}`).join('; ') : `No open issues in ${full}.`; }
+  if (cmd === 'newissue') {
+    if (!S.ghToken.trim()) return 'Creating issues needs a GitHub token in Settings > Connections.';
+    const i = await gh(`/repos/${full}/issues`, { method: 'POST', body: JSON.stringify({ title: rest[0] || 'New issue', body: rest[1] || '' }) });
+    return `Created issue #${i.number} in ${full}: ${i.html_url}`;
+  }
+  return 'Unknown GitHub command.';
+}
+
+// calendar events / reminders as an .ics the phone adds to Calendar
+function icsButton(v) {
+  const [title, start, mins, alarm] = v.split('|').map(x => (x || '').trim());
+  const d = new Date(start); if (!title || isNaN(d)) return null;
+  const end = new Date(d.getTime() + (Number(mins) > 0 ? Number(mins) : 30) * 60000);
+  const f = (x) => x.getFullYear() + String(x.getMonth() + 1).padStart(2, '0') + String(x.getDate()).padStart(2, '0') + 'T' + String(x.getHours()).padStart(2, '0') + String(x.getMinutes()).padStart(2, '0') + '00';
+  const esc = (t) => t.replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
+  const a = Number(alarm); const al = alarm === '' ? 10 : (isNaN(a) ? 10 : a);
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cerise//EN', 'BEGIN:VEVENT', 'UID:' + Date.now() + '@cerise', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z',
+    'DTSTART:' + f(d), 'DTEND:' + f(end), 'SUMMARY:' + esc(title),
+    ...(al >= 0 ? ['BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(title), 'TRIGGER:-PT' + al + 'M', 'END:VALARM'] : []), 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const when = d.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  return { label: 'Add to Calendar · ' + when, url: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics) };
+}
+
+// to-do list
+function todo(v) {
+  const [cmd, ...rest] = v.split('|'); const t = rest.join('|').trim(); const c = cmd.trim().toLowerCase();
+  if (c === 'add' && t) S.todos.push({ t, done: false });
+  else if (c === 'done' && t) { const x = S.todos.find(x => !x.done && x.t.toLowerCase().includes(t.toLowerCase())); if (x) x.done = true; }
+  else if (c === 'remove' && t) S.todos = S.todos.filter(x => !x.t.toLowerCase().includes(t.toLowerCase()));
+  else if (c === 'clear') S.todos = S.todos.filter(x => !x.done);
+  S.todos = S.todos.slice(-60); save(); renderTodos();
+}
+function renderTodos() {
+  const box = $('#todoList'); box.innerHTML = '';
+  if (!S.todos.length) { box.innerHTML = '<div class="mem" style="color:var(--mute)">Empty. Suspicious. Tell her "add … to my list".</div>'; return; }
+  S.todos.forEach((x, i) => {
+    const row = document.createElement('div'); row.className = 'mem' + (x.done ? ' done' : '');
+    const t = document.createElement('span'); t.textContent = x.t; t.style.flex = '1'; t.onclick = () => { x.done = !x.done; save(); renderTodos(); };
+    const b = document.createElement('button'); b.textContent = 'Remove'; b.onclick = () => { S.todos.splice(i, 1); save(); renderTodos(); };
+    row.append(t, b); box.appendChild(row);
+  });
+}
+$('#todoForm').addEventListener('submit', (e) => { e.preventDefault(); const t = $('#todoIn').value.trim(); if (t) { todo('add|' + t); $('#todoIn').value = ''; } });
 
 // ---------- brain ----------
 function systemPrompt() {
@@ -726,13 +833,21 @@ PERSONALITY: cold, arrogant, teasing and sassy. You act unimpressed and superior
 STYLE: you are spoken out loud, so keep replies short: 1–3 sentences, no markdown, no lists, no emojis. Answer in the language the user wrote in. The user understands English well and is a beginner in French and Arabic: in French or Arabic use simple, short sentences.
 CONTEXT: now is ${now.toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}. User's name: ${S.name || 'unknown'}. User's city: ${S.city || 'unknown'}.
 THINGS YOU REMEMBER ABOUT THE USER: ${S.memory.length ? S.memory.map((m, i) => `(${i + 1}) ${m}`).join(' ') : 'nothing yet'}.
+USER'S TO-DO LIST: ${S.todos.length ? S.todos.map(x => (x.done ? '[done] ' : '[ ] ') + x.t).join('; ') : 'empty'}.
+USER'S GITHUB: ${S.github || 'not connected'}${S.ghToken ? ' (token set, can create issues)' : ''}.
+USER'S IPHONE SHORTCUTS you can run: ${S.shortcuts.trim() ? S.shortcuts.trim().split('\n').filter(Boolean).join('; ') : 'none set up yet (tell the user they can add Shortcuts in Settings > Connections so you can control alarms, Focus, smart home, messages)'}.
 ACTIONS you can trigger with the "actions" field (value is a string):
 - weather: value = place name ("" = user's city). You will get the result back and must then answer.
-- lookup: value = a short topic to look up on Wikipedia for facts you're unsure about or that may be recent. You will get the result back.
+- search: value = a web search question. Use for anything current or that you're unsure about: news, sports, prices, releases, opening hours, people's current roles. You will get the result back.
+- lookup: value = a short topic to look up on Wikipedia for stable encyclopedic facts. You will get the result back.
+- github: value = "repos" | "commits|REPO" | "issues|REPO" | "newissue|REPO|TITLE|BODY" (newissue ONLY when the user clearly asks). You will get the result back.
+- event: value = "TITLE|START|MINUTES|ALERT_MINUTES_BEFORE" with START as local time "YYYY-MM-DDTHH:MM", e.g. "Study|2026-11-27T09:00|60|10". Use for reminders and calendar events; it shows an Add to Calendar button. Work out the date from the current time above.
+- todo: value = "add|TEXT" | "done|TEXT" | "remove|TEXT" | "clear" (removes finished ones). The list is shown above, so read it to answer questions about it.
+- shortcut: value = "EXACT SHORTCUT NAME|INPUT TEXT" (input optional). Only use names from the user's shortcut list. Shows a button that runs it.
 - timer: value = number of seconds; put a short label after a "|", e.g. "1500|Focus".
 - remember: value = a short fact the user wants you to remember or clearly would want remembered (name, preferences, plans).
 - forget: value = text of a remembered fact to delete.
-- open: value = "Button label|URL". Shows a button the user taps. Use for: Spotify "spotify:search:QUERY", YouTube "https://www.youtube.com/results?search_query=QUERY", Google "https://www.google.com/search?q=QUERY", GitHub "https://github.com/...", Maps "https://maps.apple.com/?q=PLACE", email "mailto:...", WhatsApp "https://wa.me/?text=TEXT". URL-encode queries.
+- open: value = "Button label|URL". Shows a button the user taps. Use for: Spotify "spotify:search:QUERY", YouTube "https://www.youtube.com/results?search_query=QUERY", Google "https://www.google.com/search?q=QUERY", GitHub "https://github.com/...", Maps "https://maps.apple.com/?q=PLACE", directions "https://maps.apple.com/?daddr=PLACE", email "mailto:ADDRESS?subject=S&body=B", text "sms:NUMBER&body=TEXT", call "tel:NUMBER", WhatsApp "https://wa.me/?text=TEXT", Instagram "instagram://app", Calendar "calshow:", Reminders "x-apple-reminderapp://". URL-encode queries.
 Only use actions when needed. Never claim you did something you have no action for — say it's coming in a future update instead.
 MOOD: pick the face that fits your reply and vary it a lot: neutral, cold (unimpressed, your usual), sad, bored (chin on hand), side (side-eye), annoyed, grumpy (blushing frown), angry (shouting), smug (teasing grin), smirk (hand over mouth, scheming), laugh, giggle (soft happy), calm (content, eyes closed), shock, surprised, pout (blushing at compliments), flustered (embarrassed), cry (dramatic wail), teary, sleepy (yawning), sleeping, blank (dead inside), dark (ominous threat, as a joke).`;
 }
@@ -743,7 +858,7 @@ const SCHEMA = {
     mood: { type: 'STRING', enum: MOODS },
     lang: { type: 'STRING', enum: ['en', 'fr', 'ar'] },
     actions: { type: 'ARRAY', items: { type: 'OBJECT', properties: {
-      type: { type: 'STRING', enum: ['weather', 'lookup', 'timer', 'remember', 'forget', 'open'] },
+      type: { type: 'STRING', enum: ['weather', 'search', 'lookup', 'github', 'timer', 'event', 'todo', 'shortcut', 'remember', 'forget', 'open'] },
       value: { type: 'STRING' } }, required: ['type', 'value'] } }
   },
   required: ['reply', 'mood', 'lang']
@@ -825,6 +940,12 @@ async function send(text) {
       const v = (a.value || '').trim();
       if (a.type === 'weather') toolResults.push('[weather] ' + await getWeather(v).catch(() => 'weather service unreachable'));
       else if (a.type === 'lookup') toolResults.push('[lookup] ' + await lookup(v).catch(() => 'lookup failed'));
+      else if (a.type === 'search') { status('think', 'Searching'); toolResults.push('[search] ' + await webSearch(v).catch(() => 'search failed')); }
+      else if (a.type === 'github') { status('think', 'Checking GitHub'); toolResults.push('[github] ' + await github(v).catch(e => 'GitHub failed: ' + e.message)); }
+      else if (a.type === 'event') { const b = icsButton(v); if (b) buttons.push(b); }
+      else if (a.type === 'todo' && v) todo(v);
+      else if (a.type === 'shortcut' && v) { const i = v.indexOf('|'); const name = (i > 0 ? v.slice(0, i) : v).trim(); const input = i > 0 ? v.slice(i + 1).trim() : '';
+        if (name) buttons.push({ label: 'Run "' + name + '"', url: 'shortcuts://run-shortcut?name=' + encodeURIComponent(name) + (input ? '&input=text&text=' + encodeURIComponent(input) : '') }); }
       else if (a.type === 'timer') { const [s, l] = v.split('|'); addTimer(s, (l || '').trim()); }
       else if (a.type === 'remember' && v) { if (!S.memory.includes(v)) S.memory.push(v); S.memory = S.memory.slice(-40); save(); renderMem(); }
       else if (a.type === 'forget' && v) { S.memory = S.memory.filter(m => !m.toLowerCase().includes(v.toLowerCase())); save(); renderMem(); }
@@ -859,7 +980,7 @@ function typeText(text) {
 function herSays(text, m, lang, buttons) {
   typeText(text);
   const acts = $('#bubbleActs'); acts.innerHTML = '';
-  (buttons || []).forEach(b => { const a = document.createElement('a'); a.className = 'act'; a.textContent = b.label; a.href = b.url; a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none'; a.style.color = '#fff'; acts.appendChild(a); });
+  (buttons || []).forEach(b => { const a = document.createElement('a'); a.className = 'act'; a.textContent = b.label; a.href = b.url; if (/^https:/i.test(b.url)) a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none'; a.style.color = '#fff'; acts.appendChild(a); });
   setMood(m || 'neutral');
   speak(text, lang || 'en', m || 'neutral');
 }
@@ -890,7 +1011,7 @@ function bind(id, key, type) {
   el.addEventListener(type === 'check' ? 'change' : 'input', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
-bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
+bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
 bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-pitch', 'animePitch', 'check');
 $('#s-ping').onclick = async () => {
   const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
@@ -981,7 +1102,7 @@ $('#turnBtn').onclick = turnAround; $('#bodyWrap').onclick = turnAround;
   if (j.v && j.v !== VER && !location.search.includes('v=' + j.v)) location.replace(location.pathname + '?v=' + j.v); } catch (e) {} })();
 
 // ---------- start ----------
-show('neutral', 1); renderLog(); renderMem();
+show('neutral', 1); renderLog(); renderMem(); renderTodos();
 if (S.localReady && (S.voiceEngine === 'auto' || S.voiceEngine === 'local')) setTimeout(() => loadLocal().catch(() => {}), 2500);
 // intro
 setTimeout(() => { $('#intro').classList.add('gone'); sway.classList.add('drop'); setTimeout(() => sway.classList.remove('drop'), 1000); }, 1500);
