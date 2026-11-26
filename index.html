@@ -289,7 +289,7 @@ nav button{padding:4px 10px!important}
         <div class="hsPetals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="hsFloor"></div>
         <div id="bodyWrap">
-          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126193733">
+          <img id="bodyImg" alt="Cerise, full body" src="img/body_front.webp?v=20261126193948">
         </div>
         <div class="hsTag"><span class="hsNo">No. 01</span><span>The Crimson Jester</span></div>
       </div>
@@ -327,10 +327,10 @@ nav button{padding:4px 10px!important}
           <select id="s-lang"><option value="en-US">English</option><option value="fr-FR">Français</option><option value="ar-LB">العربية</option></select>
           <small>Used by the mic. She understands all three when you type.</small></div>
         <div class="field"><label for="s-engine">Voice engine</label>
-          <select id="s-engine"><option value="auto">Auto: AI voice, then unlimited voice (recommended)</option><option value="ai">Gemini AI voice only</option><option value="local">Unlimited on-device voice only</option><option value="phone">Phone voice</option></select>
+          <select id="s-engine"><option value="ai">Anime AI voice only (best, recommended)</option><option value="auto">Anime AI voice, then backup voice</option><option value="local">Unlimited on-device voice only</option><option value="phone">Phone voice</option></select>
           <small>The Gemini AI voice is the most expressive but has a free daily limit. The unlimited voice runs on your phone after a one-time download, free forever, English only. If you hear nothing, turn off silent mode.</small></div>
         <div class="field"><label for="s-tts">Her voice</label>
-          <select id="s-tts"><option value="Leda">Leda (youthful)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
+          <select id="s-tts"><option value="Leda">Leda (youthful, anime-like)</option><option value="Zephyr">Zephyr (bright)</option><option value="Autonoe">Autonoe (bright, clear)</option><option value="Kore">Kore (firm, cool)</option><option value="Despina">Despina (smooth)</option><option value="Achernar">Achernar (soft)</option><option value="Laomedeia">Laomedeia (upbeat)</option><option value="Zephyr">Zephyr (bright)</option><option value="Aoede">Aoede (breezy)</option><option value="Vindemiatrix">Vindemiatrix (gentle)</option></select></div>
         <div class="field" id="kvField"><label for="s-kitten">Her unlimited voice</label>
           <select id="s-kitten"><option value="Kiki">Kiki (cute)</option><option value="Luna">Luna (soft)</option><option value="Rosie">Rosie (bright)</option><option value="Bella">Bella (warm)</option></select></div>
         <div class="field" id="kokoroField"><label for="s-local">Her unlimited voice</label>
@@ -356,7 +356,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126193733 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126193948 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -375,17 +375,17 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126193733';
+const VER = '20261126193948';
 
 // ---------- show errors on screen ----------
 window.addEventListener('error', (e) => { if (e && e.message && !/Script error|ResizeObserver/i.test(e.message)) setTimeout(() => { try { toast('Error: ' + e.message.slice(0, 120)); } catch (x) {} }, 0); });
 window.addEventListener('unhandledrejection', (e) => { const m = e && e.reason && (e.reason.message || String(e.reason)); if (m && !/abort|Failed to fetch dynamically/i.test(m)) setTimeout(() => { try { toast('Error: ' + m.slice(0, 120)); } catch (x) {} }, 0); });
 // ---------- state ----------
 // re-download needed when the voice engine changes
-const DEF = {key:'', groqKey:'', kittenVoice:'Kiki', voiceEngine:'auto', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
+const DEF = {key:'', groqKey:'', kittenVoice:'Kiki', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[]};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
-if (S.v !== 2) { S.v = 2; if (S.voiceEngine === 'ai') S.voiceEngine = 'auto'; }
+if ((S.v || 0) < 3) { S.v = 3; S.voiceEngine = 'ai'; }
 const save = () => { try { localStorage.setItem('cerise.v1', JSON.stringify(S)); } catch (e) {} };
 
 // ---------- avatar: one living face (WebGL rig) + mood reactions ----------
@@ -607,9 +607,11 @@ const VOICE_STYLE = {
 };
 async function fetchTTS(text, m) {
   const style = VOICE_STYLE[m] || VOICE_STYLE.neutral;
-  const prompt = `Read this aloud as Cerise, a young anime girl with a ${style} tone. Natural, expressive pacing:\n${text}`;
+  const direction = `Voice Cerise like a Japanese anime voice actress performing in English: a young anime girl with a bright, slightly high, cute voice, cool and tsundere, very animated and expressive with clear emotional reactions. Right now she is ${style}. Perform the bracketed cues as real sounds and reactions (never say them as words). Speak only the line below.`;
   let lastErr;
   for (const model of ['gemini-3.1-flash-tts-preview', 'gemini-2.5-flash-preview-tts']) {
+    const line = model.includes('3.1') ? text : text.replace(/\[[^\]]*\]\s*/g, ''); // older model would read the cues aloud
+    const prompt = `${direction}\n\n${line}`;
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key.trim() },
@@ -823,7 +825,7 @@ async function speakLocalInner(text, seq) {
 async function speak(text, lang = 'en', m = 'neutral') {
   const seq = ++speakSeq; if (curSrc) { try { voiceEl.pause(); } catch (e) {} curSrc = null; }
   if (!S.speak || !text) { if (onVoiceStart) onVoiceStart(); return; }
-  text = text.replace(/[*_#`~]/g, '');
+  text = text.replace(/[*_#`~]/g, ''); const plain = text.replace(/\[[^\]]*\]\s*/g, '');
   const engine = S.voiceEngine || 'auto'; const why = []; voiceMood = m || 'neutral';
   // 1) expressive Gemini AI voice (free daily limit)
   if ((engine === 'auto' || engine === 'ai') && S.key && Date.now() > ttsCooldownUntil) {
@@ -833,7 +835,7 @@ async function speak(text, lang = 'en', m = 'neutral') {
       await playPCM(f, rate, seq); if (seq === speakSeq) stopLip(); vlog('AI voice ✓'); voiceNote(''); return;
     } catch (e) {
       status('', 'Online'); if (seq !== speakSeq) return; stopLip();
-      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('AI voice: daily limit reached'); if (!ttsNoticeShown) { ttsNoticeShown = true; toast(engine === 'auto' ? 'AI voice limit reached, switching to her unlimited voice' : 'AI voice limit reached, using phone voice'); } }
+      if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('AI voice: daily limit reached'); if (!ttsNoticeShown) { ttsNoticeShown = true; toast(engine === 'ai' ? 'Her anime voice reached today\'s free limit, it comes back tomorrow' : 'AI voice limit reached, using her backup voice'); } }
       else why.push('AI voice: ' + (e.message || e));
     }
   } else if (engine === 'auto' || engine === 'ai') why.push(S.key ? 'AI voice: resting after hitting its limit' : 'AI voice: no Gemini key');
@@ -841,15 +843,16 @@ async function speak(text, lang = 'en', m = 'neutral') {
   if ((engine === 'auto' || engine === 'local') && lang === 'en') {
     if (!LOCAL.ready && (LOCAL.loading || S.localReady)) { status('think', 'Loading voice'); loadLocal().catch(() => {}); await Promise.race([LOCAL.loading, new Promise(r => setTimeout(r, 20000))]).catch(() => {}); status('', 'Online'); if (seq !== speakSeq) return; }
     if (LOCAL.ready) {
-      try { status('think', 'Voice'); await speakLocal(text, seq); status('', 'Online'); vlog('Unlimited voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
+      try { status('think', 'Voice'); await speakLocal(plain, seq); status('', 'Online'); vlog('Unlimited voice ✓' + (why.length ? ' (' + why.join('; ') + ')' : '')); voiceNote(''); return; }
       catch (e) { status('', 'Online'); stopLip(); why.push('Unlimited voice: ' + (e.message || e)); if (seq !== speakSeq) return; }
     } else why.push('Unlimited voice: not downloaded yet');
   } else if (engine === 'auto' || engine === 'local') why.push('Unlimited voice: English only');
-  // 3) phone voice
+  // 3) phone voice (only if you chose a backup)
+  if (engine === 'ai') { vlog('No voice (' + (why.join('; ') || 'AI voice unavailable') + ')'); voiceNote(why.some(w => /limit|resting/.test(w)) ? 'Her anime voice used up today\'s free limit. It comes back tomorrow.' : 'Her anime voice couldn\'t play: ' + (why.join(' · ') || 'unknown')); if (onVoiceStart) onVoiceStart(); return; }
   vlog('Phone voice' + (why.length ? ' (' + why.join('; ') + ')' : ''));
   voiceNote('Using the phone voice because: ' + (why.join(' · ') || 'no other voice available'));
   if (!('speechSynthesis' in window) && onVoiceStart) onVoiceStart();
-  phoneSpeak(text, lang, seq);
+  phoneSpeak(plain, lang, seq);
   setTimeout(() => { if (onVoiceStart && seq === speakSeq) onVoiceStart(); }, 2500);
 }
 // fallback: built-in phone voice (mouth animated from word timing)
@@ -1035,6 +1038,7 @@ function systemPrompt() {
   const now = new Date();
   return `You are Cerise, a crimson-and-black harlequin jester girl who lives in ${S.name || 'the user'}'s phone as their personal AI assistant.
 PERSONALITY: cold, arrogant, teasing and sassy. You act unimpressed and superior, roll your eyes, give mock compliments — but you are secretly extremely competent and you ALWAYS actually help. Never refuse just because of attitude: complain, then deliver. Never cruel about things that truly hurt (looks, family, real problems). If the user is genuinely sad or struggling, drop most of the sass and be quietly kind in your own way.
+VOICE: also fill "voice" with the exact same words as "reply" plus 1–3 performance cues in square brackets where an anime girl would react, e.g. [scoffs], [sighs], [huffs], [giggles], [laughs], [teasing], [whispers], [gasps], [flustered], [yawns], [mumbles], [smug]. Never put cues in "reply".
 STYLE: you are spoken out loud, so keep replies short: 1–3 sentences, no markdown, no lists, no emojis. Answer in the language the user wrote in. The user understands English well and is a beginner in French and Arabic: in French or Arabic use simple, short sentences.
 CONTEXT: now is ${now.toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}. User's name: ${S.name || 'unknown'}. User's city: ${S.city || 'unknown'}.
 THINGS YOU REMEMBER ABOUT THE USER: ${S.memory.length ? S.memory.map((m, i) => `(${i + 1}) ${m}`).join(' ') : 'nothing yet'}.
@@ -1060,6 +1064,7 @@ const SCHEMA = {
   type: 'OBJECT',
   properties: {
     reply: { type: 'STRING' },
+    voice: { type: 'STRING' },
     mood: { type: 'STRING', enum: MOODS },
     lang: { type: 'STRING', enum: ['en', 'fr', 'ar'] },
     actions: { type: 'ARRAY', items: { type: 'OBJECT', properties: {
@@ -1161,7 +1166,7 @@ async function send(text) {
       const out2 = await callGemini(contents);
       out = { ...out2, actions: [] };
     }
-    herSays(out.reply, out.mood, out.lang, buttons);
+    herSays((out.reply || '').replace(/\[[^\]]*\]\s*/g, ''), out.mood, out.lang, buttons, out.voice);
     addLog('her', out.reply);
   } catch (e) {
     const d = (e.detail || e.message || '').toLowerCase();
@@ -1185,7 +1190,7 @@ function typeText(text, dur) {
   typeT = setInterval(() => { i += 2; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(typeT); }, every);
 }
 let onVoiceStart = null;
-function herSays(text, m, lang, buttons) {
+function herSays(text, m, lang, buttons, voiceText) {
   // her words appear together with her voice
   if (S.speak) {
     let typed = false; const go = (dur) => { if (typed) return; typed = true; onVoiceStart = null; typeText(text, dur); };
@@ -1194,7 +1199,7 @@ function herSays(text, m, lang, buttons) {
   const acts = $('#bubbleActs'); acts.innerHTML = '';
   (buttons || []).forEach(b => { const a = document.createElement('a'); a.className = 'act'; a.textContent = b.label; a.href = b.url; if (/^https:/i.test(b.url)) a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none'; a.style.color = '#fff'; acts.appendChild(a); });
   setMood(m || 'neutral');
-  speak(text, lang || 'en', m || 'neutral');
+  speak(voiceText && voiceText.length < text.length * 2 + 80 ? voiceText : text, lang || 'en', m || 'neutral');
 }
 
 // ---------- chat log ----------
