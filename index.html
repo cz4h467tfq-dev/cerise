@@ -312,7 +312,7 @@ nav button{padding:4px 10px!important}
           <svg class="mirBow" viewBox="0 0 46 30" aria-hidden="true"><path d="M23 15C17 6 6 1 3 6s2 15 10 14c4-.5 8-3 10-5zM23 15c6-9 17-14 20-9s-2 15-10 14c-4-.5-8-3-10-5z" fill="#9b0f37" stroke="#ff8fb0" stroke-width="1.2"/><path d="M21 15l-6 14 5-2 3 3zM25 15l6 14-5-2-3 3z" fill="#7a0b2b" stroke="#ff8fb0" stroke-width="1"/><ellipse cx="23" cy="15" rx="4.2" ry="4.6" fill="#d1194a" stroke="#ffc2d4" stroke-width="1.2"/></svg>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126222900">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/body_front.webp?v=20261126223018">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -401,7 +401,7 @@ nav button{padding:4px 10px!important}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126222900 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126223018 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -421,13 +421,11 @@ const VAR = { neutral:['A00'], cold:['A33','A02','B32','B00'], sad:['A01'], bore
   smug:['A31','B24'], smirk:['A12'], laugh:['A11','B22','B23'], giggle:['A10'], calm:['A24'], shock:['A13','B13'], surprised:['B02'], pout:['A14','B10','A32'], flustered:['B14'],
   cry:['A21','B20'], teary:['A20','B21'], sleepy:['A22','B31'], sleeping:['A23','B30'], blank:['A30'], dark:['B34'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126222900';
+const VER = '20261126223018';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature', src: 'img/body_front.webp',
     when: 'her default look: everyday chat, jokes, magic, circus, theater, when nothing else fits', kw: /jester|circus|cirque|clown|harlequin|arlequin|th[ée][âa]tre|theat|magic|magie|سيرك|مهرج/i },
-  { id: 'nurse', name: 'Nurse', short: 'Nurse', sub: "Doctor's orders", when: 'hospital, doctor, nurse, being sick, medicine, injuries, pain, health, clinic, appointments, first aid',
-    kw: /hospital|h[ôo]pital|doctor|docteur|m[ée]decin|nurse|infirmi|\bsick\b|malade|\bill\b|fever|fi[èe]vre|medicine|m[ée]dicament|clinic|clinique|injur|bless[ée]|\bhurts?\b|\bpain\b|douleur|health|sant[ée]|pharmac|dentist|dentiste|مستشفى|طبيب|دكتور|مريض|دواء|ممرض|صيدلية/i },
   { id: 'pajamas', name: 'Pajamas', short: 'Pajamas', sub: 'Do not disturb', when: 'sleep, bed, being tired, good night, naps, late at night, lazy days, waking up',
     kw: /\bsleep|dormir|sommeil|\bbed\b|\blit\b|tired|fatigu|good ?night|bonne nuit|\bnap\b|sieste|insomnia|pajama|pyjama|نوم|نعسان|تصبح على خير|سرير|تعبان/i },
   { id: 'winter', name: 'Snow Coat', short: 'Winter', sub: 'Cold-weather fluff', when: 'winter, snow, cold or freezing weather, Christmas, skiing, mountains',
@@ -1230,7 +1228,7 @@ ACTIONS you can trigger with the "actions" field (value is a string):
 - forget: value = text of a remembered fact to delete.
 - open: value = "Button label|URL". Shows a button the user taps. Use for: Spotify "spotify:search:QUERY", YouTube "https://www.youtube.com/results?search_query=QUERY", Google "https://www.google.com/search?q=QUERY", GitHub "https://github.com/...", Maps "https://maps.apple.com/?q=PLACE", directions "https://maps.apple.com/?daddr=PLACE", email "mailto:ADDRESS?subject=S&body=B", text "sms:NUMBER&body=TEXT", call "tel:NUMBER", WhatsApp "https://wa.me/?text=TEXT", Instagram "instagram://app", Calendar "calshow:", Reminders "x-apple-reminderapp://". URL-encode queries.
 Only use actions when needed. Never claim you did something you have no action for — say it's coming in a future update instead.
-OUTFIT: you have a wardrobe and you are currently wearing "${outfitOf(S.outfit).id}". Fill "outfit" with the outfit that fits what the conversation is about right now, or "keep" to stay as you are. Change only when the topic clearly fits another outfit (for example hospital or being sick = nurse), and keep it while the topic continues. Your outfits: ${OUTFITS.map(o => o.id + ' (' + o.when + ')').join('; ')}.${S.outfitAuto === false ? ' The user turned outfit changes off, so always answer "keep".' : ''} When you change, you may mention it in one short in-character remark, but don't always.
+OUTFIT: you have a wardrobe and you are currently wearing "${outfitOf(S.outfit).id}". Fill "outfit" with the outfit that fits what the conversation is about right now, or "keep" to stay as you are. Change only when the topic clearly fits another outfit (for example being tired = pajamas, a party = gown), and keep it while the topic continues. Your outfits: ${OUTFITS.map(o => o.id + ' (' + o.when + ')').join('; ')}.${S.outfitAuto === false ? ' The user turned outfit changes off, so always answer "keep".' : ''} When you change, you may mention it in one short in-character remark, but don't always.
 MOOD: pick the face that fits your reply. Use the whole range and avoid using the same mood twice in a row: neutral, cold (unimpressed, your usual), sad, bored (chin on hand), side (side-eye), annoyed, grumpy (blushing frown), angry (shouting), smug (teasing grin), smirk (hand over mouth, scheming), laugh, giggle (soft happy), calm (content, eyes closed), shock, surprised, pout (blushing at compliments), flustered (embarrassed), cry (dramatic wail), teary, sleepy (yawning), sleeping, blank (dead inside), dark (ominous threat, as a joke).`;
 }
 const SCHEMA = {
