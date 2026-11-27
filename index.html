@@ -458,7 +458,7 @@ nav button svg{display:none}
           <div class="mirTag">WARDROBE</div>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127160232">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127161418">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -547,7 +547,7 @@ nav button svg{display:none}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127160232 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127161418 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -569,7 +569,7 @@ const VAR = { neutral:['F01'], cold:['F26','F19'], sad:['F22','F05'], bored:['F1
   pout:['F08','F11'], flustered:['F08','F29'], shy:['F29','F11'], love:['F17','F25'], excited:['F24'], cry:['F18'], teary:['F05'], sleepy:['F28'], sleeping:['F09'],
   blank:['F30'], dark:['F20','F23'], sick:['F27'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261127160232';
+const VER = '20261127161418';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature',
@@ -834,7 +834,10 @@ async function ensureAudio() {
   return c;
 }
 function voiceNote(msg) { const n = document.getElementById('voiceNote'); if (!n) return; if (msg) { n.textContent = '🔇 ' + msg; n.hidden = false; } else n.hidden = true; }
-function vlog(msg) { S.lastVoice = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' · ' + msg; save(); const el = document.getElementById('s-vlog'); if (el) el.textContent = 'Last time she spoke: ' + S.lastVoice; }
+const TIMING = { brain: 0, sent: 0, voice: 0 };
+function markVoiceStart() { if (TIMING.sent && !TIMING.voice) TIMING.voice = (performance.now() - TIMING.sent) / 1000; }
+function vlog(msg) { if (TIMING.sent) { msg += ' · she thought ' + TIMING.brain.toFixed(1) + 's, voice started ' + (TIMING.voice ? TIMING.voice.toFixed(1) + 's' : '—') + ' later'; TIMING.sent = 0; TIMING.voice = 0; }
+  S.lastVoice = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' · ' + msg; save(); const el = document.getElementById('s-vlog'); if (el) el.textContent = 'Last time she spoke: ' + S.lastVoice; }
 const VOICE_STYLE = {
   neutral: 'cool, unbothered and a little bored', cold: 'cold, flat and unimpressed', smug: 'smug and teasing, with a little laugh in the voice',
   smirk: 'scheming and playful', laugh: 'laughing, amused', giggle: 'softly pleased, trying to hide a smile', annoyed: 'annoyed and sharp',
@@ -851,10 +854,10 @@ async function fetchTTS(text, m) {
     const line = model.includes('3.1') ? text : text.replace(/\[[^\]]*\]\s*/g, ''); // older model would read the cues aloud
     const prompt = `${direction}\n\n${line}`;
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      const res = await fetchT(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key.trim() },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: S.ttsVoice || 'Leda' } } } } })
-      });
+      }, 8000);
       if (!res.ok) { const err = new Error('tts ' + res.status); err.status = res.status; try { err.detail = (await res.json()).error.message; } catch (e) {} throw err; }
       const data = await res.json(); const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
       if (!part) throw new Error('no audio');
@@ -862,7 +865,7 @@ async function fetchTTS(text, m) {
       const bin = atob(part.inlineData.data); const n = bin.length >> 1; const f = new Float32Array(n);
       for (let i = 0; i < n; i++) { let v = bin.charCodeAt(i * 2) | (bin.charCodeAt(i * 2 + 1) << 8); if (v >= 32768) v -= 65536; f[i] = v / 32768; }
       return { f, rate };
-    } catch (e) { lastErr = e; if (e.status === 400 || e.status === 401 || e.status === 403) break; }
+    } catch (e) { lastErr = e; if (e.status === 400 || e.status === 401 || e.status === 403 || e.status === 'timeout') break; }
   }
   throw lastErr;
 }
@@ -933,7 +936,7 @@ async function speakFish(text, seq, m) {
   } finally { playPCM.totalEst = 0; }
   if (seq === speakSeq) stopLip();
 }
-let speakSeq = 0;
+let speakSeq = 0; let ttsSlowUntil = 0;
 function stopSpeaking() { speakSeq++; try { voiceEl.pause(); } catch (e) {} curSrc = null; if ('speechSynthesis' in window) speechSynthesis.cancel(); stopLip(); }
 // play raw PCM through the analyser so her mouth follows the real audio
 // One reusable <audio> element: iOS lets it play later (after network waits) once it has played during a tap,
@@ -974,7 +977,7 @@ function playBlobDirect(blob, seq) {
     if (seq !== speakSeq) return resolve(false);
     const url = URL.createObjectURL(blob); voiceEl.src = url; voiceEl.playbackRate = 1; const token = {}; curSrc = token;
     try { await voiceEl.play(); } catch (e) { curSrc = null; URL.revokeObjectURL(url); return reject(new Error('could not play audio: ' + (e.message || e))); }
-    if (!speaking) startLip(); if (onVoiceStart) onVoiceStart(voiceEl.duration && isFinite(voiceEl.duration) ? voiceEl.duration : 3);
+    markVoiceStart(); if (!speaking) startLip(); if (onVoiceStart) onVoiceStart(voiceEl.duration && isFinite(voiceEl.duration) ? voiceEl.duration : 3);
     const flap = setInterval(() => { rig.mouthT = Math.random() < .25 ? .1 : .3 + Math.random() * .6; }, 95);
     const done = () => { clearInterval(flap); voiceEl.removeEventListener('ended', done); voiceEl.removeEventListener('error', done); if (curSrc === token) curSrc = null; URL.revokeObjectURL(url); resolve(seq === speakSeq); };
     voiceEl.addEventListener('ended', done); voiceEl.addEventListener('error', done);
@@ -992,7 +995,7 @@ async function playPCM(f, sr, seq, rate = 1) {
   try { await voiceEl.play(); }
   catch (e) { curSrc = null; URL.revokeObjectURL(url); throw new Error(e && e.name === 'NotAllowedError' ? 'iPhone blocked the sound (tap the screen once, then try again)' : 'could not play audio: ' + (e.message || e)); }
   if (!speaking) startLip();
-  if (onVoiceStart) { const est = playPCM.totalEst || (f.length / sr / rate); onVoiceStart(est); }
+  markVoiceStart(); if (onVoiceStart) { const est = playPCM.totalEst || (f.length / sr / rate); onVoiceStart(est); }
   return new Promise((resolve) => {
     const done = () => { voiceEl.removeEventListener('ended', done); voiceEl.removeEventListener('error', done); if (curSrc === token) curSrc = null; URL.revokeObjectURL(url); resolve(seq === speakSeq); };
     voiceEl.addEventListener('ended', done); voiceEl.addEventListener('error', done);
@@ -1139,7 +1142,7 @@ async function speak(text, lang = 'en', m = 'neutral') {
   if (order.includes(pick)) { order.splice(order.indexOf(pick), 1); order.unshift(pick); }
   if (engine === 'auto' || engine === 'ai') for (const step of order) {
     if (step === 'gemini') { // expressive Gemini anime voice (free daily limit)
-      if (S.key && Date.now() > ttsCooldownUntil) {
+      if (S.key && Date.now() > ttsCooldownUntil && Date.now() > ttsSlowUntil) {
         try {
           status('think', 'Voice'); const { f, rate } = await fetchTTS(text, m); status('', 'Online');
           if (seq !== speakSeq) return;
@@ -1147,9 +1150,10 @@ async function speak(text, lang = 'en', m = 'neutral') {
         } catch (e) {
           status('', 'Online'); if (seq !== speakSeq) return; stopLip();
           if (e.status === 429) { ttsCooldownUntil = Date.now() + 10 * 60 * 1000; why.push('AI voice: daily limit reached'); if (!ttsNoticeShown) { ttsNoticeShown = true; toast('Her anime voice reached today\'s free limit, switching to her next voice'); } }
+          else if (e.status === 'timeout') { ttsSlowUntil = Date.now() + 3 * 60 * 1000; why.push('AI voice: too slow right now, used her next voice'); }
           else why.push('AI voice: ' + (e.message || e));
         }
-      } else why.push(S.key ? 'AI voice: resting after hitting its limit' : 'AI voice: no Gemini key');
+      } else why.push(!S.key ? 'AI voice: no Gemini key' : Date.now() <= ttsSlowUntil ? 'AI voice: skipped for a few minutes (it was slow)' : 'AI voice: resting after hitting its limit');
     } else if (step === 'orpheus') { // Orpheus on Groq (English only)
       if (lang !== 'en') { why.push('Orpheus: English only'); continue; }
       if (S.groqKey && Date.now() > orphCooldownUntil) {
@@ -1196,7 +1200,7 @@ function phoneSpeak(text, lang, seq) {
   const v = pickVoice(lang); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang === 'fr' ? 'fr-FR' : lang === 'ar' ? 'ar-SA' : 'en-US';
   u.pitch = 1.12; u.rate = lang === 'en' ? 1.02 : 0.95;
   let flap;
-  u.onstart = () => { if (seq !== speakSeq) return; if (onVoiceStart) onVoiceStart(text.length * 0.07); startLip(); flap = setInterval(() => { rig.mouthT = Math.random() < .25 ? .1 : .35 + Math.random() * .55; }, 95); };
+  u.onstart = () => { if (seq !== speakSeq) return; markVoiceStart(); if (onVoiceStart) onVoiceStart(text.length * 0.07); startLip(); flap = setInterval(() => { rig.mouthT = Math.random() < .25 ? .1 : .35 + Math.random() * .55; }, 95); };
   u.onend = u.onerror = () => { clearInterval(flap); if (seq === speakSeq) stopLip(); };
   speechSynthesis.speak(u);
 }
@@ -1402,17 +1406,21 @@ const SCHEMA = {
   required: ['reply', 'mood', 'lang', 'outfit']
 };
 const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+// keep her quick: chatty replies don't need deep reasoning (Gemini 3 Flash thinks a lot by default)
+function thinkCfg(model) { if ((S.noThink || {})[model]) return null; return /^gemini-2\.5/.test(model) ? { thinkingBudget: 0 } : { thinkingLevel: 'low' }; }
+function fetchT(url, opt, ms) { const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
+  return fetch(url, { ...opt, signal: c.signal }).catch(e => { if (e.name === 'AbortError') { const err = new Error('took too long'); err.status = 'timeout'; throw err; } throw e; }).finally(() => clearTimeout(t)); }
 async function callModel(model, contents) {
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+  const gc = { responseMimeType: 'application/json', responseSchema: SCHEMA, temperature: 0.9, maxOutputTokens: 1500 };
+  const tc = thinkCfg(model); if (tc) gc.thinkingConfig = tc;
+  const res = await fetchT(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key.trim() },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: systemPrompt() }] },
-      contents,
-      generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA, temperature: 0.9, maxOutputTokens: 4096 }
-    })
-  });
-  if (!res.ok) { const err = new Error('HTTP ' + res.status); err.status = res.status; try { err.detail = (await res.json()).error.message; } catch (e) {} throw err; }
+    body: JSON.stringify({ system_instruction: { parts: [{ text: systemPrompt() }] }, contents, generationConfig: gc })
+  }, 30000);
+  if (!res.ok) { const err = new Error('HTTP ' + res.status); err.status = res.status; try { err.detail = (await res.json()).error.message; } catch (e) {}
+    if (tc && res.status === 400 && /think/i.test(err.detail || '')) { S.noThink = { ...(S.noThink || {}), [model]: true }; save(); return callModel(model, contents); } // this model rejects the setting: ask again without it
+    throw err; }
   const data = await res.json();
   const text = data.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('') || '';
   if (!text) { const err = new Error('empty'); err.status = 0; err.detail = 'Empty reply (' + (data.candidates?.[0]?.finishReason || data.promptFeedback?.blockReason || 'unknown') + ')'; throw err; }
@@ -1449,7 +1457,8 @@ async function callGemini(contents) {
           const keyProblem = (e.status === 400 && /api key|API_KEY/i.test(e.detail || '')) || e.status === 401 || (e.status === 403 && /key|permission|denied/i.test(e.detail || ''));
           if (keyProblem) { if (S.groqKey) break; throw e; }
           if (e.status === undefined) throw e;
-          if ((e.status === 503 || e.status === 500) && attempt === 0) { status('think', 'Retrying'); await sleep(1200); continue; }
+          if ((e.status === 503 || e.status === 500) && attempt === 0) { status('think', 'Retrying'); await sleep(700); continue; }
+          if (e.status === 'timeout') break;
           break;
         }
       }
@@ -1470,7 +1479,7 @@ async function send(text) {
   if (!S.key && !S.groqKey) { const l = "Wow, you expect me to think for free? Put a Gemini API key in Settings first."; herSays(l, 'smug', 'en', []); addLog('her', l, false); return; }
   busy = true; status('think', 'Thinking'); setMood('cold', 20000); $('#bubble').classList.add('thinking'); $('#bubbleActs').innerHTML = '';
   try {
-    let contents = historyContents();
+    let contents = historyContents(); const t0 = performance.now();
     let out = await callGemini(contents);
     const buttons = [];
     let toolResults = [];
@@ -1494,6 +1503,7 @@ async function send(text) {
       const out2 = await callGemini(contents);
       out = { ...out2, outfit: OUTFIT_IDS.includes(out2.outfit) ? out2.outfit : out.outfit, actions: [] };
     }
+    TIMING.brain = (performance.now() - t0) / 1000; TIMING.sent = performance.now();
     chooseOutfit(out.outfit, text);
     herSays((out.reply || '').replace(/\[[^\]]*\]\s*/g, ''), out.mood, out.lang, buttons, out.voice);
     addLog('her', out.reply);
@@ -1523,7 +1533,7 @@ function herSays(text, m, lang, buttons, voiceText) {
   // her words appear together with her voice
   if (S.speak) {
     let typed = false; const go = (dur) => { if (typed) return; typed = true; onVoiceStart = null; typeText(text, dur); };
-    $('#bubble').classList.add('thinking'); onVoiceStart = go; setTimeout(() => go(), 9000);
+    $('#bubble').classList.add('thinking'); onVoiceStart = go; setTimeout(() => go(), 1200);
   } else typeText(text);
   const acts = $('#bubbleActs'); acts.innerHTML = '';
   (buttons || []).forEach(b => { const a = document.createElement('a'); a.className = 'act'; a.textContent = b.label; a.href = b.url; if (/^https:/i.test(b.url)) a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none'; a.style.color = '#fff'; acts.appendChild(a); });
