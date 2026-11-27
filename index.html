@@ -445,7 +445,7 @@ nav button svg{display:none}
           <div class="mirTag">WARDROBE</div>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127225953">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127233734">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -555,7 +555,7 @@ nav button svg{display:none}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127225953 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127233734 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -577,15 +577,17 @@ const VAR = { neutral:['F01'], cold:['F26','F19'], sad:['F22','F05'], bored:['F1
   pout:['F08','F11'], flustered:['F08','F29'], shy:['F29','F11'], love:['F17','F25'], excited:['F24'], cry:['F18'], teary:['F05'], sleepy:['F28'], sleeping:['F09'],
   blank:['F30'], dark:['F20','F23'], sick:['F27'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261127225953';
+const VER = '20261127233734';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature',
     when: 'her default look: everyday chat, jokes, magic, circus, theater, when nothing else fits', kw: /jester|circus|cirque|clown|harlequin|arlequin|th[ée][âa]tre|theat|magic|magie|سيرك|مهرج/i },
   { id: 'doctor', name: 'Doctor', short: 'Doctor', sub: "Doctor's orders", when: 'hospital, doctor, being sick, medicine, injuries, pain, health, clinic, appointments, first aid, biology',
     kw: /hospital|h[ôo]pital|doctor|docteur|m[ée]decin|nurse|infirmi|\bsick\b|malade|\bill\b|fever|fi[èe]vre|medicine|m[ée]dicament|clinic|clinique|injur|bless[ée]|\bhurts?\b|\bpain\b|douleur|health|sant[ée]|pharmac|dentist|dentiste|مستشفى|طبيب|دكتور|مريض|دواء|صيدلية/i },
-  { id: 'pajamas', name: 'Bunny Pajamas', short: 'Pajamas', sub: 'Do not disturb', when: 'sleep, bed, being tired, good night, naps, late at night, lazy days, waking up',
+  { id: 'pajamas', group: 'sleep', name: 'Bunny Pajamas', short: 'Pajamas', sub: 'Do not disturb', when: 'sleep, bed, being tired, good night, naps, late at night, lazy days, waking up',
     kw: /\bsleep|dormir|sommeil|\bbed\b|\blit\b|tired|fatigu|good ?night|bonne nuit|\bnap\b|sieste|insomnia|pajama|pyjama|نوم|نعسان|تصبح على خير|سرير|تعبان/i },
+  { id: 'plaidpj', group: 'sleep', name: 'Plaid Bunny Pajamas', short: 'Plaid PJs', sub: 'Cozy night in', when: 'also for sleep, bed and tired moments; especially cozy nights in, cold nights at home, sleepovers, movie night in bed',
+    kw: /sleepover|soir[ée]e pyjama|cozy night|movie night|night in|\bsleep|dormir|sommeil|\bbed\b|\blit\b|tired|fatigu|good ?night|bonne nuit|\bnap\b|sieste|pajama|pyjama|نوم|نعسان|تصبح على خير|سرير|تعبان/i },
   { id: 'school', name: 'School Uniform', short: 'School', sub: 'Class is in session', when: 'school, homework, studying, exams, classes, teachers, university, math, physics, learning',
     kw: /school|[ée]cole|homework|devoirs?|\bexams?\b|examen|\bstudy|[ée]tudi|\bclass\b|classe|\bcours\b|lesson|le[çc]on|teacher|\bprof\b|universit|college|coll[èe]ge|lyc[ée]e|\bmath|physics|chemistry|مدرسة|درس|امتحان|جامعة|واجب/i },
   { id: 'winter', name: 'Winter Fluff', short: 'Winter', sub: 'Cold-weather fluff', when: 'winter, snow, cold or freezing weather, Christmas, skiing, mountains',
@@ -600,8 +602,10 @@ const OUTFITS = [
     kw: /\bclean|nettoy|m[ée]nage|\bcook|cuisin|recipe|recette|chores|laundry|lessive|dishes|vaisselle|tea time|طبخ|تنظيف|وصفة/i },
   { id: 'street', name: 'Streetwear', short: 'Street', sub: 'Too cool to care', when: 'music, concerts, the gym, sports, gaming, skating, the city, coding, tech, GitHub, hacking',
     kw: /\bgym\b|workout|\bsports?\b|football|basket|concert|music|musique|\bsong|chanson|gaming|video ?game|jeu vid|\bskate|\brap\b|\brock\b|github|\bcode\b|coding|programm|hack|رياضة|موسيقى|العاب/i },
-  { id: 'casual', name: 'Cozy Sweater', short: 'Casual', sub: 'Casual day out', when: 'hanging out, shopping, the mall, coffee, friends, weekends, movies, walks, work and errands, chilling',
+  { id: 'casual', group: 'casual', name: 'Cozy Sweater', short: 'Casual', sub: 'Casual day out', when: 'hanging out, shopping, the mall, coffee, friends, weekends, movies, walks, work and errands, chilling',
     kw: /shopping|\bmall\b|coffee|\bcaf[ée]\b|hang ?out|friends|\bamis\b|weekend|week-end|\bmovies?\b|\bfilm\b|cin[ée]ma|\bwalk\b|promenade|\bchill|beach|plage|تسوق|قهوة|اصحاب|سينما/i },
+  { id: 'sweater', group: 'casual', name: 'Striped Sweater', short: 'Sweater', sub: 'Comfy and cute', when: 'also for casual moments; especially comfy days, rainy days, staying home, relaxing, reading, just chatting',
+    kw: /\brain|pluie|cozy|cosy|\bcomfy|relax|reading|\blire\b|chez moi|at home|lazy|مطر|راحة|كسل/i },
 ];
 OUTFITS.forEach((o, i) => { o.n = i + 1; o.src = 'img/outfits/' + o.id + '.webp?v=' + VER; o.thumb = 'img/outfits/t_' + o.id + '.webp?v=' + VER; });
 const OUTFIT_IDS = OUTFITS.map(o => o.id);
@@ -1853,7 +1857,9 @@ function outfitFromText(t) { for (const o of OUTFITS) if (o.kw.test(t || '')) re
 // pick an outfit for this turn: her own choice first, then keywords from what you said
 function chooseOutfit(brainPick, userText) {
   if (S.outfitAuto === false) return;
-  const pick = OUTFIT_IDS.includes(brainPick) ? brainPick : brainPick === 'keep' ? null : outfitFromText(userText);
+  let pick = OUTFIT_IDS.includes(brainPick) ? brainPick : brainPick === 'keep' ? null : outfitFromText(userText);
+  if (pick) { const g = outfitOf(pick).group; if (g) { const same = OUTFITS.filter(o => o.group === g);
+    pick = same.some(o => o.id === S.outfit) ? S.outfit : brainPick === pick ? pick : same[Math.floor(Math.random() * same.length)].id; } }
   if (pick && pick !== S.outfit) setOutfit(pick, 'chat');
 }
 function openHer() { const f = shown === 'neutral' || !IMG[shown] ? 'neutral' : shown; $('#cFaceImg').src = IMG[f]; $('#stMood').textContent = mood; $('#stMsg').textContent = S.history.length; paintLook(outfitOf(S.outfit), false); }
