@@ -246,7 +246,7 @@ nav button{padding:4px 10px!important}
 @keyframes hsUp{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}
 @keyframes hsIn{0%{opacity:0;letter-spacing:.2em}100%{opacity:1}}
 .cFace{width:46px;height:46px;border-radius:50%;overflow:hidden;flex:none;border:2px solid var(--crimson);background:#2a0f19}
-.cFace img{width:170%;height:auto;margin:-57% 0 0 -45%;display:block}
+.cFace img{width:230%;height:auto;margin:-58% 0 0 -66%;display:block}
 .cardTop{justify-content:flex-start!important;gap:12px!important}
 .pillBtn{flex:none;border:1px solid rgba(255,61,110,.5);background:rgba(209,25,74,.18);color:#ffd1de;font-weight:700;font-size:13px;border-radius:999px;padding:9px 14px;min-height:40px}
 .stats{margin-top:10px!important}.stats div{padding:8px!important}
@@ -255,7 +255,7 @@ nav button{padding:4px 10px!important}
 .galTop b{font-size:18px}.galTop button{background:rgba(255,255,255,.1);border:0;border-radius:999px;padding:9px 16px;font-weight:700;min-height:40px}
 .galGrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-content:start}
 .galGrid button{border:0;padding:0;background:#2a0f19;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;align-items:stretch}
-.galGrid img{width:100%;aspect-ratio:1;object-fit:cover;object-position:55% 56%;display:block}
+.galGrid img{width:100%;aspect-ratio:1;object-fit:cover;display:block;transform:scale(1.438);transform-origin:41.7% 11.6%}
 .galGrid span{font-size:10px;color:var(--mute);padding:4px 2px 6px;text-transform:capitalize}
 .galHint{color:var(--mute);font-size:12px;text-align:center;margin:8px 0 0}
 
@@ -458,7 +458,7 @@ nav button svg{display:none}
           <div class="mirTag">WARDROBE</div>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261126234436">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127160232">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -470,7 +470,7 @@ nav button svg{display:none}
         <div class="cardTop">
           <div class="cFace"><img id="cFaceImg" alt=""></div>
           <div style="flex:1;min-width:0"><div class="cName">Cerise</div><div class="cSub">Cold · arrogant · secretly helpful</div></div>
-          <button class="pillBtn" id="galBtn" type="button">40 faces</button>
+          <button class="pillBtn" id="galBtn" type="button">Faces</button>
         </div>
         <div class="stats"><div><b id="stMood">cold</b><span>mood</span></div><div><b id="stLook">Jester</b><span>outfit</span></div><div><b id="stMsg">0</b><span>messages</span></div></div>
       </div>
@@ -547,7 +547,7 @@ nav button svg{display:none}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261126234436 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127160232 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -559,17 +559,17 @@ nav button svg{display:none}
 </div>
 <div id="grain" aria-hidden="true"></div>
 <div id="toast"></div>
-<div id="gallery" hidden><div class="galTop"><b>Her 40 expressions</b><button type="button" id="galClose" aria-label="Close">Close</button></div><div class="galGrid" id="galGrid"></div><p class="galHint">Tap a face and she'll make it.</p></div>
+<div id="gallery" hidden><div class="galTop"><b id="galTitle">Her expressions</b><button type="button" id="galClose" aria-label="Close">Close</button></div><div class="galGrid" id="galGrid"></div><p class="galHint">Tap a face and she'll make it.</p></div>
 <div id="intro"><div class="title">CERISE</div><div class="diamonds"></div><div class="sub">your pocket jester</div></div>
 
 <script>
 const $ = (s) => document.querySelector(s);
-const VAR = { neutral:['F01'], cold:['F19','F40','F34'], sad:['F18','F37'], bored:['F10','F34'], side:['F29','F21'], annoyed:['F38'], grumpy:['F26'], angry:['F04'],
-  smug:['F13','F39','F36'], smirk:['F03','F14'], laugh:['F02','F25'], giggle:['F16','F30'], calm:['F15','F22'], shock:['F07','F12'], surprised:['F31'], confused:['F08'],
-  pout:['F27'], flustered:['F06','F11'], shy:['F32','F21'], love:['F28','F11'], excited:['F24'], cry:['F17'], teary:['F05'], sleepy:['F35','F22'], sleeping:['F09'],
-  blank:['F20'], dark:['F23'], sick:['F33'] };
+const VAR = { neutral:['F01'], cold:['F26','F19'], sad:['F22','F05'], bored:['F10','F26'], side:['F21'], annoyed:['F19','F33'], grumpy:['F19'], angry:['F04','F23'],
+  smug:['F03','F25','F13'], smirk:['F14'], laugh:['F02','F32'], giggle:['F16','F17'], calm:['F16'], shock:['F06','F12'], surprised:['F06','F07'], confused:['F07'],
+  pout:['F08','F11'], flustered:['F08','F29'], shy:['F29','F11'], love:['F17','F25'], excited:['F24'], cry:['F18'], teary:['F05'], sleepy:['F28'], sleeping:['F09'],
+  blank:['F30'], dark:['F20','F23'], sick:['F27'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261126234436';
+const VER = '20261127160232';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature',
@@ -627,8 +627,8 @@ const R = (() => {
   const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}';
   const fs = `precision highp float;
 uniform sampler2D A,B,C;uniform float m,t,k,bl,mo;varying vec2 v;
-const vec2 TS=vec2(1024.,1093.);
-const vec4 MO=vec4(571.,801.,19.,0.);
+const vec2 TS=vec2(1024.,1024.);
+const vec4 MO=vec4(518.,601.,16.,0.);
 vec2 warp(vec2 uv){
   float side=smoothstep(.30,.5,abs(uv.x-.5));float low=smoothstep(.25,.95,uv.y);
   uv.x+=(sin(uv.y*6.-t*1.25)*.0055+sin(uv.y*15.-t*2.3)*.0013)*side*low;
@@ -638,7 +638,7 @@ vec2 warp(vec2 uv){
 vec3 mouth(vec3 c,vec2 p){
   float o=smoothstep(.02,1.,mo);if(o<.001)return c;
   vec2 ctr=vec2(MO.x,MO.y+1.+5.*o);
-  float rx=MO.z*(.78+.34*o);float ryTop=1.4+4.5*o;float ryBot=2.+15.*o;
+  float rx=MO.z*(.8+.32*o);float ryTop=1.2+3.8*o;float ryBot=1.8+12.5*o;
   vec2 d=p-ctr;float ry=d.y<0.?ryTop:ryBot;
   float r=length(vec2(d.x/rx,d.y/ry));
   float inside=1.-smoothstep(.84,1.,r);
@@ -726,7 +726,7 @@ void main(){
 })();
 if (R) fallback.remove(); else cv.remove();
 // size the card so her picture shows at its real resolution (never enlarged), snapped to whole screen pixels
-const IW = 1024, IH = 1093, CROP = { l: .1025, t: .0659, w: .7793, h: .7896 };
+const IW = 1024, IH = 1024, CROP = { l: .127, t: .035, w: .695, h: .735 };
 function layoutCard() {
   const st = $('#stage'); if (!st || !st.clientWidth) return;
   const dpr = window.devicePixelRatio || 1, el = R ? cv : fallback;
@@ -1540,7 +1540,7 @@ function renderLogItem(who, text) {
   const log = $('#log'); const e = log.querySelector('.empty'); if (e) e.remove();
   if (who === 'her') {
     const row = document.createElement('div'); row.className = 'row';
-    row.innerHTML = `<img src="${IMG.neutral}" alt="">`;
+    row.innerHTML = `<img src="img/avatar.webp?v=${VER}" alt="">`;
     const m = document.createElement('div'); m.className = 'msg her'; m.textContent = text; row.appendChild(m); log.appendChild(row);
   } else { const m = document.createElement('div'); m.className = 'msg ' + who; m.textContent = text; log.appendChild(m); }
   log.scrollTop = log.scrollHeight;
@@ -1617,7 +1617,8 @@ $('#rig').addEventListener('click', () => { if (busy || speaking) return; const 
   ["H-hey! Warn me first!", 'flustered'], ["Are you serious right now?", 'angry'], ["...Wow. Riveting.", 'blank'], ["Pfft. You're so weird.", 'giggle'], ["Excuse me?!", 'shock'], ["Ugh. Fine. I'm listening.", 'grumpy'], ["Keep poking and see what happens.", 'dark'], ["Don't look at me like that...", 'side']]; const p = pokes[Math.floor(Math.random() * pokes.length)]; unlockAudio(); herSays(p[0], p[1], 'en', []); });
 
 
-// ---------- gallery: every one of her 40 faces ----------
+// ---------- gallery: every one of her faces ----------
+$('#galTitle').textContent = 'Her ' + FRAMES.length + ' expressions'; $('#galBtn').textContent = FRAMES.length + ' faces';
 const FACE_MOOD = {}; Object.entries(VAR).forEach(([m, ids]) => ids.forEach(id => { FACE_MOOD[id] = m; }));
 function openGallery() {
   const g = $('#galGrid'); if (!g.children.length) {
