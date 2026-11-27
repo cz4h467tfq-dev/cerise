@@ -458,7 +458,7 @@ nav button svg{display:none}
           <div class="mirTag">WARDROBE</div>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127161418">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127161937">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -485,9 +485,29 @@ nav button svg{display:none}
         <div class="field"><label for="s-groq">Backup brain: Groq API key (optional)</label>
           <input id="s-groq" type="password" placeholder="gsk_…" autocomplete="off">
           <small>Free from <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>. Used automatically when Gemini is busy.</small></div>
-        <div class="field"><label for="s-model">Gemini model</label>
-          <input id="s-model" autocomplete="off">
-          <small>Leave empty to pick a working model automatically.</small></div>
+        <div class="field"><label for="s-modelPick">Her brain (Gemini model)</label>
+          <select id="s-modelPick">
+            <option value="">Auto (best one that works)</option>
+            <optgroup label="Free models">
+              <option value="gemini-3.8-flash">Gemini 3.8 Flash · smartest</option>
+              <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+              <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+              <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+              <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite · fastest</option>
+              <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite · fast</option>
+              <option value="gemini-flash-latest">Gemini Flash (always newest)</option>
+              <option value="gemini-flash-lite-latest">Gemini Flash-Lite (always newest)</option>
+            </optgroup>
+            <optgroup label="Paid only">
+              <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
+            </optgroup>
+            <optgroup label="From your key" id="s-modelMine" hidden></optgroup>
+            <option value="custom">Other model ID…</option>
+          </select>
+          <small>Flash = smarter, Flash-Lite = quicker replies. If your pick is busy or out of free uses, she falls back to another model so she keeps answering.</small></div>
+        <div class="field" id="modelCustomField"><label for="s-modelCustom">Model ID</label>
+          <input id="s-modelCustom" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. gemini-3.8-flash"></div>
+        <button class="btn ghost" id="s-loadModels" type="button" style="width:calc(100% - 28px);margin:4px 14px 6px">Show every model my key can use</button>
         <button class="btn" id="s-ping" type="button" style="width:calc(100% - 28px);margin:4px 14px 14px">Test connection</button>
         <div id="s-pingout" style="padding:0 14px 14px;font-size:13px;color:var(--mute);white-space:pre-wrap;word-break:break-word"></div>
       </div>
@@ -547,7 +567,7 @@ nav button svg{display:none}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127161418 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127161937 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -569,7 +589,7 @@ const VAR = { neutral:['F01'], cold:['F26','F19'], sad:['F22','F05'], bored:['F1
   pout:['F08','F11'], flustered:['F08','F29'], shy:['F29','F11'], love:['F17','F25'], excited:['F24'], cry:['F18'], teary:['F05'], sleepy:['F28'], sleeping:['F09'],
   blank:['F30'], dark:['F20','F23'], sick:['F27'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261127161418';
+const VER = '20261127161937';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature',
@@ -836,7 +856,7 @@ async function ensureAudio() {
 function voiceNote(msg) { const n = document.getElementById('voiceNote'); if (!n) return; if (msg) { n.textContent = '🔇 ' + msg; n.hidden = false; } else n.hidden = true; }
 const TIMING = { brain: 0, sent: 0, voice: 0 };
 function markVoiceStart() { if (TIMING.sent && !TIMING.voice) TIMING.voice = (performance.now() - TIMING.sent) / 1000; }
-function vlog(msg) { if (TIMING.sent) { msg += ' · she thought ' + TIMING.brain.toFixed(1) + 's, voice started ' + (TIMING.voice ? TIMING.voice.toFixed(1) + 's' : '—') + ' later'; TIMING.sent = 0; TIMING.voice = 0; }
+function vlog(msg) { if (TIMING.sent) { msg += ' · she thought ' + TIMING.brain.toFixed(1) + 's (' + (S.okModel || '?').replace(/^groq:/, 'Groq ') + '), voice started ' + (TIMING.voice ? TIMING.voice.toFixed(1) + 's' : '—') + ' later'; TIMING.sent = 0; TIMING.voice = 0; }
   S.lastVoice = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' · ' + msg; save(); const el = document.getElementById('s-vlog'); if (el) el.textContent = 'Last time she spoke: ' + S.lastVoice; }
 const VOICE_STYLE = {
   neutral: 'cool, unbothered and a little bored', cold: 'cold, flat and unimpressed', smug: 'smug and teasing, with a little laugh in the voice',
@@ -1405,7 +1425,7 @@ const SCHEMA = {
   },
   required: ['reply', 'mood', 'lang', 'outfit']
 };
-const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite', 'gemini-2.5-flash'];
 // keep her quick: chatty replies don't need deep reasoning (Gemini 3 Flash thinks a lot by default)
 function thinkCfg(model) { if ((S.noThink || {})[model]) return null; return /^gemini-2\.5/.test(model) ? { thinkingBudget: 0 } : { thinkingLevel: 'low' }; }
 function fetchT(url, opt, ms) { const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
@@ -1567,7 +1587,7 @@ function bind(id, key, type) {
   el.addEventListener(type === 'check' ? 'change' : 'input', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
-bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-model', 'model'); bind('#s-name', 'name'); bind('#s-city', 'city');
+bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-name', 'name'); bind('#s-city', 'city');
 bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-orph', 'orphVoice'); bind('#s-pitch', 'animePitch', 'check'); bind('#s-voicePick', 'voicePick'); bind('#s-fishKey', 'fishKey'); bind('#s-fishVoice', 'fishVoice'); bind('#s-fishCustom', 'fishCustom'); bind('#s-fishProxy', 'fishProxy');
 function refreshFishUI() { $('#fishCustomField').hidden = S.fishVoice !== 'custom'; } refreshFishUI(); $('#s-fishVoice').addEventListener('change', refreshFishUI);
 $('#s-testFish').onclick = async () => {
@@ -1578,11 +1598,47 @@ $('#s-testFish').onclick = async () => {
   try { await speakFish('[smug] Hmph. So you finally gave me a voice with no limit. [giggles] Took you long enough.', seq, 'smug'); out.style.color = '#59e08b'; out.textContent = '✓ Fish voice works (' + ((performance.now() - t0) / 1000).toFixed(1) + 's). She uses it when the other voices run out.'; }
   catch (e) { stopLip(); out.style.color = '#ff6b8a'; out.textContent = '✗ ' + fishError(e); }
 };
+// ---- choosing her brain model ----
+function modelOptionExists(id) { return [...$('#s-modelPick').options].some(o => o.value === id && o.value !== 'custom'); }
+function syncModelUI() {
+  const pick = $('#s-modelPick'), cur = (S.model || '').trim();
+  if (!cur) pick.value = ''; else if (modelOptionExists(cur)) pick.value = cur; else { pick.value = 'custom'; $('#s-modelCustom').value = cur; }
+  $('#modelCustomField').hidden = pick.value !== 'custom';
+}
+$('#s-modelPick').addEventListener('change', () => {
+  const v = $('#s-modelPick').value;
+  if (v === 'custom') { $('#modelCustomField').hidden = false; S.model = $('#s-modelCustom').value.trim(); $('#s-modelCustom').focus(); }
+  else { $('#modelCustomField').hidden = true; S.model = v; }
+  S.okModel = ''; save(); toast(S.model ? 'Her brain: ' + S.model : 'Her brain: picked automatically');
+});
+$('#s-modelCustom').addEventListener('input', () => { S.model = $('#s-modelCustom').value.trim(); S.okModel = ''; save(); });
+const NOT_CHAT = /tts|image|imagen|veo|embed|aqa|live|audio|native|transcri|translate|robotics|computer-use|learnlm|gemma|nano|banana|lyria|vision|customtools/i;
+$('#s-loadModels').onclick = async () => {
+  const out = $('#s-pingout'), btn = $('#s-loadModels'); S.key = $('#s-key').value.trim(); save();
+  if (!S.key) { out.style.color = '#ff6b8a'; out.textContent = 'Paste your Gemini key first.'; return; }
+  btn.disabled = true; out.style.color = 'var(--mute)'; out.textContent = 'Asking Google which models your key can use…';
+  try {
+    let list = [], tok = '';
+    do {
+      const r = await fetchT('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200' + (tok ? '&pageToken=' + encodeURIComponent(tok) : ''), { headers: { 'x-goog-api-key': S.key } }, 15000);
+      if (!r.ok) { const e = new Error('HTTP ' + r.status); try { e.message += ': ' + (await r.json()).error.message; } catch (x) {} throw e; }
+      const j = await r.json(); list = list.concat(j.models || []); tok = j.nextPageToken || '';
+    } while (tok);
+    const ids = list.filter(m => (m.supportedGenerationMethods || []).includes('generateContent')).map(m => ({ id: m.name.replace(/^models\//, ''), name: m.displayName || '' }))
+      .filter(m => /^gemini/i.test(m.id) && !NOT_CHAT.test(m.id + ' ' + m.name));
+    const grp = $('#s-modelMine'); grp.innerHTML = '';
+    ids.sort((a, b) => b.id.localeCompare(a.id, undefined, { numeric: true })).forEach(m => { if (modelOptionExists(m.id)) return; const o = document.createElement('option'); o.value = m.id; o.textContent = m.name && m.name !== m.id ? m.name + ' (' + m.id + ')' : m.id; grp.appendChild(o); });
+    grp.hidden = !grp.children.length; S.myModels = [...grp.children].map(o => [o.value, o.textContent]); save(); syncModelUI();
+    out.style.color = '#59e08b'; out.textContent = '✓ Your key can use ' + ids.length + ' chat models.' + (grp.children.length ? ' ' + grp.children.length + ' extra ones were added to the list under "From your key".' : ' They are all already in the list.');
+  } catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ Could not get the list: ' + (e.message || e); }
+  finally { btn.disabled = false; }
+};
+(function restoreMyModels() { const grp = $('#s-modelMine'); (S.myModels || []).forEach(([v, t]) => { if (modelOptionExists(v)) return; const o = document.createElement('option'); o.value = v; o.textContent = t; grp.appendChild(o); }); grp.hidden = !grp.children.length; syncModelUI(); })();
 $('#s-ping').onclick = async () => {
   const out = $('#s-pingout'); S.key = $('#s-key').value.trim(); S.groqKey = $('#s-groq').value.trim(); save();
   if (!S.key && !S.groqKey) { out.textContent = 'Paste a key first.'; return; }
   out.textContent = 'Testing…';
-  try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + '\n' + (r.reply || ''); }
+  try { const r = await callGemini([{ role: 'user', parts: [{ text: 'Say hi in one short sentence.' }] }]); out.style.color = '#59e08b'; out.textContent = '✓ Working with ' + S.okModel + (S.model && S.okModel !== S.model ? '\n(' + S.model + ' didn\'t answer, so she used this one)' : '') + '\n' + (r.reply || ''); }
   catch (e) { out.style.color = '#ff6b8a'; out.textContent = '✗ ' + (e.status ? 'HTTP ' + e.status + ': ' : '') + (e.detail || e.message || 'unknown error'); }
 };
 function refreshVoiceUI() { if (!LOCAL.ready && !LOCAL.loading) $('#s-dl').textContent = LOCAL.kind === 'kokoro-gpu' ? 'Download HD on-device voice (330 MB)' : 'Download on-device voice (90 MB)'; }
