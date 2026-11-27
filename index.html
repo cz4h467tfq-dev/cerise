@@ -417,6 +417,12 @@ nav button svg{display:none}
 /* light paper behind her everywhere her face appears, so no trace of the original white paper can show */
 .galGrid button,.galGrid img{background:#fbf3f6}
 .cFace,.row img{background:#fbf3f6}
+
+/* mic: level glow while she listens, steady ring while live chat is on */
+.mic{position:relative;--lvl:0;transition:transform .12s}
+.mic.on{background:#fff!important;color:var(--c)!important;animation:none!important;transform:scale(calc(1 + var(--lvl) * .12))}
+.mic.hear{background:linear-gradient(160deg,#ffd1de,#ff8fb0)!important;color:#8d0b31!important;animation:micPulse .7s infinite!important}
+.mic.live::after{content:"LIVE";position:absolute;top:-9px;right:6px;font-size:8px;font-weight:900;letter-spacing:.16em;color:#fff;background:#0b0408;padding:2px 5px;border:1px solid var(--c2)}
 </style>
 </head>
 <body>
@@ -458,7 +464,7 @@ nav button svg{display:none}
           <div class="mirTag">WARDROBE</div>
           <div class="mirIn">
             <div class="mirShadow"></div>
-            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127161937">
+            <img id="look0" class="look on" alt="Cerise, full body" src="img/outfits/jester.webp?v=20261127162356">
             <img id="look1" class="look" alt="">
             <div class="mirFlash" id="mirFlash"></div>
           </div>
@@ -517,6 +523,7 @@ nav button svg{display:none}
       </div>
       <div class="group"><h3>Voice</h3>
         <div class="field switch"><label for="s-speak">She talks out loud</label><input id="s-speak" type="checkbox"></div>
+        <div class="field switch"><label for="s-liveKeep">Live chat: keep listening after she answers</label><input id="s-liveKeep" type="checkbox"></div>
         <div class="field"><label for="s-voicePick">Her voice right now</label>
           <select id="s-voicePick"><option value="auto">Auto (anime voice first)</option><option value="fish">Fish Audio (unlimited)</option><option value="orpheus">Orpheus on Groq</option><option value="gemini">Gemini anime voice</option></select>
           <small>She speaks with this one first. If it can't (daily limit, no key), she moves to the next so she never goes quiet. Auto order: Gemini anime voice, Orpheus, Fish. Orpheus is English only.</small></div>
@@ -567,7 +574,7 @@ nav button svg{display:none}
       </div>
       <div class="group"><h3>What she remembers</h3><div id="memList"></div></div>
       <button class="btn ghost" id="s-clear" type="button">Clear chat history</button>
-      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127161937 · settings save automatically</p>
+      <p style="color:var(--mute);font-size:12px;text-align:center;margin-top:18px">Cerise build 20261127162356 · settings save automatically</p>
     </div></section>
   </main>
   <nav>
@@ -589,7 +596,7 @@ const VAR = { neutral:['F01'], cold:['F26','F19'], sad:['F22','F05'], bored:['F1
   pout:['F08','F11'], flustered:['F08','F29'], shy:['F29','F11'], love:['F17','F25'], excited:['F24'], cry:['F18'], teary:['F05'], sleepy:['F28'], sleeping:['F09'],
   blank:['F30'], dark:['F20','F23'], sick:['F27'] };
 const MOODS = Object.keys(VAR);
-const VER = '20261127161937';
+const VER = '20261127162356';
 // her wardrobe (Her tab): she changes outfit to fit what you talk about
 const OUTFITS = [
   { id: 'jester', name: 'The Crimson Jester', short: 'Jester', sub: 'Her signature',
@@ -624,7 +631,7 @@ window.addEventListener('error', (e) => { if (e && e.message && !/Script error|R
 window.addEventListener('unhandledrejection', (e) => { const m = e && e.reason && (e.reason.message || String(e.reason)); if (m && !/abort|Failed to fetch dynamically/i.test(m)) setTimeout(() => { try { toast('Error: ' + m.slice(0, 120)); } catch (x) {} }, 0); });
 // ---------- state ----------
 // re-download needed when the voice engine changes
-const DEF = {key:'', groqKey:'', orphVoice:'hannah', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[], outfit:'jester', outfitAuto:true, fishKey:'', fishProxy:'', fishVoice:'08f852cd76f944cca6910f691a9547b7', fishCustom:'', voicePick:'auto'};
+const DEF = {key:'', groqKey:'', orphVoice:'hannah', voiceEngine:'ai', ttsVoice:'Leda', localVoice:'af_bella', animePitch:true, model:'', okModel:'', name:'', city:'Beirut', speak:true, lang:'en-US', voice:'', memory:[], history:[], github:'', ghToken:'', shortcuts:'', todos:[], outfit:'jester', outfitAuto:true, fishKey:'', fishProxy:'', fishVoice:'08f852cd76f944cca6910f691a9547b7', fishCustom:'', voicePick:'auto', liveKeep:true};
 let S;
 try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem('cerise.v1') || '{}')); } catch (e) { S = {...DEF}; }
 if ((S.v || 0) < 3) { S.v = 3; S.voiceEngine = 'ai'; }
@@ -1225,29 +1232,111 @@ function phoneSpeak(text, lang, seq) {
   speechSynthesis.speak(u);
 }
 
-// ---------- voice in ----------
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null, listening = false;
+// ---------- voice in: tap the mic to talk with her hands-free ----------
+// iPhone home-screen apps can't use the browser's speech recognition, so she records you herself
+// and turns it into text with Whisper on Groq (free, fast, English/French/Arabic) or with Gemini.
+const MIC = { live: false, rec: null, stream: null, ctx: null, raf: 0, stopNow: null };
+function micUI(state) {
+  const b = $('#mic'); b.classList.toggle('on', state === 'listen'); b.classList.toggle('hear', state === 'hear'); b.classList.toggle('live', MIC.live);
+  $('#stage').classList.toggle('listen', state === 'listen');
+  if (state === 'listen') status('listen', 'Listening'); else if (state === 'hear') status('think', 'Hearing you'); else if (!busy) status('', 'Online');
+}
+function pickMime() { for (const t of ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus']) if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t; return ''; }
+async function openMic() {
+  if (MIC.stream && MIC.stream.active) return MIC.stream;
+  try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}
+  MIC.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+  return MIC.stream;
+}
+function closeMic() {
+  cancelAnimationFrame(MIC.raf);
+  if (MIC.ctx) { try { MIC.ctx.close(); } catch (e) {} MIC.ctx = null; }
+  if (MIC.stream) { MIC.stream.getTracks().forEach(t => t.stop()); MIC.stream = null; }
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+}
+// records one thing you say: starts when you speak, stops after a short pause
+function listenOnce() {
+  return new Promise(async (resolve) => {
+    let stream; try { stream = await openMic(); } catch (e) {
+      toast(/denied|NotAllowed/i.test(e.name + e.message) ? 'Allow the microphone for Cerise (iPhone Settings → Safari → Microphone).' : 'Microphone unavailable: ' + (e.message || e.name));
+      return resolve({ error: true }); }
+    const mime = pickMime(); let rec; try { rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined); } catch (e) { toast('Recording is not supported here.'); return resolve({ error: true }); }
+    const chunks = []; rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+    let heard = false, cancelled = false, t0 = performance.now(), lastLoud = 0, floor = 0.012;
+    const AC = window.AudioContext || window.webkitAudioContext; let an = null, buf = null;
+    try { MIC.ctx = new AC(); if (MIC.ctx.state === 'suspended') await MIC.ctx.resume(); const src = MIC.ctx.createMediaStreamSource(stream); an = MIC.ctx.createAnalyser(); an.fftSize = 1024; src.connect(an); buf = new Float32Array(an.fftSize); } catch (e) { an = null; }
+    const finish = (cancel) => { if (rec.state === 'inactive') return; cancelled = !!cancel; cancelAnimationFrame(MIC.raf); try { rec.stop(); } catch (e) {} };
+    MIC.stopNow = finish;
+    rec.onstop = () => {
+      MIC.stopNow = null; if (MIC.ctx) { try { MIC.ctx.close(); } catch (e) {} MIC.ctx = null; }
+      rig.mouthT = 0; $('#hudBar').style.width = '';
+      if (cancelled || (an && !heard)) return resolve({ text: '', silent: !cancelled, cancelled });
+      resolve({ blob: new Blob(chunks, { type: rec.mimeType || mime || 'audio/mp4' }) });
+    };
+    rec.start(250); micUI('listen');
+    const tick = () => {
+      const now = performance.now();
+      if (an) {
+        an.getFloatTimeDomainData(buf); let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+        const rms = Math.sqrt(sum / buf.length); if (!heard) floor = floor * 0.95 + Math.min(rms, 0.05) * 0.05;
+        const loud = rms > Math.max(0.02, floor * 2.6);
+        if (loud) { lastLoud = now; if (!heard && now - t0 > 150) heard = true; }
+        $('#mic').style.setProperty('--lvl', Math.min(1, rms * 12).toFixed(2));
+        if (heard && now - lastLoud > 1100) return finish(false);      // you paused: done
+        if (!heard && now - t0 > 9000) return finish(false);           // nobody spoke
+      } else if (now - t0 > 7000) return finish(false);                // no level meter: fixed 7 s
+      if (now - t0 > 45000) return finish(false);
+      MIC.raf = requestAnimationFrame(tick);
+    };
+    MIC.raf = requestAnimationFrame(tick);
+  });
+}
+async function transcribe(blob) {
+  const ext = /mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm';
+  const hint = { 'en-US': 'en', 'fr-FR': 'fr', 'ar-LB': 'ar', 'ar': 'ar', 'fr': 'fr', 'en': 'en' }[S.lang];
+  if (S.groqKey) {
+    try {
+      const fd = new FormData(); fd.append('file', blob, 'speech.' + ext); fd.append('model', 'whisper-large-v3-turbo'); fd.append('response_format', 'json'); fd.append('temperature', '0');
+      fd.append('prompt', 'Cerise. English, français, عربي.');
+      const r = await fetchT('https://api.groq.com/openai/v1/audio/transcriptions', { method: 'POST', headers: { 'Authorization': 'Bearer ' + S.groqKey.trim() }, body: fd }, 20000);
+      if (r.ok) { const j = await r.json(); return (j.text || '').trim(); }
+      let d = ''; try { d = (await r.json()).error.message; } catch (e) {} if (!S.key) throw new Error('Whisper ' + r.status + (d ? ': ' + d : ''));
+    } catch (e) { if (!S.key) throw e; }
+  }
+  if (S.key) {
+    const b64 = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob); });
+    const r = await fetchT('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': S.key.trim() },
+      body: JSON.stringify({ contents: [{ parts: [{ inline_data: { mime_type: (blob.type || 'audio/mp4').split(';')[0], data: b64 } }, { text: 'Transcribe exactly what the speaker says, in the language they speak (English, French or Arabic). Output only the words. If nobody speaks, output nothing.' }] }], generationConfig: { temperature: 0, maxOutputTokens: 400, thinkingConfig: { thinkingLevel: 'low' } } }) }, 20000);
+    if (!r.ok) { let d = ''; try { d = (await r.json()).error.message; } catch (e) {} throw new Error('Gemini ' + r.status + (d ? ': ' + d : '')); }
+    const j = await r.json(); return (j.candidates?.[0]?.content?.parts || []).filter(p => !p.thought).map(p => p.text || '').join('').trim();
+  }
+  throw new Error('Add a Groq or Gemini key in Settings to talk to her.');
+}
+const herDone = () => Promise.race([lastSpeech, sleep(60000)]).then(async () => { while (busy) await sleep(150); await sleep(350); });
+async function liveTalk() {
+  MIC.live = true; micUI('listen'); let quiet = 0;
+  while (MIC.live) {
+    const r = await listenOnce(); if (!MIC.live) break;
+    if (r.error || r.cancelled) break;
+    if (!r.blob) { if (++quiet >= 2) { toast('Live chat ended (I didn\'t hear anything)'); break; } continue; }
+    micUI('hear'); let text = '';
+    try { text = await transcribe(r.blob); } catch (e) { toast((e.message || 'Could not understand').slice(0, 120)); break; }
+    text = text.replace(/^[\s.…]+|[\s.…]+$/g, '');
+    if (!text || /^(thank you\.?|thanks for watching!?|\.+)$/i.test(text)) { if (++quiet >= 2) { toast('Live chat ended'); break; } continue; }   // Whisper hears these in pure noise
+    quiet = 0; micUI('idle'); closeMic();
+    await send(text); if (!MIC.live) break;
+    if (S.liveKeep === false) break;                                       // one question per tap
+    await herDone(); if (!MIC.live) break;
+  }
+  MIC.live = false; closeMic(); micUI('idle');
+}
 $('#mic').addEventListener('click', () => {
   unlockAudio();
-  if (!SR) { toast('Voice input not supported here. Use the mic on your keyboard.'); $('#input').focus(); return; }
-  if (listening) { rec && rec.stop(); return; }
-  stopSpeaking();
-  rec = new SR(); rec.lang = S.lang; rec.interimResults = true; rec.continuous = false;
-  let finalText = '';
-  rec.onstart = () => { $('#stage').classList.add('listen'); listening = true; $('#mic').classList.add('on'); status('listen', 'Listening'); setMood('neutral'); };
-  rec.onresult = (e) => {
-    let t = ''; for (const r of e.results) t += r[0].transcript;
-    $('#input').value = t; if (e.results[e.results.length - 1].isFinal) finalText = t;
-  };
-  rec.onerror = (e) => { if (e.error === 'not-allowed') toast('Allow microphone access for Cerise in Settings.'); };
-  rec.onend = () => {
-    ensureAudio();
-    $('#stage').classList.remove('listen'); listening = false; $('#mic').classList.remove('on'); status('', 'Online');
-    const t = (finalText || $('#input').value).trim(); if (t) { $('#input').value = ''; send(t); }
-  };
-  try { rec.start(); } catch (e) { toast('Mic is busy, try again.'); }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { toast('This browser can\'t record audio. Use the mic on your keyboard.'); $('#input').focus(); return; }
+  if (MIC.live) { MIC.live = false; if (MIC.stopNow) MIC.stopNow(true); stopSpeaking(); closeMic(); micUI('idle'); toast('Live chat off'); return; }   // tap again: end the chat
+  stopSpeaking(); liveTalk();
 });
+document.addEventListener('visibilitychange', () => { if (document.hidden && MIC.live) { MIC.live = false; if (MIC.stopNow) MIC.stopNow(true); closeMic(); micUI('idle'); } });
 
 // ---------- tools ----------
 async function getWeather(place) {
@@ -1548,7 +1637,7 @@ function typeText(text, dur) {
   const every = dur ? Math.max(12, Math.min(90, dur * 1000 * 0.9 / steps)) : 28;
   typeT = setInterval(() => { i += 2; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(typeT); }, every);
 }
-let onVoiceStart = null;
+let onVoiceStart = null; let lastSpeech = Promise.resolve();
 function herSays(text, m, lang, buttons, voiceText) {
   // her words appear together with her voice
   if (S.speak) {
@@ -1558,7 +1647,7 @@ function herSays(text, m, lang, buttons, voiceText) {
   const acts = $('#bubbleActs'); acts.innerHTML = '';
   (buttons || []).forEach(b => { const a = document.createElement('a'); a.className = 'act'; a.textContent = b.label; a.href = b.url; if (/^https:/i.test(b.url)) a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none'; a.style.color = '#fff'; acts.appendChild(a); });
   setMood(m || 'neutral');
-  speak(voiceText && voiceText.length < text.length * 2 + 80 ? voiceText : text, lang || 'en', m || 'neutral');
+  lastSpeech = speak(voiceText && voiceText.length < text.length * 2 + 80 ? voiceText : text, lang || 'en', m || 'neutral').catch(() => {});
 }
 
 // ---------- chat log ----------
@@ -1588,7 +1677,7 @@ function bind(id, key, type) {
   el.addEventListener('change', () => { S[key] = type === 'check' ? el.checked : el.value; save(); });
 }
 bind('#s-gh', 'github'); bind('#s-ghtok', 'ghToken'); bind('#s-sc', 'shortcuts'); bind('#s-key', 'key'); bind('#s-groq', 'groqKey'); bind('#s-name', 'name'); bind('#s-city', 'city');
-bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-orph', 'orphVoice'); bind('#s-pitch', 'animePitch', 'check'); bind('#s-voicePick', 'voicePick'); bind('#s-fishKey', 'fishKey'); bind('#s-fishVoice', 'fishVoice'); bind('#s-fishCustom', 'fishCustom'); bind('#s-fishProxy', 'fishProxy');
+bind('#s-speak', 'speak', 'check'); bind('#s-lang', 'lang'); bind('#s-engine', 'voiceEngine'); bind('#s-tts', 'ttsVoice'); bind('#s-local', 'localVoice'); bind('#s-orph', 'orphVoice'); bind('#s-pitch', 'animePitch', 'check'); bind('#s-voicePick', 'voicePick'); bind('#s-liveKeep', 'liveKeep', 'check'); bind('#s-fishKey', 'fishKey'); bind('#s-fishVoice', 'fishVoice'); bind('#s-fishCustom', 'fishCustom'); bind('#s-fishProxy', 'fishProxy');
 function refreshFishUI() { $('#fishCustomField').hidden = S.fishVoice !== 'custom'; } refreshFishUI(); $('#s-fishVoice').addEventListener('change', refreshFishUI);
 $('#s-testFish').onclick = async () => {
   unlockAudio(); const out = $('#s-fishout'); out.style.color = 'var(--mute)';
